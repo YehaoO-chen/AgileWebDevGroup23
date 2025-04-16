@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Together</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="hero-title">Welcome to Study Together</h1>
+            <p class="hero-subtitle">Join the largest global student community and say goodbye to lack of motivation</p>
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <i class="bi bi-people feature-icon"></i>
+                    <h3 class="feature-title"><a href="{{ url_for('login') }}">Set Targets</a></h3>
+                    <p class="feature-desc">Define your study goals and track your progress with personalized plans</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <i class="bi bi-alarm feature-icon"></i>
+                    <h3 class="feature-title"><a href="{{ url_for('login') }}">Focus Timer</a></h3>
+                    <p class="feature-desc">Track your study time and stay focused with our built-in timer</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <i class="bi bi-journal-bookmark feature-icon"></i>
+                    <h3 class="feature-title"><a href="{{ url_for('login') }}">Share</a></h3>
+                    <p class="feature-desc">Share your ideas and progress with other people in real time</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Active Students</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Study Rooms</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Countries</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
