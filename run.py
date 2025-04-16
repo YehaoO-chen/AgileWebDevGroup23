@@ -1,7 +1,8 @@
-from flask import Flask
-from flask import render_template
-app = Flask(__name__)
+from app import create_app
 
-@app.route('/')
-def home(name=None):
-    return render_template('home.html')
+# Create the Flask application instance
+app = create_app()
+
+# Run the application
+if __name__ == "__main__":
+    app.run(debug=True)
