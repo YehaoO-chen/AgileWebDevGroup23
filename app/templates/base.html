@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+
+    <title>{%block title %}ProcrastiNo - Your Best Study Buddy{% endblock %}</title> 
+</head>
+
+<body>
+    <nav class="sidebar">
+        <!-- Profile dropdown -->
+        <div class="btn-group dropend">
+          <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <!-- TODO: the profile img should be replaced as "img src="{{ user.profile_pic_url }}" " in the future -->
+            <img src="https://st2.depositphotos.com/53447130/50476/v/450/depositphotos_504768188-stock-illustration-pixel-black-cat-image-vector.jpg" alt="Profile" class="profile-img">
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{{ url_for('dashboard') }}">Profile</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a></li>
+          </ul>
+        </div>
+      
+        <!-- Nav links & items -->
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-custom"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29">
+                        <path fill="#1fa4a3" d="M14 2h-4v2H8v2H6v2H4v2H2v2h2v10h7v-6h2v6h7V12h2v-2h-2V8h-2V6h-2V4h-2zm0 2v2h2v2h2v2h2v2h-2v8h-3v-6H9v6H6v-8H4v-2h2V8h2V6h2V4z" />
+                    </svg>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('studyplan') }}" class="nav-custom">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29">
+                        <path fill="#1fa4a3" d="M12 13h-2v-1H9v-2h1V9h2v1h1v2h-1Zm2 4H8v-1H7v-1H6v-1H5V8h1V7h1V6h1V5h6v1h1v1h1v1h1v6h-1v1h-1v1h-1Zm1 4H7v-1H5v-1H4v-1H3v-1H2v-2H1V7h1V5h1V4h1V3h1V2h2V1h8v1h2v1h1v1h1v1h1v2h1v8h-1v2h-1v1h-1v1h-1v1h-2Zm-2-6v-1h1v-1h1V9h-1V8h-1V7H9v1H8v1H7v4h1v1h1v1Zm1 4v-1h2v-1h1v-1h1v-2h1V8h-1V6h-1V5h-1V4h-2V3H8v1H6v1H5v1H4v2H3v6h1v2h1v1h1v1h2v1Z" />
+                    </svg>
+                    <span>Study Plan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('dashboard') }}" class="nav-custom">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="#2aa6a6" d="M3 3h8v10H3zm2 2v6h4V5zm8-2h8v6h-8zm2 2v2h4V5zm-2 6h8v10h-8zm2 2v6h4v-6zM3 15h8v6H3zm2 2v2h4v-2z" />
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('notification')}}" class="nav-custom">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="#2aa6a6" d="M15 20v2h-1v1h-4v-1H9v-2zm6-3v-1h-1v-2h-1V8h-1V6h-1V5h-1V4h-2V3h-1V1h-2v2h-1v1H8v1H7v1H6v2H5v6H4v2H3v1H2v1h1v1h18v-1h1v-1zM6 16v-2h1V8h1V6h2V5h4v1h2v2h1v6h1v2h1v1H5v-1z" />
+                    </svg>
+                    <span>Notification</span>
+                </a>
+            </li>
+            <li class="nav-item logout">
+                <a href="{{ url_for('logout')}}" class="nav-custom">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="#2aa6a6" d="M10 3H8v2H6v2h2V5h2v2h2v2h-2v2H8v2H6v2H4v-2H2v2h2v2h2v-2h4v2h2v2h-2v2h2v-2h2v-2h-2v-4h2v-2h2v2h2v2h2v-2h2v-2h-2v2h-2v-2h-2V9h2V5h-4v2h-2V5h-2z" />
+                    </svg>
+                    <span>Log Out</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+<!-- Make sure the added content will exclude the space of sidebar -->
+<div class="content-wrapper">
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+
+<footer>
+    <p>&copy; 2025 CIST5505 Group 23 | All rights reserved</p>
+</footer>
+</div>
+</body>
+</html>
