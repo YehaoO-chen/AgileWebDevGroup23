@@ -34,6 +34,7 @@ main{
   width: 110px; 
   height: 100vh; 
   position: fixed;
+  justify-content: space-between;
 }
 
 /* Manage the sidebar items */
@@ -41,7 +42,18 @@ main{
 gap: 6px;
 display: flex;
 flex-direction: column;
-height: 100vh; /* ensure the items will be laid out vertically */ 
+flex-grow: 1; /* fulfill the whole sidebar */
+justify-content: flex-start;
+
+}
+
+.nav-item {
+  white-space: nowrap;       
+  padding: 0.5rem 0;
+}
+
+.logout {
+  margin-top: auto;
 }
 
 /* ensure the fixed size of profile picture */
@@ -101,7 +113,7 @@ margin-bottom: 0.3rem;
 
 
 .nav-custom span, .dropdown-item {
-font-family: 'Pixelify Sans', cursive, 'Segoe UI', sans-serif, Verdana;
+font-family: "Pixelify Sans", sans-serif, 'Segoe UI', sans-serif, Verdana;
 font-size: .9rem;
 color: #856e60;
 line-height: 1.4rem;
@@ -114,6 +126,7 @@ margin-top: 1rem;
 width: 35px;     
 height: 35px;
 margin-bottom: 0.4rem;
+
 }
 
 
@@ -128,8 +141,4 @@ margin-bottom: 0.4rem;
 
 .nav-custom:hover svg path {
   fill: #ffffff;
-}
-
-.logout {
-  margin-top: auto;
 }
