@@ -1,19 +1,17 @@
 from flask_login import UserMixin
-from app import login_manager
+from datetime import datetime
+from app.extensions import db, login_manager
 
-# Create a simple User class
-class User(UserMixin):
-    def __init__(self, id, username, password):
-        self.id = id
-        self.username = username
-        self.password = password
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(150), nullable=False)
+    security_answer = db.Column(db.String(150), nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Create a simple in-memory user database
-users = {
-    '1': User('1', 'aaa', 'aaaaaaaa'),
-    '2': User('2', 'b', 'b')
-}
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return users.get(user_id)
+    return User.query.get(int(user_id))

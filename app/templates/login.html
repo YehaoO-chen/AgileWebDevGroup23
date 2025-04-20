@@ -11,11 +11,26 @@
 
 <body>
     {% include 'navbar.html' %}
-    
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <h2 class="text-center mb-4">Login</h2>
+
+    <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm p-4 border-0 rounded-4">
+                <h2 class="text-center mb-4">Welcome Back</h2>
+                <p class="text-center text-muted mb-4">Please log in to your account</p>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    <div>
+                      {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                          {{ message }}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
 
                 <form method="POST" action="{{ url_for('login') }}">
                     <!-- Username Input -->
@@ -25,15 +40,26 @@
                     </div>
 
                     <!-- Password Input -->
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="password" name="password" required>
                     </div>
+                    <div class="text-end mb-3">
+                        <a href="{{ url_for('reset') }}" class="small text-decoration-none text-muted">Forgot password?</a>
+                    </div>
 
                     <!-- Submit Button -->
-                    <div class="d-grid">
+                    <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-primary">Login</button>
                     </div>
+
+                    <!-- Divider -->
+                    <hr class="my-3">
+
+                    <!-- Registration Link -->
+                    <p class="text-center">
+                        New user? <a href="{{ url_for('signup') }}" class="text-decoration-none">Create an account</a>
+                    </p>
                 </form>
             </div>
         </div>
