@@ -12,6 +12,19 @@ footer {
   color: #666;
 }
 
+/* Ensure that the footer will not come up to block the main content whenever the window size adjusts */
+@media (max-height: 650px) {
+  footer{
+    display:none
+  }
+}
+
+@media (max-width: 650px) {
+  footer{
+    display:none
+  }
+}
+
 main{
   flex: 1;
 }
