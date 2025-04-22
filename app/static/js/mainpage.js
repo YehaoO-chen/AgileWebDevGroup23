@@ -1,5 +1,4 @@
-/* JS for Timer function */
-
+// Initialise the default value
 let focusTime = 50;
 let breakTime = 10;
 let remainingSeconds = 0;
@@ -110,11 +109,10 @@ function resetTimer() {
 function updateCountdownDisplay() {
   const min = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
   const sec = (remainingSeconds % 60).toString().padStart(2, '0');
-  // Match different type of mode to better differentiate what the current timer is for
   const emoji = isFocus ? "✍🏻" : "☕";
   const emoji2 = isFocus ? "📖" : "🍫"
 
-  document.getElementById("countdown-display").textContent = `${emoji} ${min}:${sec} ${emoji2}`;
+  document.getElementById('countdown-display').textContent = `${emoji} ${min}:${sec} ${emoji2}`;
 }
 
 function backToSetup() {
@@ -124,20 +122,21 @@ function backToSetup() {
 function showPopup() {
   const times = isFocus ? focusTime : breakTime;
   const formatted = `${String(times).padStart(2, '0')}:00`; 
+  const emoji = "🎉"
 
-  document.getElementById("completed_time").textContent= formatted;
-  document.getElementById("popup-window").style.display= 'block';
+  document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
+  document.getElementById('popup-window').style.display = 'block';
   document.getElementById('floating-timer').classList.remove('show');
 
 }
 
 function closePopup() {
-  document.getElementById("popup-window").style.display='none';
+  document.getElementById('popup-window').style.display='none';
   document.getElementById('setup-area').style.display = 'block';
 }
 
 function takeBreak() {
-  document.getElementById("popup-window").style.display='none';
+  document.getElementById('popup-window').style.display='none';
   document.getElementById('floating-timer').classList.add('show');
 
 
@@ -156,8 +155,8 @@ function takeBreak() {
       if (remainingSeconds <= 0) {
         clearInterval(timer);
         timer = null;
-        document.getElementById("floating-timer").classList.remove("show");
-        document.getElementById("break-window").style.display='block';
+        document.getElementById('floating-timer').classList.remove('show');
+        document.getElementById('break-window').style.display='block';
         
       }
     }
@@ -165,6 +164,26 @@ function takeBreak() {
 }
 
 function ContinueFocus() {
-  startTimer();
-  document.getElementById("break-window").style.display='none';
+  isFocus = true;
+  remainingSeconds = focusTime * 60;
+  document.getElementById('break-window').style.display = 'none';
+  document.getElementById('floating-timer').classList.add('show');
+  updateCountdownDisplay();
+
+  if (timer) clearInterval (timer);
+  
+  timer = setInterval(() => {
+    if (!isPaused) {
+      remainingSeconds--;
+      updateCountdownDisplay();
+
+      if (remainingSeconds <= 0) {
+        clearInterval(timer);
+        timer = null;
+        showPopup();
+        
+      }
+    }
+  }, 1000);
+
 }
