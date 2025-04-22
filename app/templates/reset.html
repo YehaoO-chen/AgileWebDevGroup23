@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Reset Password</title>
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container d-flex align-items-center justify-content-center mt-3" style="min-height: 80vh;">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm p-4 border-0 rounded-4">
+                <h2 class="text-center mb-4">Reset Password</h2>
+                <p class="text-center text-muted mb-4">Answer the question and set a new password</p>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    <div>
+                      {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                          {{ message }}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('reset') }}">
+                    <!-- Username -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-bold">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+
+                    <!-- Security Question -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Security Question</label>
+                        <div class="card bg-light mb-2">
+                            <div class="card-body py-2">
+                                <p class="mb-0">What was the name of your best friend in elementary school?</p>
+                            </div>
+                        </div>
+                        <label for="security_answer" class="form-label">Your Answer</label>
+                        <input type="text" class="form-control" id="security_answer" name="security_answer" required>
+                    </div>
+
+                    <!-- New Password -->
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label fw-bold">New Password</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" required>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Reset Password</button>
+                    </div>
+
+                    <!-- Back to Login -->
+                    <p class="text-center mt-3">
+                        Remembered your password? <a href="{{ url_for('login') }}" class="text-decoration-none">Back to login</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

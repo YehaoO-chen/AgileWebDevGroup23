@@ -1,4 +1,115 @@
 body {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    background-color: #66D2CE;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #3A3A3A !important;
+}
+
+.nav-link {
+    color: #3A3A3A !important;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: #008B8B !important;
+}
+
+.hero-section {
+    background: #eaeaea;
+    color: white;
+    padding: 100px 0;
+    margin-bottom: 50px;
+}
+
+.hero-title,
+.hero-subtitle {
+    color: #3A3A3A;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    height: 100%;
+    transition: transform 0.3s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: #66D2CE;
+    margin-bottom: 20px;
+}
+
+.feature-title {
+    color: #3A3A3A;
+}
+
+.feature-desc {
+    color: #555;
+}
+
+.stats-section {
+    background-color: white;
+    padding: 50px 0;
+    margin: 50px 0;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #66D2CE;
+}
+
+.stat-label {
+    color: #555;
+    font-size: 1.2rem;
+}
+
+.btn-primary {
+    background-color: #E3D2C3;
+    border-color: #E3D2C3;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 500px;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #CBB9AC;
+    border-color: #CBB9AC;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.feature-title a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.feature-title a:hover {
+    color: #008B8B;
+    text-decoration: none;
+}
+
+=======
+>>>>>>> yehao_framework
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -38,4 +149,9 @@ body {
 }
 .header-icons i:hover {
     color: #007bff;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cf24331 (set a project)
+>>>>>>> yehao_framework
