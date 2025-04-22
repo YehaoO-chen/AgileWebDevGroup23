@@ -1,0 +1,216 @@
+
+/* This is for the main functional pages */
+/* Timer section CSS */
+#setup-area {
+  position: fixed;
+  top: 20px;
+  left: 130px;
+  background-color: rgba(20, 20, 20, 0.8);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  width: 250px;
+  color: white;
+  text-align: center;
+  z-index: 999;
+}
+
+@media (max-width: 600px){
+  #setup-area{
+    display: none;
+  }
+}
+
+@media (max-height: 400px){
+  #setup-area{
+    display: none;
+  }
+}
+
+.time-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.time-selector div {
+  background-color: #111;
+  color: white;
+  padding: 10px 18px;
+  font-size: 22px;
+  border-radius: 8px;
+  min-width: 60px;
+}
+
+.time-selector button {
+  font-size: 18px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background-color: #444;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.loop-toggle {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+
+.round-btn:hover {
+  background-color: #333;
+}
+
+
+.floating-timer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(20, 20, 20, 0.699);
+  padding: 40px 68px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  color: rgb(255, 255, 255);
+  text-align: center;
+  z-index: 999;
+  display: none;
+  min-width: 160px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@media (max-width: 600px){
+  .floating-timer.show {
+    display: none !important;
+  }
+}
+
+@media (max-height: 400px){
+  .floating-timer.show {
+    display: none !important;
+  }
+}
+
+.floating-timer.show {
+  display: block;
+}
+
+
+
+#countdown-display {
+  font-size: 42px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.floating-controls button {
+  margin: 0 6px;
+  padding: 7px 15px;
+  border: none;
+  border-radius: 6px;
+  
+}
+
+.floating-controls button:hover {
+  background-color: #4242425d;
+}
+
+.floating-controls .back-btn {
+  background-color: #999;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -60%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.floating-controls button {
+  color: rgb(0, 0, 0); 
+  background-color: transparent; 
+  border: 1px; 
+  font-size: 30px; 
+}
+
+
+.timer_text {
+  font-family:  "Pixelify Sans", sans-serif, 'Segoe UI', sans-serif, Verdana;
+  font-size: 24px;
+  white-space:nowrap;
+}
+
+
+#break-time, #focus-time {
+  font-family:  "Pixelify Sans", sans-serif, 'Segoe UI', sans-serif, Verdana;
+  background-color: #1111113f;
+  color: white;
+  padding: 10px 18px;
+  font-size: 25px;
+  border-radius: 8px;
+  min-width: 60px;
+  text-align: center;
+  border: none;
+}
+
+/* hire the spin-button, also make sure most of the browsers are compatible */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* for Firefox */
+}
+
+
+.popup-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(20, 20, 20, 0.699);
+  padding: 40px 68px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  color: rgb(255, 255, 255);
+  text-align: center;
+  z-index: 999;
+  display: none;
+  min-width: 160px;
+  animation: fadeIn 0.3s ease-in-out;
+  white-space: nowrap;
+}
+
+.break-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(20, 20, 20, 0.699);
+  padding: 40px 68px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  color: rgb(255, 255, 255);
+  text-align: center;
+  z-index: 999;
+  display: none;
+  min-width: 160px;
+  animation: fadeIn 0.3s ease-in-out;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px){
+  .break-window, .popup-window {
+    display: none !important;
+  }
+}
+
+@media (max-height: 400px){
+  .break-window, .popup-window{
+    display: none !important;
+  }
+}
