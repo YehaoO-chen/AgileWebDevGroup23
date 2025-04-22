@@ -1,4 +1,5 @@
 body {
+<<<<<<< HEAD
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8f9fa;
 }
@@ -105,3 +106,45 @@ body {
     text-decoration: none;
 }
 
+=======
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+.sidebar {
+    height: 100vh;
+    background-color: #343a40;
+    color: white;
+    padding-top: 1rem;
+}
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    display: block;
+}
+.sidebar a:hover {
+    background-color: #495057;
+}
+.content {
+    margin-left: 200px;
+    padding: 2rem;
+}
+.header-icons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+.header-icons i {
+    font-size: 1.5rem;
+    margin-left: 1rem;
+    cursor: pointer;
+}
+.header-icons i:hover {
+    color: #007bff;
+}
+>>>>>>> cf24331 (set a project)
