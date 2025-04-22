@@ -124,11 +124,33 @@ def init_routes(app):
                 return redirect(url_for('reset'))
 
         return render_template('reset.html')
+    
+    # Study plan route (requires login)
+    @app.route('/studyplan')
+    @login_required
+    def studyplan():
+        return render_template('studyplan.html')
 
-    @app.route('/study-plan')
-    def study_plan():
-        return render_template('study_plan.html')
-
+    # Share route (requires login)
     @app.route('/share')
+    @login_required
     def share():
         return render_template('share.html')
+
+    # Main page route (requires login)
+    @app.route('/mainpage')
+    @login_required
+    def mainpage():
+        return render_template('mainpage.html', user=current_user)
+    
+    # Dashboard route (requires login)
+    @app.route('/dashboard')
+    @login_required
+    def dashboard():
+        return render_template('dashboard.html')
+    
+    # Notification route (requires login)
+    @app.route('/notification')
+    @login_required
+    def notification():
+        return render_template('notification.html')
