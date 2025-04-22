@@ -73,7 +73,7 @@ def init_routes(app):
                 db.session.add(new_user)
                 db.session.commit()
                 
-                # 验证用户是否成功添加到数据库
+                # Verify if the user was successfully added to the database
                 check_user = User.query.filter_by(username=username).first()
                 if check_user:
                     flash('Signup successful! Please log in.', 'success')
@@ -83,9 +83,9 @@ def init_routes(app):
                     return redirect(url_for('signup'))
                     
             except Exception as e:
-                # 回滚事务
+                # Rollback the transaction
                 db.session.rollback()
-                # 输出错误信息
+                # Output the error message
                 flash(f'An error occurred: {str(e)}', 'danger')
                 return redirect(url_for('signup'))
 
