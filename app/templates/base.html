@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-
+    {% block extra_css %}{% endblock %}
     <title>{%block title %}ProcrastiNo - Your Best Study Buddy{% endblock %}</title> 
 </head>
 
@@ -83,5 +83,7 @@
     <p>&copy; 2025 CIST5505 Group 23 | All rights reserved</p>
 </footer>
 </div>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>
