@@ -18,7 +18,12 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    
+
+    # Set the login view for unauthorized users
+    login_manager.login_view = 'login'
+    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message_category = 'info'
+
     # Import models before creating tables
     from app.models import User  # Ensure models are imported
 
