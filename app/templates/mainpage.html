@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{%block title %}ProcrastiNo - Home page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mainpage.css') }}">
+{% endblock %}
+
+
+{% block content %}
+     <div class="homepage-container">
+        <!-- countdown section -->
+        <div id="setup-area">
+            <h3 class="timer_text">Focus time (min)</h3>
+            <div class="time-selector">
+              <button class="round-btn" onclick="adjustTime('focus', -1)">−</button>
+              <input type="number" id="focus-time" min="1" max="180" value="50" onchange="updateTimeFromInput('focus')">
+              <button class="round-btn" onclick="adjustTime('focus', 1)">＋</button>
+            </div>
+        
+            <h3 class="timer_text">Break time (min)</h3>
+            <div class="time-selector">
+              <button onclick="adjustTime('break', -1)">−</button>
+              <input type="number" id="break-time" min="1" max="180" value="10" onchange="updateTimeFromInput('break')">
+              <button onclick="adjustTime('break', 1)">＋</button>
+            </div>
+
+        
+            <button class="timer_text" onclick="startTimer()">Start</button>
+          </div> 
+        
+          <!-- floating-timer -->
+          <div id="floating-timer" class="floating-timer">
+            <div class="timer_text" id="countdown-display">00:00</div>
+            <div class="floating-controls">
+              <button onclick="pauseTimer()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path id="pause-path" fill="#fff" d="M23 2v20h-1v1h-7v-1h-1V2h1V1h7v1zM9 2h1v20H9v1H2v-1H1V2h1V1h7z" />
+            </svg></button>
+              <button onclick="resetTimer()"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
+                <path fill="#fff" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" />
+            </svg></button>
+            </div>
+          </div>
+
+          <!-- completed popup window -->
+          <div id="popup-window" class="popup-window">
+            <div id="completed_time" class="timer_text">Your Focus Time: 00:00</div>
+            <div id="completed_text" class="timer_text">congratulations! <br> you've been working hard!</div>
+            <div class="popup_close">
+                <button class="timer_text" onclick="takeBreak()">Take a Break</button>
+                <button class="timer_text" onclick="closePopup()">Close</button>
+            </div>
+          </div>
+
+          <div id="break-window" class="break-window">
+            <div id="completed_break" class="timer_text">Did you have a good stretch? Wanna continue?</div>
+            <div class="break_btn">
+                <button class="timer_text" onclick="ContinueFocus()">Yes</button>
+                <button class="timer_text" onclick="closePopup()">Close</button>
+            </div>
+          </div>
+
+        <!-- TODO: Goal setup section -->
+        <!-- <div class="goals-setting">
+            <h2>Goals Setting</h2>
+            <form id="goal-form">
+                <input type="text" id="goal-input" placeholder="Enter your goal" required>
+                <button type="submit" class="btn btn-success">Set Goal</button>
+            </form>
+            <ul id="goal-list"></ul>
+        </div> -->
+
+        <!-- TODO: background section -->
+        <!-- <div class="bg-change">
+            <h2>Background Color Change</h2>
+            <button id="bg-color-btn" class="btn btn-info">Change Background Color</button>
+        </div>
+     </div> -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/mainpage.js') }}"></script>
+{% endblock %}
