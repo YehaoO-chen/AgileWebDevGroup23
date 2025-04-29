@@ -1,30 +1,81 @@
-body {
-    padding-top: 60px;
-    background-color: #f8f9fa;
+/* Home page specific styles */
+
+.welcome-card {
+    background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
 }
-.card {
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+.feature-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+    border: 1px solid var(--border-color);
+    opacity: 0;
+    transform: translateY(20px);
 }
-.stat-card {
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
 }
-.stat-card h3 {
-    color: #007bff;
-    margin-bottom: 10px;
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: inline-block;
 }
-.welcome-text {
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .welcome-card {
+        padding: 2rem 1rem;
+    }
+}
+
+/* Quick stats section */
+.quick-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.stat-item {
     text-align: center;
-    padding: 50px 0;
-    font-size: 1.2rem;
+    padding: 1rem;
+    flex: 1;
+    min-width: 150px;
 }
-.welcome-text a {
-    color: #007bff;
-    text-decoration: none;
+
+.stat-number {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: var(--dark-primary);
 }
-.welcome-text a:hover {
-    text-decoration: underline;
+
+.stat-label {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
 }

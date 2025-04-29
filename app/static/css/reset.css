@@ -1,0 +1,82 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    color: #3A3A3A;
+}
+
+.auth-card {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    padding: 2.5rem;
+    border: none;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #e1e1e1;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #66D2CE;
+    box-shadow: 0 0 0 0.2rem rgba(102, 210, 206, 0.25);
+}
+
+.btn-primary {
+    background-color: #66D2CE;
+    border-color: #66D2CE;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #55c1bd;
+    border-color: #55c1bd;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 210, 206, 0.4);
+}
+
+.security-card {
+    background-color: #f7f7f7;
+    border-left: 4px solid #66D2CE;
+}
+
+a {
+    color: #66D2CE;
+    transition: all 0.2s;
+}
+
+a:hover {
+    color: #55c1bd;
+    text-decoration: none;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #3A3A3A;
+}
+
+.page-header {
+    color: #3A3A3A;
+    font-weight: 700;
+}
+
+.alert {
+    border-radius: 8px;
+}
+
+/* Floating animation for the card */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.floating-card {
+    animation: float 6s ease-in-out infinite;
+}
