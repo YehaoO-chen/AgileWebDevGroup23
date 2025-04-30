@@ -4,6 +4,7 @@ from datetime import datetime
 from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
 
+
 def init_routes(app):
     # Home page route
     @app.route('/')
@@ -168,3 +169,25 @@ def init_routes(app):
     @login_required
     def notification():
         return render_template('notification.html')
+    
+    #Profile route
+    @app.route('/profile')
+    @login_required
+    def profile():
+        user = current_user
+        return render_template('profile.html', user=user)
+    
+    
+    # UPLOAD_FOLDER = 'static/uploads'
+    
+    # @app.route('/upload_avatar', methods=['POST'])
+    # @login_required
+    # def upload_avatar():
+    #     if 'avatar' in request.files:
+    #         file = request.files['avatar']
+    #         filename = secure_filename(file.filename)
+    #         save_path = os.path.join(UPLOAD_FOLDER, filename)
+    #         file.save(save_path)
+    #         avatar_url = url_for('static', filename=f'uploads/{filename}')
+    #         return jsonify({'success': True, 'avatar_url': avatar_url})
+    #     return jsonify({'success': False})
