@@ -2,15 +2,90 @@
 
 {% block title %}Data Analysis{% endblock %}
 
-{% block styles %}
-{{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+{% block extra_css %}
 <style>
-    /* Share Modal 样式 */
+    .page-title {
+        text-align: center;
+        color: #C38D60;
+        margin-bottom: 30px;
+        font-size: 32px;
+    }
+    
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .stat-card {
+        background-color: #F3E7DD;
+        border-radius: 10px;
+        padding: 20px;
+        width: 23%;
+        text-align: center;
+    }
+    
+    .stat-label {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .stat-value {
+        font-size: 40px;
+        font-weight: bold;
+        color: #C38D60;
+    }
+    
+    .filters-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+    }
+    
+    .filter-label {
+        color: #C38D60;
+        font-size: 16px;
+    }
+    
+    .charts-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .chart-container {
+        width: 48%;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        height: 350px;
+    }
+    
+    .btn-container {
+        text-align: center;
+        margin: 30px 0;
+    }
+    
+    .share-btn {
+        background-color: #C38D60;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 30px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    .share-btn:hover {
+        background-color: #b07a50;
+    }
+    
+    /* Modal styles */
     .modal-content {
-        background-color: #c69c6d; /* 棕色背景，与图片匹配 */
+        background-color: #c69c6d;
         border-radius: 8px;
         padding: 15px;
     }
@@ -88,7 +163,7 @@
     }
     
     .btn-done {
-        background-color: #26a69a; /* 使用图片中的绿松石色 */
+        background-color: #26a69a;
         color: white;
         border-radius: 20px;
         padding: 8px 30px;
@@ -101,99 +176,64 @@
         padding: 8px 30px;
     }
     
-    /* 调整分享按钮的样式，使其与图片中的按钮匹配 */
-    .share-btn {
-        background-color: #C38D60; /* 棕色按钮 */
-        border: none;
-        border-radius: 20px;
-        padding: 8px 30px;
-        color: white;
-        font-size: 16px;
-    }
-    
-    .share-btn:hover {
-        background-color: #b07a50;
-        color: white;
+    @media (max-width: 768px) {
+        .stat-card {
+            width: 48%;
+            margin-bottom: 15px;
+        }
+        
+        .chart-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="text-center mb-5" style="color: #C38D60;">Data Analysis</h1>
-    
-    <!-- Summary Cards -->
-    <div class="row mb-5">
-        <div class="col-md-3">
-            <div class="card summary-card" style="background-color: #F3E7DD; border: none; border-radius: 10px;">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Total Duration(Minutes)</h5>
-                    <p class="card-text display-4" style="color: #C38D60;">50</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card summary-card" style="background-color: #F3E7DD; border: none; border-radius: 10px;">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Today Learning (Minutes)</h5>
-                    <p class="card-text display-4" style="color: #C38D60;">20</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card summary-card" style="background-color: #F3E7DD; border: none; border-radius: 10px;">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Average Duration(Minutes)</h5>
-                    <p class="card-text display-4" style="color: #C38D60;">15</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card summary-card" style="background-color: #F3E7DD; border: none; border-radius: 10px;">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Today Learning (Minutes)</h5>
-                    <p class="card-text display-4" style="color: #C38D60;">20</p>
-                </div>
-            </div>
-        </div>
+<h1 class="page-title">Data Analysis</h1>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-label">Total Duration(Minutes)</div>
+        <div class="stat-value">50</div>
     </div>
-    
-    <!-- Filter Section -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="filter-section">
-                <p class="filter-label" style="color: #C38D60;">Filter : This Month</p>
-            </div>
-        </div>
-        <div class="col-md-6 text-end">
-            <div class="filter-section">
-                <p class="filter-label" style="color: #C38D60;">Filter : This Month</p>
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-label">Today Learning (Minutes)</div>
+        <div class="stat-value">20</div>
     </div>
-    
-    <!-- Charts -->
-    <div class="row mb-5">
-        <div class="col-md-6">
-            <div class="chart-container">
-                <canvas id="studyPlanChart"></canvas>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="chart-container">
-                <canvas id="studyDurationChart"></canvas>
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-label">Average Duration(Minutes)</div>
+        <div class="stat-value">15</div>
     </div>
-    
-    <!-- Share Button -->
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <button type="button" class="btn share-btn" data-bs-toggle="modal" data-bs-target="#shareModal">
-                Share
-            </button>
-        </div>
+    <div class="stat-card">
+        <div class="stat-label">Today Learning (Minutes)</div>
+        <div class="stat-value">20</div>
     </div>
+</div>
+
+<div class="filters-row">
+    <div>
+        <span class="filter-label">Filter : This Month</span>
+    </div>
+    <div>
+        <span class="filter-label">Filter : This Month</span>
+    </div>
+</div>
+
+<div class="charts-row">
+    <div class="chart-container">
+        <canvas id="studyPlanChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="studyDurationChart"></canvas>
+    </div>
+</div>
+
+<div class="btn-container">
+    <button type="button" class="share-btn" data-bs-toggle="modal" data-bs-target="#shareModal">
+        Share
+    </button>
 </div>
 
 <!-- Share Modal -->
@@ -253,126 +293,134 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-{{ super() }}
-<!-- 确保先加载依赖库 -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
-    // 确保页面完全加载后再执行脚本
-    document.addEventListener('DOMContentLoaded', function() {
-        // 初始化图表
-        initCharts();
+    // check Chart.js 
+    window.onload = function() {
+        console.log('Window loaded');
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js fail');
+            alert('Chart libraries are not loaded correctly, some functions may not be available');
+            return;
+        }
         
-        // 设置分享按钮点击事件
-        // setupShareButton();
+        console.log('Chart.js ready:', typeof Chart);
         
-        // 设置用户选择功能
-        setupUserSelection();
-        
-        // 设置Done按钮点击事件
-        setupDoneButton();
-    });
+        // wait dom 
+        setTimeout(function() {
+            // initial
+            initializeCharts();
+            
+            // 
+            setupUserSelection();
+            
+            // 
+            setupDoneButton();
+        }, 200);
+    };
     
-    // 初始化图表
-    function initCharts() {
-        // 饼图 - 学习计划状态
-        const planStatusChart = new Chart(
-            document.getElementById('studyPlanChart').getContext('2d'),
-            {
-                type: 'pie',
-                data: {
-                    labels: ['Open', 'Completed', 'Deleted', 'In Progress', 'Late'],
-                    datasets: [{
-                        data: [5, 3, 1, 4, 2],
-                        backgroundColor: [
-                            'rgba(23, 96, 120, 0.9)',
-                            'rgba(40, 140, 160, 0.9)',
-                            'rgba(70, 190, 180, 0.9)',
-                            'rgba(40, 210, 170, 0.9)',
-                            'rgba(90, 220, 190, 0.9)'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        );
-        
-        // 柱状图 - 每日学习时长
-        const studyDurationChart = new Chart(
-            document.getElementById('studyDurationChart').getContext('2d'),
-            {
-                type: 'bar',
-                data: {
-                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
-                    datasets: [{
-                        label: 'Study Duration (Minutes)',
-                        data: [45, 30, 60, 80, 40],
-                        backgroundColor: [
-                            'rgba(23, 96, 120, 0.9)',
-                            'rgba(40, 140, 160, 0.9)',
-                            'rgba(70, 190, 180, 0.9)',
-                            'rgba(40, 210, 170, 0.9)',
-                            'rgba(90, 220, 190, 0.9)'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                display: false
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
+    // 
+    function initializeCharts() {
+        try {
+            // pie
+            const pieCtx = document.getElementById('studyPlanChart');
+            if (pieCtx) {
+                console.log('Creating pie chart...');
+                const planStatusChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Open', 'Completed', 'Deleted', 'In Progress', 'Late'],
+                        datasets: [{
+                            data: [5, 3, 1, 4, 2],
+                            backgroundColor: [
+                                'rgba(23, 96, 120, 0.9)',
+                                'rgba(40, 140, 160, 0.9)',
+                                'rgba(70, 190, 180, 0.9)',
+                                'rgba(40, 210, 170, 0.9)',
+                                'rgba(90, 220, 190, 0.9)'
+                            ],
+                            borderWidth: 0
+                        }]
                     },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: false
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: false
+                            }
                         }
                     }
-                }
+                });
+            } else {
+                console.error('can not find');
             }
-        );
+            
+            // bar
+            const barCtx = document.getElementById('studyDurationChart');
+            if (barCtx) {
+                console.log('Creating bar chart...');
+                const studyDurationChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+                        datasets: [{
+                            label: 'Study Duration (Minutes)',
+                            data: [45, 30, 60, 80, 40],
+                            backgroundColor: [
+                                'rgba(23, 96, 120, 0.9)',
+                                'rgba(40, 140, 160, 0.9)',
+                                'rgba(70, 190, 180, 0.9)',
+                                'rgba(40, 210, 170, 0.9)',
+                                'rgba(90, 220, 190, 0.9)'
+                            ],
+                            borderWidth: 0,
+                            barThickness: 40
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.error('can not find');
+            }
+            
+            console.log('Charts initialized');
+            
+        } catch (error) {
+            console.error('Error initializing charts:', error);
+        }
     }
     
-    // // 设置分享按钮点击事件
-    // function setupShareButton() {
-    //     const shareButton = document.getElementById('shareButton');
-    //     if (shareButton) {
-    //         shareButton.addEventListener('click', function() {
-    //             // 使用JavaScript手动显示模态窗口
-    //             var myModal = new bootstrap.Modal(document.getElementById('shareModal'));
-    //             myModal.show();
-    //         });
-    //     } else {
-    //         console.error('Share button not found!');
-    //     }
-    // }
-    
-    // 设置用户选择功能
+    // 
     function setupUserSelection() {
         const userSelect = document.getElementById('userSelect');
         const selectedUsers = document.getElementById('selectedUsers');
@@ -383,7 +431,7 @@
                 const selectedOption = this.options[this.selectedIndex];
                 
                 if (selectedUser) {
-                    // 检查用户是否已添加
+                    // 
                     if (!document.querySelector(`.remove-user[data-user="${selectedUser}"]`)) {
                         const userTag = document.createElement('div');
                         userTag.className = 'user-tag';
@@ -393,13 +441,13 @@
                         `;
                         selectedUsers.appendChild(userTag);
                         
-                        // 重置选择
+                        // 
                         this.selectedIndex = 0;
                     }
                 }
             });
             
-            // 移除用户（使用事件委托）
+            // 
             selectedUsers.addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-user')) {
                     e.target.parentElement.remove();
@@ -408,57 +456,59 @@
         }
     }
     
-    // 设置Done按钮点击事件
+    // 
     function setupDoneButton() {
         const doneButton = document.getElementById('doneButton');
-        const shareModal = document.getElementById('shareModal');
         
-        if (doneButton && shareModal) {
+        if (doneButton) {
             doneButton.addEventListener('click', function() {
-                // 收集表单数据
-                const form = document.getElementById('shareForm');
-                const formData = new FormData(form);
-                
-                // 添加选中的用户
-                const userTags = document.querySelectorAll('.user-tag');
-                userTags.forEach(tag => {
-                    const userName = tag.textContent.trim().replace('✕', '').trim();
-                    formData.append('users[]', userName);
-                });
-                
-                // 这里是预留的后端代码，实际部署时取消注释
-                /*
-                fetch('/share', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Success:', data);
-                    const modal = bootstrap.Modal.getInstance(shareModal);
-                    modal.hide();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-                */
-                
-                // 暂时只是隐藏模态窗口并显示一个成功消息
-                // var modal = bootstrap.Modal.getOrCreateInstance(shareModal);
-                // modal.hide();
-                // console.log('Share form submitted');
-                
-                // // 可选：显示一个成功消息
-                // alert('Data shared successfully!');
-                const modal = bootstrap.Modal.getOrCreateInstance(shareModal);
-                modal.hide();
-
-            // 打印确认信息
-                console.log('Share form submitted');
-
-            // ✅ 显示确认弹窗
-                alert('Data shared successfully!');
-                });
+                try {
+                    // 
+                    const shareModal = document.getElementById('shareModal');
+                    
+                    //
+                    let modalInstance;
+                    if (window.bootstrap && typeof bootstrap.Modal !== 'undefined') {
+                        modalInstance = bootstrap.Modal.getInstance(shareModal);
+                        
+                        if (!modalInstance) {
+                            modalInstance = new bootstrap.Modal(shareModal);
+                        }
+                        
+                        // 
+                        modalInstance.hide();
+                    } else {
+                        // 
+                        if (window.jQuery) {
+                            jQuery(shareModal).modal('hide');
+                        } else {
+                            // 
+                            shareModal.classList.remove('show');
+                            shareModal.style.display = 'none';
+                            
+                            // 
+                            const modalBackdrops = document.getElementsByClassName('modal-backdrop');
+                            if (modalBackdrops.length > 0) {
+                                for (let i = 0; i < modalBackdrops.length; i++) {
+                                    modalBackdrops[i].remove();
+                                }
+                            }
+                            
+                            // remove body overflow hidden
+                            document.body.classList.remove('modal-open');
+                            document.body.style.overflow = '';
+                            document.body.style.paddingRight = '';
+                        }
+                    }
+                    
+                    // 
+                    console.log('Share form submitted');
+                    alert('Data shared successfully!');
+                    
+                } catch (error) {
+                    console.error('Error in doneButton handler:', error);
+                }
+            });
         }
     }
 </script>
