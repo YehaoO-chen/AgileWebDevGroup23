@@ -3,9 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual environment
+# Virtual environment folders
 venv/
 env/
+.venv/
+
+# Environment variable files
 .env
 
 # Flask instance folder
