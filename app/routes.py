@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models import User
+from datetime import datetime
+from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
 
 def init_routes(app):
@@ -128,14 +129,27 @@ def init_routes(app):
     # Study plan route (requires login)
     @app.route('/studyplan')
     @login_required
-    def studyplan():
+    def study_plan():
         return render_template('studyplan.html')
 
-    # Share route (requires login)
+
+    #Share route (requires login)
+
     @app.route('/share')
     @login_required
     def share():
-        return render_template('share.html')
+        data_type = request.form.get('dataType')
+        users = request.form.getlist('users[]')
+    
+    # 这里添加处理分享逻辑
+    # 例如保存到数据库或发送通知
+    
+    # 返回成功响应
+        return jsonify({
+            'success': True,
+            'message': f'成功分享{data_type}给{len(users)}位用户'
+        })
+
 
     # Main page route (requires login)
     @app.route('/mainpage')

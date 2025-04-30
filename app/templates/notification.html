@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Notification{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container notification-container">
+    <h1 class="text-center mb-4">Notification</h1>
+    
+    <!-- Notification items -->
+    <div class="notification-list">
+        <!-- Notification 1 -->
+        <div class="notification-card">
+            <div class="notification-header">
+                <h5>User Celia Wong shared you a study message</h5>
+                <button class="delete-btn" aria-label="Delete notification">
+                    <i class="trash-icon"></i>
+                </button>
+            </div>
+            <div class="notification-body">
+                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
+            </div>
+            <div class="notification-footer">
+                <span class="notification-time">Apr 20 12:00 pm</span>
+            </div>
+        </div>
+
+        <!-- Notification 2 -->
+        <div class="notification-card">
+            <div class="notification-header">
+                <h5>User Celia Wong shared you a study message</h5>
+                <button class="delete-btn" aria-label="Delete notification">
+                    <i class="trash-icon"></i>
+                </button>
+            </div>
+            <div class="notification-body">
+                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
+            </div>
+            <div class="notification-footer">
+                <span class="notification-time">Apr 20 12:00 pm</span>
+            </div>
+        </div>
+
+        <!-- Notification 3 -->
+        <div class="notification-card">
+            <div class="notification-header">
+                <h5>User Celia Wong shared you a study message</h5>
+                <button class="delete-btn" aria-label="Delete notification">
+                    <i class="trash-icon"></i>
+                </button>
+            </div>
+            <div class="notification-body">
+                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
+            </div>
+            <div class="notification-footer">
+                <span class="notification-time">Apr 20 12:00 pm</span>
+            </div>
+        </div>
+
+        <!-- Notification 4 -->
+        <div class="notification-card">
+            <div class="notification-header">
+                <h5>User Celia Wong shared you a study message</h5>
+                <button class="delete-btn" aria-label="Delete notification">
+                    <i class="trash-icon"></i>
+                </button>
+            </div>
+            <div class="notification-body">
+                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
+            </div>
+            <div class="notification-footer">
+                <span class="notification-time">Apr 20 12:00 pm</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+{% endblock %}
