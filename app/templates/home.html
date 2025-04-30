@@ -1,43 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Supervise</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/styles.css">
+{% extends 'base.html' %}
 
-</head>
-<body>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h2 class="text-center">Study Supervise</h2>
-            <a href="#">Home</a>
-            <a href="#">Study Plan</a>
-            <a href="#">Share</a>
-        </div>
+{% block title %}Home - ProcrastiNo{% endblock %}
 
-        <!-- Main Content -->
-        <div class="flex-grow-1">
-            <!-- Header -->
-            <div class="header-icons">
-                <i class="bi bi-bell" title="Notifications"></i>
-                <i class="bi bi-person-circle" title="User Profile"></i>
-            </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
 
-            <!-- Main Content -->
-            <div class="content">
-                <h1>Welcome to Study Supervise</h1>
-                <p>This is your study supervision platform. Use the navigation bar to explore features like creating study plans and sharing resources.</p>
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="welcome-card floating-card">
+                <h1 class="page-header text-center mb-4">Welcome to ProcrastiNo</h1>
+                <p class="text-center lead mb-5">Your personal study productivity hub. Choose from the options below to get started.</p>
+                
+                <div class="row justify-content-center g-4">
+                    <div class="col-md-4">
+                        <div class="feature-card text-center p-4">
+                            <i class="bi bi-alarm feature-icon mb-3"></i>
+                            <h3>Focus Timer</h3>
+                            <p>Set up focused study sessions with scheduled breaks to maximize productivity</p>
+                            <a href="{{ url_for('mainpage') }}" class="btn btn-primary mt-3">
+                                <i class="bi bi-play-circle me-2"></i>Start Timer
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="feature-card text-center p-4">
+                            <i class="bi bi-journal-text feature-icon mb-3"></i>
+                            <h3>Study Plan</h3>
+                            <p>Create and manage your study schedule and academic goals</p>
+                            <a href="{{ url_for('studyplan') }}" class="btn btn-primary mt-3">
+                                <i class="bi bi-calendar-check me-2"></i>View Plans
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="feature-card text-center p-4">
+                            <i class="bi bi-graph-up feature-icon mb-3"></i>
+                            <h3>Dashboard</h3>
+                            <p>Track your progress and see insights about your study habits</p>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
+                                <i class="bi bi-pie-chart me-2"></i>View Stats
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-</body>
-</html>
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to the feature cards when they come into view
+        const featureCards = document.querySelectorAll('.feature-card');
+        
+        featureCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('fade-in-up');
+            }, 100 * index);
+        });
+    });
+</script>
+{% endblock %}

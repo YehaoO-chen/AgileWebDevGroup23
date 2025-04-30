@@ -1,0 +1,173 @@
+/* Navbar Styles */
+.navbar {
+    background-color: var(--primary-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 12px 0;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Add top padding to body to compensate for fixed navbar */
+body {
+    padding-top: 70px;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: #3A3A3A !important;
+    font-size: 1.4rem;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+    font-size: 1.3rem;
+}
+
+.nav-link {
+    color: #3A3A3A !important;
+    font-weight: 500;
+    transition: all 0.3s;
+    padding: 8px 16px !important;
+    border-radius: 20px;
+    margin: 0 5px;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Active link indicator */
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px;
+}
+
+/* Animation for navbar on scroll */
+.navbar-scrolled {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 8px 0;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 992px) {
+    .navbar-collapse {
+        background-color: var(--primary-color);
+        padding: 15px;
+        border-radius: 0 0 15px 15px;
+        margin-top: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .nav-link {
+        text-align: center;
+        margin: 5px 0;
+    }
+}
+
+/* Global CSS styles */
+:root {
+    --primary-color: #66D2CE;
+    --secondary-color: #E3D2C3;
+    --dark-primary: #1fa4a3;
+    --text-color: #333333;
+    --background-color: #ffffff;
+    --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
+    --border-color: #dee2e6;
+  }
+  
+  /* Always show scrollbar to prevent layout shifts */
+  html {
+    overflow-y: scroll;
+    margin-right: 0 !important;
+    scroll-behavior: smooth;
+  }
+  
+  /* Consistent page styling for all templates */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 0 !important;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Common card styling */
+  .floating-card {
+    background-color: var(--background-color);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .floating-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Global button styling */
+  .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover, .btn-primary:focus {
+    background-color: var(--dark-primary);
+    border-color: var(--dark-primary);
+    box-shadow: 0 4px 8px rgba(102, 210, 206, 0.3);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .page-header {
+    color: var(--dark-primary);
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .page-header:after {
+    content: '';
+    position: absolute;
+    width: 40%;
+    height: 3px;
+    background-color: var(--primary-color);
+    bottom: -6px;
+    left: 30%;
+    border-radius: 2px;
+  }
