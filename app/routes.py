@@ -129,7 +129,7 @@ def init_routes(app):
     # Study plan route (requires login)
     @app.route('/studyplan')
     @login_required
-    def studyplan():
+    def study_plan():
         return render_template('studyplan.html')
 
 
