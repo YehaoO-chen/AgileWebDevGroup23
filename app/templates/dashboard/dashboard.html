@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Analysis{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-5">Data Analysis</h1>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="card summary-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Duration(Minutes)</h5>
+                    <p class="card-text display-4">50</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card summary-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Today Learning (Minutes)</h5>
+                    <p class="card-text display-4">20</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card summary-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Average Duration(Minutes)</h5>
+                    <p class="card-text display-4">15</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card summary-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Today Learning (Minutes)</h5>
+                    <p class="card-text display-4">20</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="filter-section">
+                <p class="filter-label">Filter: This Month</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="filter-section text-right">
+                <p class="filter-label">Filter: This Month</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <canvas id="studyPlanChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <canvas id="studyDurationChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Share Button -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <button class="btn btn-primary">Share</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 饼图 - 学习计划状态
+    const planStatusChart = new Chart(
+        document.getElementById('studyPlanChart').getContext('2d'),
+        {
+            type: 'pie',
+            data: {
+                labels: ['Open', 'Completed', 'Deleted'],
+                datasets: [{
+                    data: [5, 3, 1],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(255, 99, 132, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Study Plan Status'
+                    }
+                }
+            }
+        }
+    );
+    
+    // 柱状图 - 每日学习时长
+    const studyDurationChart = new Chart(
+        document.getElementById('studyDurationChart').getContext('2d'),
+        {
+            type: 'bar',
+            data: {
+                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+                datasets: [{
+                    label: 'Study Duration (Minutes)',
+                    data: [45, 30, 60, 80, 40],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(255, 99, 132, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Daily Study Duration'
+                    }
+                }
+            }
+        }
+    );
+</script>
+{% endblock %}

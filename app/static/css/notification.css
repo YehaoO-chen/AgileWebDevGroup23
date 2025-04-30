@@ -1,0 +1,90 @@
+/* notification.css */
+.notification-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notification-card {
+    background-color: #f8f1e7;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.notification-card:hover {
+    transform: translateY(-3px);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.notification-header h5 {
+    color: #b07d48;
+    margin: 0;
+    font-size: 18px;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #dc3545;
+    font-size: 16px;
+    padding: 5px;
+}
+
+.trash-icon {
+    display: inline-block;
+    width: 16px;
+    height: 18px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='18' viewBox='0 0 16 18'%3E%3Cpath fill='%23dc3545' d='M1 16C1 17.1 1.9 18 3 18H13C14.1 18 15 17.1 15 16V4H1V16ZM16 1H12.5L11.5 0H4.5L3.5 1H0V3H16V1Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.notification-body {
+    margin-bottom: 10px;
+}
+
+.notification-body p {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.notification-footer {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.notification-time {
+    color: #888;
+    font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .notification-container {
+        padding: 10px;
+    }
+    
+    .notification-card {
+        padding: 12px 15px;
+    }
+    
+    .notification-header h5 {
+        font-size: 16px;
+    }
+}

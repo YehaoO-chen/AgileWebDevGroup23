@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models import User
+from datetime import datetime
+from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
 
 def init_routes(app):
@@ -127,8 +128,18 @@ def init_routes(app):
 
     @app.route('/study-plan')
     def study_plan():
-        return render_template('study_plan.html')
+        return render_template('studyplan.html')
 
     @app.route('/share')
     def share():
         return render_template('share.html')
+
+    # Dashboard route - simplified version with mock data
+    @app.route('/dashboard')
+    def dashboard():
+        return render_template('dashboard/dashboard.html')
+    
+    @app.route('/notification')
+    def notification():
+    # 这里只返回UI，不需要后端数据
+        return render_template('notification/notification.html')
