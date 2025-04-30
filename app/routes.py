@@ -133,12 +133,22 @@ def init_routes(app):
         return render_template('studyplan.html')
 
 
-    # Share route (requires login)
+    #Share route (requires login)
 
     @app.route('/share')
     @login_required
     def share():
-        return render_template('share.html')
+        data_type = request.form.get('dataType')
+        users = request.form.getlist('users[]')
+    
+    # 这里添加处理分享逻辑
+    # 例如保存到数据库或发送通知
+    
+    # 返回成功响应
+        return jsonify({
+            'success': True,
+            'message': f'成功分享{data_type}给{len(users)}位用户'
+        })
 
 
     # Main page route (requires login)
