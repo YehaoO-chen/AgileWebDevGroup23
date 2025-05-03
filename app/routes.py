@@ -342,9 +342,30 @@ def init_routes(app):
             'notifications': [{'id': n.id, 'content': n.content} for n in notifications]
         })
     
+    @app.route('/api/profile', methods=['GET'])
+    @login_required
+    def get_profile():
+        user = current_user
+        return jsonify({
+            'id': user.id,
+            'username': user.username,
+            'create_time': user.create_time.strftime('%Y-%m-%d %H:%M:%S')
+        })
 
+
+    @app.route('api/profile', methods=['PUT'])
+    @login_required
+    def update_profile():
+        data = request.get_json()
+        user = current_user
+        user.username = data['username']
+        user.password = data['password']
+        db.session.commit()
+        return jsonify({'success': True})
     
-    
+
+
+
     # UPLOAD_FOLDER = 'static/uploads'
     
     # @app.route('/upload_avatar', methods=['POST'])
