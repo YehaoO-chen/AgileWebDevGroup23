@@ -56,7 +56,7 @@ class Notification(db.Model):
     receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     content = db.Column(db.String(200), nullable=False)
     send_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    status = db.Column(db.Integer, default=0, nullable=False)  # 0: sent, 1: failed, 2: deleted
+    status = db.Column(db.Integer, default=0, nullable=False)  # 0: unread, 1: deleted 2:read
     
     sender = db.relationship('User', foreign_keys=[sender_id], backref=db.backref('sent_notifications', lazy=True))
     receiver = db.relationship('User', foreign_keys=[receiver_id], backref=db.backref('received_notifications', lazy=True))

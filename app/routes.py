@@ -177,6 +177,173 @@ def init_routes(app):
         user = current_user
         return render_template('profile.html', user=user)
     
+    #=================================================================
+    #APIs
+    #=================================================================
+    @app.route('/api/studyplan', methods=['POST'])
+    @login_required
+    def create_study_plan():
+        data = request.get_json()
+        study_plan = StudyPlan(
+            user_id=current_user.id,
+            title=data['title'],
+            description=data['description'],
+            start_date=datetime.strptime(data['start_date'], '%Y-%m-%d'),
+            end_date=datetime.strptime(data['end_date'], '%Y-%m-%d')
+        )
+        db.session.add(study_plan)
+        db.session.commit()
+        return jsonify({'success': True, 'study_plan_id': study_plan.id})
+    
+    @app.route('/api/studyplan/<int:study_plan_id>', methods=['GET'])
+    @login_required
+    def get_study_plan(study_plan_id):
+        study_plan = StudyPlan.query.get_or_404(study_plan_id)
+        return jsonify({
+            'id': study_plan.id,
+            'title': study_plan.title,
+            'description': study_plan.description,
+            'start_date': study_plan.start_date.strftime('%Y-%m-%d'),
+            'end_date': study_plan.end_date.strftime('%Y-%m-%d')
+        })
+    
+    @app.route('/api/studyplan/<int:study_plan_id>', methods=['PUT'])
+    @login_required
+    def update_study_plan(study_plan_id):
+        data = request.get_json()
+        study_plan = StudyPlan.query.get_or_404(study_plan_id)
+        study_plan.title = data['title']
+        study_plan.description = data['description']
+        study_plan.start_date = datetime.strptime(data['start_date'], '%Y-%m-%d')
+        study_plan.end_date = datetime.strptime(data['end_date'], '%Y-%m-%d')
+        db.session.commit()
+        return jsonify({'success': True})
+    
+    @app.route('/api/studyplan/<int:study_plan_id>', methods=['DELETE'])
+    @login_required
+    def delete_study_plan(study_plan_id):
+        study_plan = StudyPlan.query.get_or_404(study_plan_id)
+        db.session.delete(study_plan)
+        db.session.commit()
+        return jsonify({'success': True})
+    
+    @app.route('/api/studyplan', methods=['GET'])
+    @login_required
+    def get_study_plans():
+        study_plans = StudyPlan.query.filter_by(user_id=current_user.id).all()
+        return jsonify([{
+            'id': sp.id,
+            'title': sp.title,
+            'description': sp.description,
+            'start_date': sp.start_date.strftime('%Y-%m-%d'),
+            'end_date': sp.end_date.strftime('%Y-%m-%d')
+        } for sp in study_plans])
+    
+
+
+    @app.route('/api/studyduration', methods=['POST'])
+    @login_required
+    def create_study_duration():
+        data = request.get_json()
+        study_duration = StudyDuration(
+            user_id=current_user.id,
+            duration=data['duration'],
+            start_time=datetime.strptime(data['start_time'], '%Y-%m-%d %H:%M:%S'),
+            end_time=datetime.strptime(data['end_time'], '%Y-%m-%d %H:%M:%S'),
+            stop_times=data['stop_times']
+        )
+        db.session.add(study_duration)
+        db.session.commit()
+        return jsonify({'success': True, 'study_duration_id': study_duration.id})
+    
+    
+    @app.route('/api/studyduration/<int:study_duration_id>', methods=['GET'])
+    @login_required
+    def get_study_duration(study_duration_id):
+        study_duration = StudyDuration.query.get_or_404(study_duration_id)
+        return jsonify({
+            'id': study_duration.id,
+            'duration': study_duration.duration,
+            'start_time': study_duration.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': study_duration.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'stop_times': study_duration.stop_times
+        })
+    
+    @app.route('/api/studyduration/<int:study_duration_id>', methods=['PUT'])
+    @login_required
+    def update_study_duration(study_duration_id):
+        data = request.get_json()
+        study_duration = StudyDuration.query.get_or_404(study_duration_id)
+        study_duration.duration = data['duration']
+        study_duration.start_time = datetime.strptime(data['start_time'], '%Y-%m-%d %H:%M:%S')
+        study_duration.end_time = datetime.strptime(data['end_time'], '%Y-%m-%d %H:%M:%S')
+        study_duration.stop_times = data['stop_times']
+        db.session.commit()
+        return jsonify({'success': True})
+    
+    @app.route('/api/studyduration/<int:study_duration_id>', methods=['DELETE'])
+    @login_required
+    def delete_study_duration(study_duration_id):
+        study_duration = StudyDuration.query.get_or_404(study_duration_id)
+        db.session.delete(study_duration)
+        db.session.commit()
+        return jsonify({'success': True})
+    
+    @app.route('/api/studyduration', methods=['GET'])
+    @login_required
+    def get_study_durations():
+        study_durations = StudyDuration.query.filter_by(user_id=current_user.id).all()
+        return jsonify([{
+            'id': sd.id,
+            'duration': sd.duration,
+            'start_time': sd.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': sd.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'stop_times': sd.stop_times
+        } for sd in study_durations])
+    # Notification API
+    @app.route('/api/notification', methods=['POST'])
+    @login_required
+    def create_notification():
+        data = request.get_json()
+        notification = Notification(
+            sender_id=current_user.id,
+            receiver_id=data['receiver_id'],
+            content=data['content']
+        )
+        db.session.add(notification)
+        db.session.commit()
+        return jsonify({'success': True, 'notification_id': notification.id})
+    
+    @app.route('/api/notification/', methods=['GET'])
+    @login_required
+    def get_notification():
+        notification = Notification.query.filter_by(receiver_id=current_user.id, status='sent').all()
+        return jsonify({
+            'id': notification.id,
+            'sender_id': notification.sender_id,
+            'receiver_id': notification.receiver_id,
+            'content': notification.content,
+            'send_time': notification.send_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'status': notification.status
+        })
+    
+
+    @app.route('/api/dashboard', methods=['GET'])
+    @login_required
+    def get_dashboard_data():
+        # Example data for the dashboard
+        study_plans = StudyPlan.query.filter_by(user_id=current_user.id).all()
+        study_durations = StudyDuration.query.filter_by(user_id=current_user.id).all()
+        notifications = Notification.query.filter_by(receiver_id=current_user.id).all()
+
+        return jsonify({
+            'study_plans': [{'id': sp.id, 'title': sp.title} for sp in study_plans],
+            'study_durations': [{'id': sd.id, 'duration': sd.duration} for sd in study_durations],
+            'notifications': [{'id': n.id, 'content': n.content} for n in notifications]
+        })
+    
+
+    
     
     # UPLOAD_FOLDER = 'static/uploads'
     
