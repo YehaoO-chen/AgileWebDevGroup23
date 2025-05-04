@@ -32,22 +32,18 @@ def init_routes(app):
     # Home page route
     @app.route('/')
     def index():
-        return render_template('index.html')
+        # If the user is already logged in, redirect to the home page
+        if not current_user.is_authenticated:
+            return render_template('index.html')
+        return render_template('base.html', route='home', user=current_user)
 
-    # Dashboard route
-    @app.route('/home')
-    def home():
-        # If the user is authenticated, show the dashboard
-        if current_user.is_authenticated:
-            return render_template('home.html', username=current_user.username)
-        # If not authenticated, redirect to the index page
-        return render_template('index.html')
+
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         # If the user is already logged in, redirect to the home page
         if current_user.is_authenticated:
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
 
         if request.method == 'POST':
             username = request.form['username']
@@ -65,7 +61,7 @@ def init_routes(app):
             if user.password == password:
                 login_user(user)
                 flash('Login successful', 'success')
-                return redirect(url_for('home'))
+                return redirect(url_for('index'))
             else:
                 flash('Invalid password. Please try again.', 'danger')
 
@@ -154,7 +150,13 @@ def init_routes(app):
     @app.route('/studyplan')
     @login_required
     def study_plan():
-        return render_template('studyplan.html')
+        user = current_user
+        # Check if the request is an AJAX request (based on header set by JS)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render_template('studyplan.html', user=user, is_partial=True) # Pass a flag if needed
+        else:
+            # If normal request, render with the base template
+            return render_template('studyplan.html', user=user, is_partial=False) # Or just render normally
 
 
     #Share route (requires login)
@@ -174,31 +176,78 @@ def init_routes(app):
             'message': f'成功分享{data_type}给{len(users)}位用户'
         })
 
+    # Dashboard route
+    @app.route('/home')
+    @login_required
+    def home():
+        user = current_user
+        # Check if the request is an AJAX request (based on header set by JS)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render_template('home.html', user=user, is_partial=True) # Pass a flag if needed
+        else:
+            # If normal request, render with the base template
+            return render_template('base.html', route='home', user=user)
 
     # Main page route (requires login)
     @app.route('/mainpage')
     @login_required
     def mainpage():
-        return render_template('mainpage.html', user=current_user)
+        user = current_user
+        # Check if the request is an AJAX request (based on header set by JS)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # If AJAX, render *only* the content part (mainpage.html itself)
+            # Crucially, mainpage.html should NOT have {% extends 'base.html' %}
+            # OR, keep extends but render only the block (more complex)
+            # Easiest: Render the template directly without base.
+            return render_template('mainpage.html', user=user, is_partial=True) # Pass a flag if needed
+        else:
+            # If normal request, render with the base template
+            return render_template('base.html', route='mainpage', user=user)
+
     
     # Dashboard route (requires login)
     @app.route('/dashboard')
     @login_required
     def dashboard():
-        return render_template('dashboard.html')
+        user = current_user
+        # Check if the request is an AJAX request (based on header set by JS)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render_template('dashboard.html', user=user, is_partial=True) # Pass a flag if needed
+        else:
+            # If normal request, render with the base template
+            return render_template('base.html', route='dashboard', user=user)
+
     
     # Notification route (requires login)
     @app.route('/notification')
     @login_required
     def notification():
-        return render_template('notification.html')
+        user = current_user
+        # Check if the request is an AJAX request (based on header set by JS)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render_template('notification.html', user=user, is_partial=True) # Pass a flag if needed
+        else:
+            # If normal request, render with the base template
+            return render_template('base.html', route='notification', user=user)
+
     
     #Profile route
     @app.route('/profile')
     @login_required
     def profile():
-        user = current_user
-        return render_template('profile.html', user=user)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render_template('profile.html')
+        else:
+            return render_template('base.html', route='profile')
+        
+        # user = current_user
+        # if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        #     # Render only the profile content part
+        #     return render_template('profile.html', user=user, is_partial=True)
+        # else:
+        #     # Render the full page including base
+        #     return render_template('profile.html', user=user, is_partial=False)
+
     
     #=================================================================
     #APIs

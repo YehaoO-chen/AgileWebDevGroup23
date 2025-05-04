@@ -1,6 +1,3 @@
-{% extends 'base.html' %}
-
-{% block title %}Home - ProcrastiNo{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
@@ -20,7 +17,7 @@
                             <i class="bi bi-alarm feature-icon mb-3"></i>
                             <h3>Focus Timer</h3>
                             <p>Set up focused study sessions with scheduled breaks to maximize productivity</p>
-                            <a href="{{ url_for('mainpage') }}" class="btn btn-primary mt-3">
+                            <a  class="btn btn-primary mt-3" id="start-timer-btn" >
                                 <i class="bi bi-play-circle me-2"></i>Start Timer
                             </a>
                         </div>
@@ -56,15 +53,45 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add animation to the feature cards when they come into view
-        const featureCards = document.querySelectorAll('.feature-card');
-        
-        featureCards.forEach((card, index) => {
+    $(document).ready(function() {
+        // Select all feature cards using jQuery selector
+        const $featureCards = $('.feature-card');
+
+        // Iterate through each feature card using jQuery's .each()
+        $featureCards.each(function(index) {
+            // 'this' refers to the current DOM element in the loop
+            const $card = $(this); // Wrap the DOM element in a jQuery object
+
+            // Use setTimeout to add the class with a staggered delay
             setTimeout(() => {
-                card.classList.add('fade-in-up');
-            }, 100 * index);
+                $card.addClass('fade-in-up');
+            }, 100 * index); // Delay increases for each card
         });
+
+
+                // --- Click Listener for "Start Timer" Button ---
+        // Assumes loadMainContent is globally available from base.js
+        $('#start-timer-btn').on('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior
+
+
+            if (typeof loadMainContent === 'function') {
+                loadMainContent('mainpage'); // Use the existing function to load content into <main>
+
+                // Update browser history
+                // Update active class in sidebar (assuming 'mainpage' corresponds to 'Home' link)
+                // Adjust selector if 'mainpage' has its own sidebar link
+                $('.sidebar .nav-custom').removeClass('active');
+                $('.sidebar a.nav-custom[href="/home"]').addClass('active'); // Activate 'Home' link
+
+
+            } else {
+                console.error("loadMainContent function is not defined.");
+                // Fallback: Perform a standard navigation if function is missing
+                // window.location.href = targetUrl;
+            }
+        });
+
     });
 </script>
 {% endblock %}
