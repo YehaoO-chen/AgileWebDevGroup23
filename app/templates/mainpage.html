@@ -61,15 +61,29 @@
             </div>
           </div>
 
-        <!-- TODO: Goal setup section -->
-        <!-- <div class="goals-setting">
-            <h2>Goals Setting</h2>
-            <form id="goal-form">
-                <input type="text" id="goal-input" placeholder="Enter your goal" required>
-                <button type="submit" class="btn btn-success">Set Goal</button>
-            </form>
-            <ul id="goal-list"></ul>
-        </div> -->
+        <!-- Goal setup section -->
+        <div class="todo-container">
+          <div class="todo-header">
+            <input type="text" id="task-input" placeholder="Let's crush some tasks today!" />
+            <button id="add-btn"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 256 256">
+              <path fill="#fff" d="M34 64a6 6 0 0 1 6-6h176a6 6 0 0 1 0 12H40a6 6 0 0 1-6-6m6 70h176a6 6 0 0 0 0-12H40a6 6 0 0 0 0 12m104 52H40a6 6 0 0 0 0 12h104a6 6 0 0 0 0-12m88 0h-18v-18a6 6 0 0 0-12 0v18h-18a6 6 0 0 0 0 12h18v18a6 6 0 0 0 12 0v-18h18a6 6 0 0 0 0-12" />
+            </svg></button>
+          </div>
+      
+          <div class="filters">
+            <div class="filter-group">
+              <button class="filter active" data-filter="all">All</button>
+              <button class="filter" data-filter="active">Active</button>
+              <button class="filter" data-filter="completed">Completed</button>
+            </div>
+          
+            <div class="toggle-container">
+              <button id="toggle-task-list">Hide</button>
+            </div>
+            
+          </div>
+          <ul class="task-list"></ul>
+      </div>
 
         <!-- TODO: background section -->
         <!-- <div class="bg-change">

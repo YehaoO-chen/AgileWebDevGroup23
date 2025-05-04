@@ -1,3 +1,4 @@
+/* Timer widget JS */
 // Initialise the default value
 let focusTime = 50;
 let breakTime = 10;
@@ -39,7 +40,7 @@ function sanitizeInput(input, type) {
   setTimeValue(type, value);
 }
 
-// Copilot generated - ensure whenever the user types, it gets cleaned and limited 3 digits
+//  ensure whenever the user types, it gets cleaned and limited 3 digits
 window.addEventListener('DOMContentLoaded', () => {
   ['focus', 'break'].forEach(type => {
     const input = document.getElementById(`${type}-time`);
@@ -187,3 +188,118 @@ function ContinueFocus() {
   }, 1000);
 
 }
+
+/* Goal setting widget JS */
+const input = document.getElementById('task-input');
+const addBtn = document.getElementById('add-btn');
+const taskList = document.querySelector('.task-list');
+const filters = document.querySelectorAll('.filter');
+
+addBtn.addEventListener('click', () => {
+  const taskText = input.value.trim();
+  if (taskText === '') return;
+
+  const li = document.createElement('li');
+  li.classList.add('task');
+  li.setAttribute('data-status', 'active');
+
+  li.innerHTML = `
+    <div class="task-content">
+      <input type="checkbox" class="task-checkbox" />
+      <span class="task-text">${taskText}</span>
+      <button class="expand-btn">${icon_down}</button>
+      <button class="delete-btn">${icon_delete}</button>
+    </div>
+  `;
+
+  taskList.appendChild(li);
+  input.value = '';
+});
+
+
+taskList.addEventListener('change', e => {
+  if (e.target.classList.contains('task-checkbox')) {
+    const task = e.target.closest('li');
+    const span = task.querySelector('.task-text');
+
+    const isChecked = e.target.checked;
+    task.setAttribute('data-status', isChecked ? 'completed' : 'active');
+    span.classList.toggle('completed', isChecked);
+
+    const activeFilter = document.querySelector('.filter.active');
+    const currentFilter = activeFilter?.getAttribute('data-filter');
+
+    if (isChecked && currentFilter === 'all') {
+      taskList.appendChild(task);
+    }
+
+    if (isChecked && currentFilter === 'active') {
+      task.style.display = 'none';
+    }
+
+    if (!isChecked && currentFilter === 'completed') {
+      task.style.display = 'none';
+    }
+  }
+});
+
+
+
+filters.forEach(button => {
+  button.addEventListener('click', () => {
+    document.querySelector('.filter.active').classList.remove('active');
+    button.classList.add('active');
+
+    const filter = button.getAttribute('data-filter');
+    document.querySelectorAll('.task').forEach(task => {
+      const status = task.getAttribute('data-status');
+      if (filter === 'all') {
+        task.style.display = 'flex';
+      } else {
+        task.style.display = status === filter ? 'flex' : 'none';
+      }
+    });
+  });
+});
+
+
+const toggleListBtn = document.getElementById('toggle-task-list');
+const taskListContainer = document.querySelector('.task-list');
+
+toggleListBtn.addEventListener('click', () => {
+  taskListContainer.classList.toggle('hidden');
+  toggleListBtn.textContent = taskListContainer.classList.contains('hidden')
+    ? 'Show'
+    : 'Hide';
+});
+
+
+const icon_up = `
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24 ">
+  <path fill="#fff" d="M20 15v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-2v1h-1v1H9v1H8v1H7v1H6v1H5v-1H4v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1V9h1V8h2v1h1v1h1v1h1v1h1v1h1v1h1v1z" />
+</svg>`;
+
+const icon_down = `
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+  <path fill="#fff" d="M20 8v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5V9H4V8h1V7h1v1h1v1h1v1h1v1h1v1h1v1h2v-1h1v-1h1v-1h1V9h1V8h1V7h1v1z" />
+</svg>`;    
+
+const icon_delete = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+<path fill="#fff" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM8 9h8v10H8zm7.5-5l-1-1h-5l-1 1H5v2h14V4z" />
+</svg>`;
+
+taskList.addEventListener('click', e => {
+  const expandBtn = e.target.closest('.expand-btn');
+  if (expandBtn) {
+    const task = expandBtn.closest('.task');
+    task.classList.toggle('expanded');
+    expandBtn.innerHTML = task.classList.contains('expanded') ? icon_up : icon_down;
+  }
+
+  const deleteBtn = e.target.closest('.delete-btn');
+  if (deleteBtn) {
+    const task = deleteBtn.closest('.task');
+    task.remove();
+  }
+
+});
