@@ -141,6 +141,11 @@ height: 35px;
 margin-bottom: 0.4rem;
 
 }
+.sidebar .nav-item a.nav-custom.active {
+  background-color: #93BFCF; /* Example active background color (light blue/teal) */
+  color: #E2E8F0; /* Example active text color (darker blue/teal) */
+  font-weight: bold; /* Make text bold */
+}
 
 
 .nav-custom:hover {
