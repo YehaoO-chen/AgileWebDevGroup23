@@ -1,14 +1,34 @@
+import os
 from sqlite3 import IntegrityError
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
-
+from werkzeug.utils import secure_filename
 from sqlalchemy import func
 from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
+from PIL import Image # Import Pillow Image module
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def init_routes(app):
+    # Define the upload folder relative to the app's root path
+    # Ensure the UPLOAD_FOLDER exists
+    UPLOAD_FOLDER = os.path.join(app.root_path,'static', 'uploads')
+    if not os.path.exists(UPLOAD_FOLDER):
+        try:
+            os.makedirs(UPLOAD_FOLDER) # Create the directory if it doesn't exist
+            print(f"Created directory: {UPLOAD_FOLDER}")
+        except OSError as e:
+            print(f"Error creating directory {UPLOAD_FOLDER}: {e}")
+            # Handle the error appropriately, maybe raise it or log critical error
+
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Store in app config
+    app.config['MAX_IMAGE_SIZE'] = 256 # Define max size for resizing
+
     # Home page route
     @app.route('/')
     def index():
@@ -467,6 +487,7 @@ def init_routes(app):
             'phone': user.phone,
             'address': user.address,
             'student_id': user.student_id,
+            'avatar': user.avatar
         })
 
 
@@ -551,16 +572,85 @@ def init_routes(app):
             return jsonify({'success': False, 'error': 'An unexpected error occurred.'}), 500
 
 
-    # UPLOAD_FOLDER = 'static/uploads'
     
-    # @app.route('/upload_avatar', methods=['POST'])
-    # @login_required
-    # def upload_avatar():
-    #     if 'avatar' in request.files:
-    #         file = request.files['avatar']
-    #         filename = secure_filename(file.filename)
-    #         save_path = os.path.join(UPLOAD_FOLDER, filename)
-    #         file.save(save_path)
-    #         avatar_url = url_for('static', filename=f'uploads/{filename}')
-    #         return jsonify({'success': True, 'avatar_url': avatar_url})
-    #     return jsonify({'success': False})
+    @app.route('/api/upload_avatar', methods=['POST'])
+    @login_required
+    def upload_avatar():
+        # Check if the post request has the file part
+        if 'avatar' not in request.files:
+            return jsonify({'success': False, 'error': 'No file part in the request'}), 400
+        
+        file = request.files['avatar']
+        
+        # If the user does not select a file, the browser submits an empty file without a filename.
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No selected file'}), 400
+        
+        if file and allowed_file(file.filename):
+            # Generate a secure filename and add user-specific prefix to avoid collisions
+            original_extension = file.filename.rsplit('.', 1)[1].lower()
+            # Using user ID is safer than username for uniqueness and avoiding special chars
+            filename = secure_filename(f"user_{current_user.id}_avatar.{original_extension}")
+            save_path = os.path.join( app.config['UPLOAD_FOLDER'] , filename)
+            
+            try:
+                # --- Optional: Delete old avatar file before saving new one ---
+                if current_user.avatar and current_user.avatar != 'default.jpg':
+                    old_avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], current_user.avatar)
+                    if os.path.exists(old_avatar_path):
+                        try:
+                            os.remove(old_avatar_path)
+                        except OSError as e:
+                            print(f"Error deleting old avatar {old_avatar_path}: {e}") # Log error but continue
+               
+                # --- End Optional ---
+
+                # --- Image Resizing Logic ---
+                max_size = app.config['MAX_IMAGE_SIZE']
+                img = Image.open(file.stream) # Open image from the file stream
+                width, height = img.size
+                resized = False
+
+                if max(width, height) > max_size:
+                    ratio = max_size / max(width, height)
+                    new_width = int(width * ratio)
+                    new_height = int(height * ratio)
+                    # Use LANCZOS for high-quality downsampling
+                    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                    resized = True
+                    print(f"Resized image to: {new_width}x{new_height}") # Optional logging
+
+                # Handle image format and transparency for saving
+                save_format = original_extension.upper()
+                if save_format == 'JPG':
+                    save_format = 'JPEG' # Pillow uses 'JPEG'
+
+                # If saving as JPEG and image has alpha channel (transparency), convert to RGB
+                if save_format == 'JPEG' and img.mode in ('RGBA', 'P'):
+                     img = img.convert('RGB')
+
+                # Save the (potentially resized) image
+                img.save(save_path, format=save_format, quality=85, optimize=True) # Adjust quality as needed
+                # --- End Image Resizing Logic ---
+                
+                # Update user avatar field in the database with the new filename
+                current_user.avatar = filename
+                db.session.commit()
+                
+                # Construct the URL path for the frontend
+                # Assumes 'static' is served at the root URL path '/static'
+                avatar_url = url_for('static', filename=f'uploads/{filename}', _external=False) # Use relative URL
+
+                return jsonify({'success': True, 'avatar_url': avatar_url, 'filename': filename})
+
+            except IntegrityError as e:
+                 db.session.rollback()
+                 return jsonify({'success': False, 'error': 'Database error saving avatar reference.'}), 500
+            except Exception as e:
+                db.session.rollback() # Rollback DB changes if file save fails after potential DB update attempt
+                print(f"Error saving avatar: {e}") # Log the error
+                return jsonify({'success': False, 'error': f'Failed to save file: {str(e)}'}), 500
+        else:
+            return jsonify({'success': False, 'error': 'File type not allowed'}), 400
+
+

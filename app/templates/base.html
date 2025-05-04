@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     {% block extra_css %}{% endblock %}
     <title>{%block title %}ProcrastiNo - Your Best Study Buddy{% endblock %}</title> 
     {% block head %}{% endblock %}
@@ -19,7 +20,7 @@
         <!-- Profile dropdown -->
         <div class="btn-group dropend">
           <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="https://st2.depositphotos.com/53447130/50476/v/450/depositphotos_504768188-stock-illustration-pixel-black-cat-image-vector.jpg" alt="Profile" class="profile-img">
+            <img src="" alt="Profile" class="profile-img">
           </button>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a></li>
@@ -92,5 +93,6 @@
 {% block extra_js %}{% endblock %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
 </body>
 </html>

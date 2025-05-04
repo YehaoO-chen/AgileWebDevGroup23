@@ -9,7 +9,6 @@ env/
 .venv/
 .env
 
-
 # Flask instance folder
 instance/
 
@@ -46,3 +45,4 @@ migrations/
 
 # Static files generated during runtime
 staticfiles/
+app/static/uploads/

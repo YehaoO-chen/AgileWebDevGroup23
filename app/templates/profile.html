@@ -4,242 +4,164 @@
 
 {% block styles %}
 <style>
+    /* Add styles from previous prompt or your profile.css */
     .profile-container {
         padding: 30px;
+        max-width: 800px; /* Optional: Limit width */
+        margin: 20px auto; /* Optional: Center */
     }
-    
+
     .page-title {
         text-align: center;
-        color: #C38D60;
+        color: #C38D60; /* Example color */
         margin-bottom: 30px;
         font-size: 32px;
     }
-    
+
     .profile-card {
-        background-color: #F3E7DD;
+        background-color: #F3E7DD; /* Example color */
         border-radius: 15px;
         padding: 30px;
         margin-bottom: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        /* Removed align-items: center to allow table to be full width */
     }
-    
+
     .profile-header {
         display: flex;
         align-items: center;
         width: 100%;
         margin-bottom: 30px;
+        border-bottom: 1px solid #e0d5cc; /* Separator */
+        padding-bottom: 20px;
     }
-    
+
     .profile-photo-container {
-        width: 150px;
-        height: 150px;
+        width: 100px; /* Adjusted size */
+        height: 100px;
         margin-right: 30px;
         position: relative;
+        flex-shrink: 0; /* Prevent shrinking */
     }
-    
+
     .profile-photo {
         width: 100%;
         height: 100%;
         border-radius: 50%;
         object-fit: cover;
-        border: 4px solid #1fa4a3;
+        border: 3px solid #1fa4a3; /* Example color */
     }
-    
+
     .change-photo-btn {
         position: absolute;
-        bottom: 5px;
-        right: 5px;
-        background-color: #C38D60;
+        bottom: 0px;
+        right: 0px;
+        background-color: #C38D60; /* Example color */
         color: white;
         border: none;
         border-radius: 50%;
-        width: 32px;
-        height: 32px;
+        width: 30px; /* Adjusted size */
+        height: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    
+     .change-photo-btn svg {
+        width: 14px; /* Adjusted icon size */
+        height: 14px;
+    }
+
+
     .profile-name {
-        font-size: 24px;
+        font-size: 22px; /* Adjusted size */
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 5px; /* Adjusted spacing */
         color: #333;
     }
-    
+
     .profile-role {
-        font-size: 16px;
+        font-size: 15px; /* Adjusted size */
         color: #666;
-        margin-bottom: 5px;
+        margin-bottom: 10px; /* Adjusted spacing */
     }
-    
+
     .edit-profile-btn {
-        background-color: #1fa4a3;
+        background-color: #1fa4a3; /* Example color */
         color: white;
         border: none;
         border-radius: 20px;
-        padding: 8px 20px;
-        margin-top: 10px;
+        padding: 8px 18px; /* Adjusted padding */
         cursor: pointer;
         font-size: 14px;
     }
-    
+     /* Style for cancel button added via JS */
+    #cancelEditBtn {
+        background-color: #888;
+        margin-left: 10px;
+    }
+
+
     .info-section {
         width: 100%;
         margin-top: 20px;
     }
-    
+
     .info-title {
-        color: #C38D60;
-        font-size: 20px;
+        color: #C38D60; /* Example color */
+        font-size: 18px; /* Adjusted size */
         margin-bottom: 15px;
         position: relative;
-        padding-bottom: 10px;
+        padding-bottom: 8px; /* Adjusted spacing */
     }
-    
+
     .info-title::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
-        width: 50px;
+        width: 40px; /* Adjusted size */
         height: 2px;
-        background-color: #C38D60;
+        background-color: #C38D60; /* Example color */
     }
-    
+
     .info-table {
         width: 100%;
         border-collapse: collapse;
     }
-    
+
     .info-table tr {
-        border-bottom: 1px solid #e0d5cc;
+        border-bottom: 1px solid #e0d5cc; /* Example color */
     }
-    
+
     .info-table tr:last-child {
         border-bottom: none;
     }
-    
+
     .info-table td {
-        padding: 12px 0;
+        padding: 12px 5px; /* Adjusted padding */
+        vertical-align: top; /* Align top for multi-line addresses */
     }
-    
+
     .info-label {
-        width: 140px;
+        width: 120px; /* Adjusted width */
         color: #666;
         font-weight: 500;
+        padding-right: 15px; /* Add spacing */
     }
-    
+
     .info-value {
         color: #333;
     }
-    
-    .section-card {
-        background-color: #F3E7DD;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 30px;
-    }
-    
-    .stats-row {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-    
-    .stat-item {
-        width: 30%;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    
-    .stat-value {
-        font-size: 28px;
-        font-weight: bold;
-        color: #1fa4a3;
-        margin-bottom: 5px;
-    }
-    
-    .stat-label {
-        font-size: 14px;
-        color: #666;
-    }
-    
-    .progress-container {
-        margin-top: 20px;
-    }
-    
-    .progress-item {
-        margin-bottom: 15px;
-    }
-    
-    .progress-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 5px;
-    }
-    
-    .progress-label {
-        font-size: 14px;
-        color: #333;
-    }
-    
-    .progress-value {
-        font-size: 14px;
-        color: #1fa4a3;
-        font-weight: 500;
-    }
-    
-    .progress-bar-bg {
-        width: 100%;
-        height: 8px;
-        background-color: #e0d5cc;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-    
-    .progress-bar {
-        height: 100%;
-        background-color: #1fa4a3;
-        border-radius: 4px;
-    }
-    
-    .badges-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 15px;
-        margin-top: 10px;
-    }
-    
-    .badge-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 80px;
-    }
-    
-    .badge-icon {
-        width: 50px;
-        height: 50px;
-        margin-bottom: 5px;
-    }
-    
-    .badge-name {
-        font-size: 12px;
-        text-align: center;
-        color: #666;
-    }
-    
+
     /* For edit mode */
     .edit-input {
-        width: 100%;
+        width: calc(100% - 24px); /* Adjust width considering padding */
         padding: 8px 12px;
-        border: 1px solid #ddd;
+        border: 1px solid #ccc; /* Adjusted border */
         border-radius: 5px;
+        font-size: 14px; /* Match display font size */
+        box-sizing: border-box; /* Include padding in width */
     }
 </style>
 {% endblock %}
@@ -247,263 +169,91 @@
 {% block content %}
 <div class="profile-container">
     <h1 class="page-title">My Profile</h1>
-    
+
     <!-- Main Profile Info -->
     <div class="profile-card">
         <div class="profile-header">
             <div class="profile-photo-container">
-                <img src="https://st2.depositphotos.com/53447130/50476/v/450/depositphotos_504768188-stock-illustration-pixel-black-cat-image-vector.jpg" alt="Profile Photo" class="profile-photo">
-                <button class="change-photo-btn">
+                <!-- src will be set by JS, provide a default or placeholder -->
+                <img src="{{ url_for('static', filename='images/default_avatar.png') }}" alt="Profile Photo" class="profile-photo" id="profilePhoto">
+                <button class="change-photo-btn" id="changePhotoBtn" title="Change Photo">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                        <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
+                        <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                        <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0"/>
                     </svg>
                 </button>
+                <!-- Hidden file input for avatar upload -->
+                <input type="file" id="avatarUpload" style="display: none;" accept="image/*">
             </div>
             <div>
-                <h2 class="profile-name">Alex Johnson</h2>
-                <p class="profile-role">Computer Science Student</p>
+                <!-- Text will be set by JS -->
+                <h2 class="profile-name" id="profileName">Loading...</h2>
+                <p class="profile-role" id="profileRole">Loading...</p>
                 <button class="edit-profile-btn" id="editProfileBtn">Edit Profile</button>
+                <!-- Cancel button will be added here by JS -->
             </div>
         </div>
-        
+
         <div class="info-section">
             <h3 class="info-title">Personal Information</h3>
             <table class="info-table">
                 <tr>
+                    <td class="info-label">Username</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="username"></td>
+                </tr>
+                <tr>
                     <td class="info-label">Full Name</td>
-                    <td class="info-value" id="fullName">Alexander Michael Johnson</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="fullName"></td>
                 </tr>
                 <tr>
                     <td class="info-label">Email</td>
-                    <td class="info-value" id="email">alex.johnson@example.com</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="email"></td>
                 </tr>
                 <tr>
                     <td class="info-label">Phone</td>
-                    <td class="info-value" id="phone">+1 (555) 123-4567</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="phone"></td>
                 </tr>
                 <tr>
                     <td class="info-label">Address</td>
-                    <td class="info-value" id="address">123 University Ave, Campus Town, CA 90210</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="address"></td>
                 </tr>
                 <tr>
                     <td class="info-label">Major</td>
-                    <td class="info-value" id="major">Computer Science</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="major"></td>
                 </tr>
                 <tr>
                     <td class="info-label">Student ID</td>
-                    <td class="info-value" id="studentId">CS202312345</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="studentId"></td>
+                </tr>
+                 <tr>
+                    <td class="info-label">Joined</td>
+                    <!-- Text will be set by JS -->
+                    <td class="info-value" id="createTime"></td>
                 </tr>
             </table>
         </div>
     </div>
-    
-    <!-- Study Stats -->
+
+    <!-- Placeholder for other sections if needed -->
+    <!--
     <div class="section-card">
-        <h3 class="info-title">Study Statistics</h3>
-        <div class="stats-row">
-            <div class="stat-item">
-                <div class="stat-value">24h</div>
-                <div class="stat-label">Total Study Time</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">15</div>
-                <div class="stat-label">Completed Tasks</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">8</div>
-                <div class="stat-label">Active Study Plans</div>
-            </div>
-        </div>
-        
-        <div class="progress-container">
-            <div class="progress-item">
-                <div class="progress-header">
-                    <span class="progress-label">Mathematics</span>
-                    <span class="progress-value">75%</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar" style="width: 75%;"></div>
-                </div>
-            </div>
-            <div class="progress-item">
-                <div class="progress-header">
-                    <span class="progress-label">Computer Science</span>
-                    <span class="progress-value">90%</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar" style="width: 90%;"></div>
-                </div>
-            </div>
-            <div class="progress-item">
-                <div class="progress-header">
-                    <span class="progress-label">Physics</span>
-                    <span class="progress-value">60%</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar" style="width: 60%;"></div>
-                </div>
-            </div>
-        </div>
+        <h3 class="info-title">Stats</h3>
+        ...
     </div>
-    
-    <!-- Achievements & Badges -->
-    <div class="section-card">
-        <h3 class="info-title">Achievements</h3>
-        <div class="badges-container">
-            <div class="badge-item">
-                <img src="{{ url_for('static', filename='img/badge-streak.png') }}" alt="Streak Badge" class="badge-icon" onerror="this.src='https://via.placeholder.com/50/1fa4a3/ffffff?text=🔥'">
-                <div class="badge-name">7-Day Streak</div>
-            </div>
-            <div class="badge-item">
-                <img src="{{ url_for('static', filename='img/badge-master.png') }}" alt="Master Badge" class="badge-icon" onerror="this.src='https://via.placeholder.com/50/1fa4a3/ffffff?text=🏆'">
-                <div class="badge-name">Study Master</div>
-            </div>
-            <div class="badge-item">
-                <img src="{{ url_for('static', filename='img/badge-early.png') }}" alt="Early Bird Badge" class="badge-icon" onerror="this.src='https://via.placeholder.com/50/1fa4a3/ffffff?text=🌅'">
-                <div class="badge-name">Early Bird</div>
-            </div>
-            <div class="badge-item">
-                <img src="{{ url_for('static', filename='img/badge-completionist.png') }}" alt="Completionist Badge" class="badge-icon" onerror="this.src='https://via.placeholder.com/50/1fa4a3/ffffff?text=✓'">
-                <div class="badge-name">Completionist</div>
-            </div>
-            <div class="badge-item">
-                <img src="{{ url_for('static', filename='img/badge-focus.png') }}" alt="Focus Badge" class="badge-icon" onerror="this.src='https://via.placeholder.com/50/1fa4a3/ffffff?text=🎯'">
-                <div class="badge-name">Focus Mode</div>
-            </div>
-        </div>
-    </div>
+    -->
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const editProfileBtn = document.getElementById('editProfileBtn');
-        const fullNameElem = document.getElementById('fullName');
-        const emailElem = document.getElementById('email');
-        const phoneElem = document.getElementById('phone');
-        const addressElem = document.getElementById('address');
-        const majorElem = document.getElementById('major');
-        
-        let isEditing = false;
-        let originalValues = {};
-        
-        editProfileBtn.addEventListener('click', function() {
-            if (!isEditing) {
-                // Switch to edit mode
-                isEditing = true;
-                editProfileBtn.textContent = 'Save Changes';
-                
-                // Save original values
-                originalValues.fullName = fullNameElem.textContent;
-                originalValues.email = emailElem.textContent;
-                originalValues.phone = phoneElem.textContent;
-                originalValues.address = addressElem.textContent;
-                originalValues.major = majorElem.textContent;
-                
-                // Replace with input fields
-                replaceWithInput(fullNameElem, 'fullName');
-                replaceWithInput(emailElem, 'email', 'email');
-                replaceWithInput(phoneElem, 'phone', 'tel');
-                replaceWithInput(addressElem, 'address');
-                replaceWithInput(majorElem, 'major');
-                
-                // Add cancel button
-                const cancelBtn = document.createElement('button');
-                cancelBtn.textContent = 'Cancel';
-                cancelBtn.className = 'edit-profile-btn';
-                cancelBtn.style.backgroundColor = '#888';
-                cancelBtn.style.marginLeft = '10px';
-                cancelBtn.id = 'cancelEditBtn';
-                
-                cancelBtn.addEventListener('click', function() {
-                    // Restore original values
-                    fullNameElem.textContent = originalValues.fullName;
-                    emailElem.textContent = originalValues.email;
-                    phoneElem.textContent = originalValues.phone;
-                    addressElem.textContent = originalValues.address;
-                    majorElem.textContent = originalValues.major;
-                    
-                    // Reset state
-                    isEditing = false;
-                    editProfileBtn.textContent = 'Edit Profile';
-                    this.remove();
-                });
-                
-                editProfileBtn.parentNode.appendChild(cancelBtn);
-            } else {
-                // Save changes
-                saveChanges();
-            }
-        });
-        
-        function replaceWithInput(element, id, type = 'text') {
-            const originalValue = element.textContent;
-            const input = document.createElement('input');
-            input.type = type;
-            input.value = originalValue;
-            input.className = 'edit-input';
-            input.id = 'edit_' + id;
-            
-            element.textContent = '';
-            element.appendChild(input);
-        }
-        
-        function saveChanges() {
-            // Update all editable fields
-            updateField(fullNameElem, 'fullName');
-            updateField(emailElem, 'email');
-            updateField(phoneElem, 'phone');
-            updateField(addressElem, 'address');
-            updateField(majorElem, 'major');
-            
-            // Reset state
-            isEditing = false;
-            editProfileBtn.textContent = 'Edit Profile';
-            
-            // Remove cancel button
-            const cancelBtn = document.getElementById('cancelEditBtn');
-            if (cancelBtn) {
-                cancelBtn.remove();
-            }
-            
-            // Here you would typically send an AJAX request to update the user profile
-            // For now, we'll just show a success message
-            showNotification('Profile updated successfully!');
-        }
-        
-        function updateField(element, fieldName) {
-            const input = document.getElementById('edit_' + fieldName);
-            if (input) {
-                element.textContent = input.value;
-                
-                // This is where you would update your data model
-                // For example: userData[fieldName] = input.value;
-            }
-        }
-        
-        function showNotification(message) {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.textContent = message;
-            notification.style.position = 'fixed';
-            notification.style.bottom = '20px';
-            notification.style.right = '20px';
-            notification.style.backgroundColor = '#1fa4a3';
-            notification.style.color = 'white';
-            notification.style.padding = '10px 20px';
-            notification.style.borderRadius = '5px';
-            notification.style.zIndex = '1000';
-            
-            // Add to document
-            document.body.appendChild(notification);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-    });
-</script>
+<!-- Make sure jQuery is loaded first (ideally in base.html) -->
+<!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script> -->
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}
