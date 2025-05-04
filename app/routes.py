@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
+
+from sqlalchemy import func
 from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
 
@@ -300,6 +302,8 @@ def init_routes(app):
             'end_time': sd.end_time.strftime('%Y-%m-%d %H:%M:%S'),
             'stop_times': sd.stop_times
         } for sd in study_durations])
+
+
     # Notification API
     @app.route('/api/notification', methods=['POST'])
     @login_required
@@ -392,16 +396,61 @@ def init_routes(app):
             'study_durations_by_day': study_durations_by_day
         })
     
-    # @app.route('/api/dashboard/task', methods=['GET'])
-    # @login_required
-    # def get_dashboard_data():
-    #     # Example data for the dashboard
-    #     study_plans = StudyPlan.query.filter_by(user_id=current_user.id).all()
-    #     return jsonify({
-    #         'study_plans': [{'id': sp.id, 'title': sp.title} for sp in study_plans],
-    #         'study_durations': [{'id': sd.id, 'duration': sd.duration} for sd in study_durations],
-    #         'notifications': [{'id': n.id, 'content': n.content} for n in notifications]
-    #     })
+    @app.route('/api/dashboard/task', methods=['GET'])
+    @login_required
+    def get_dashboard_task_data(): # Renamed function
+        period = request.args.get('period', 'week') # get period, default 'week'
+
+        # Calculate start date based on period (same logic as above)
+        now = datetime.now(datetime.timezone.utc) # Use timezone-aware datetime
+        start_date = None
+
+        if period == 'day':
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'week':
+            start_date = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'month':
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'quarter':
+            current_quarter = (now.month - 1) // 3 + 1
+            start_month = (current_quarter - 1) * 3 + 1
+            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'half_year':
+            start_month = 1 if now.month <= 6 else 7
+            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'year':
+            start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        else:
+            return jsonify({'error': 'Invalid period specified'}), 400
+
+        # Query StudyPlan counts grouped by status within the period
+        # Filter based on create_time >= start_date
+        status_counts = db.session.query(
+                StudyPlan.status,
+                func.count(StudyPlan.id)
+            ).filter(
+                StudyPlan.user_id == current_user.id,
+                StudyPlan.create_time >= start_date # Filter plans created within the period
+            ).group_by(
+                StudyPlan.status
+            ).all()
+
+        # Format the results into a dictionary {status_code: count}
+        # Initialize with 0 counts for all statuses
+        plan_summary = {0: 0, 1: 0, 2: 0}
+        for status, count in status_counts:
+            if status in plan_summary: # Ensure status is valid (0, 1, or 2)
+                plan_summary[status] = count
+
+        return jsonify({
+            'period': period,
+            'start_date': start_date.isoformat(), # Optionally return the calculated start date
+            'task_summary': {
+                'open': plan_summary.get(0, 0),
+                'completed': plan_summary.get(1, 0),
+                'deleted': plan_summary.get(2, 0)
+            }
+        })
     
     @app.route('/api/profile', methods=['GET'])
     @login_required
