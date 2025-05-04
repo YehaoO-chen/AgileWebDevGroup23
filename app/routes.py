@@ -55,7 +55,7 @@ def init_routes(app):
             # Check if the user exists
             if not user:
                 flash('User not found. Please check your username or sign up.', 'danger')
-                return redirect(url_for('login'))
+                return redirect(url_for('index'))
 
             # Validate user credentials
             if user.password == password:
