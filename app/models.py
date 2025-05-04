@@ -14,6 +14,7 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String(20), unique=True, nullable=True)
     address = db.Column(db.String(200), nullable=True)
     student_id = db.Column(db.String(20), unique=True, nullable=True)
+    avatar = db.Column(db.String(200), nullable=True, default='')
     def __repr__(self):
         return f'<User {self.username}>'
 
