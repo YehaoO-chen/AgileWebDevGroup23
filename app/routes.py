@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
@@ -459,7 +460,13 @@ def init_routes(app):
         return jsonify({
             'id': user.id,
             'username': user.username,
-            'create_time': user.create_time.strftime('%Y-%m-%d %H:%M:%S')
+            'create_time': user.create_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'fullname': user.fullname,
+            'major': user.major,
+            'email': user.email,
+            'phone': user.phone,
+            'address': user.address,
+            'student_id': user.student_id,
         })
 
 
@@ -467,13 +474,81 @@ def init_routes(app):
     @login_required
     def update_profile():
         data = request.get_json()
-        user = current_user
-        user.username = data['username']
-        user.password = data['password']
-        db.session.commit()
-        return jsonify({'success': True})
-    
+        if not data:
+            return jsonify({'success': False, 'error': 'Invalid input data'}), 400
 
+        user = current_user
+        errors = {}
+
+        # --- Update fields and perform checks ---
+
+        # Username (check uniqueness if changed)
+        new_username = data.get('username')
+        if new_username and new_username != user.username:
+            existing_user = User.query.filter(User.username == new_username, User.id != user.id).first()
+            if existing_user:
+                errors['username'] = 'Username already taken.'
+            else:
+                user.username = new_username
+
+        # Email (check uniqueness if changed)
+        new_email = data.get('email')
+        if new_email and new_email != user.email:
+            existing_user = User.query.filter(User.email == new_email, User.id != user.id).first()
+            if existing_user:
+                errors['email'] = 'Email already registered.'
+            else:
+                user.email = new_email
+        elif 'email' in data and not new_email: # Allow setting email to null if desired and model allows
+             user.email = None
+
+
+        # Phone (check uniqueness if changed)
+        new_phone = data.get('phone')
+        if new_phone and new_phone != user.phone:
+            existing_user = User.query.filter(User.phone == new_phone, User.id != user.id).first()
+            if existing_user:
+                errors['phone'] = 'Phone number already registered.'
+            else:
+                user.phone = new_phone
+        elif 'phone' in data and not new_phone: # Allow setting phone to null
+            user.phone = None
+
+        # Student ID (check uniqueness if changed)
+        new_student_id = data.get('student_id')
+        if new_student_id and new_student_id != user.student_id:
+            existing_user = User.query.filter(User.student_id == new_student_id, User.id != user.id).first()
+            if existing_user:
+                errors['student_id'] = 'Student ID already registered.'
+            else:
+                user.student_id = new_student_id
+        elif 'student_id' in data and not new_student_id: # Allow setting student_id to null
+            user.student_id = None
+
+        # Update other nullable fields directly if provided
+        if 'fullname' in data:
+            user.fullname = data.get('fullname')
+        if 'major' in data:
+            user.major = data.get('major')
+        if 'address' in data:
+            user.address = data.get('address')
+
+        # --- Commit changes if no errors ---
+        if errors:
+            return jsonify({'success': False, 'errors': errors}), 400
+
+        try:
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Profile updated successfully.'})
+        except IntegrityError as e:
+            db.session.rollback()
+            # This might catch uniqueness errors missed above, though less specific
+            return jsonify({'success': False, 'error': 'Database error: Could not update profile. Check unique fields.'}), 500
+        except Exception as e:
+            db.session.rollback()
+            # Log the exception e for debugging
+            print(f"Error updating profile: {e}")
+            return jsonify({'success': False, 'error': 'An unexpected error occurred.'}), 500
 
 
     # UPLOAD_FOLDER = 'static/uploads'
