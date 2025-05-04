@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
 
@@ -328,19 +328,80 @@ def init_routes(app):
         })
     
 
-    @app.route('/api/dashboard', methods=['GET'])
+    @app.route('/api/dashboard/duration', methods=['GET'])
     @login_required
     def get_dashboard_data():
-        # Example data for the dashboard
-        study_plans = StudyPlan.query.filter_by(user_id=current_user.id).all()
-        study_durations = StudyDuration.query.filter_by(user_id=current_user.id).all()
-        notifications = Notification.query.filter_by(receiver_id=current_user.id).all()
+        period = request.args.get('period', 'week') # get period ，default 'week'
+        # cal start date
+        now = datetime.now(datetime.timezone.utc)
+        start_date = None
+
+        if period == 'day':
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'week':
+            start_date = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'month':
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'quarter':
+            current_quarter = (now.month - 1) // 3 + 1
+            start_month = (current_quarter - 1) * 3 + 1
+            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'half_year':
+            start_month = 1 if now.month <= 6 else 7
+            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'year':
+            start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        else:
+            return jsonify({'error': 'Invalid period specified'}), 400
+
+        study_durations = StudyDuration.query.filter(
+            StudyDuration.user_id == current_user.id,
+            StudyDuration.start_time >= start_date
+        ).all()
+        #cal total study time in minutes
+        total_study_time = sum(sd.duration for sd in study_durations)
+
+        #cal avg study time in minutes
+        if len(study_durations) > 0:
+            avg_study_time = total_study_time / len(study_durations)
+        else:
+            avg_study_time = 0
+        
+        #cal today study time in minutes
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+        today_study_time = sum(sd.duration for sd in study_durations if sd.start_time >= today_start and sd.end_time <= today_end)
+
+        #cal each day study time in minutes during period
+        study_durations_by_day = {}
+        for sd in study_durations:
+            day = sd.start_time.date()
+            if day not in study_durations_by_day:
+                study_durations_by_day[day] = 0
+            study_durations_by_day[day] += sd.duration
+ 
+        # study_plans = StudyPlan.query.filter_by(user_id=current_user.id).all()
 
         return jsonify({
-            'study_plans': [{'id': sp.id, 'title': sp.title} for sp in study_plans],
-            'study_durations': [{'id': sd.id, 'duration': sd.duration} for sd in study_durations],
-            'notifications': [{'id': n.id, 'content': n.content} for n in notifications]
+            'period': period,
+            'start_date': start_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'end_date': now.strftime('%Y-%m-%d %H:%M:%S'),
+            'total_study_time': total_study_time,
+            'avg_study_time': avg_study_time,
+            'today_study_time': today_study_time,
+            'study_durations_by_day': study_durations_by_day
         })
+    
+    # @app.route('/api/dashboard/task', methods=['GET'])
+    # @login_required
+    # def get_dashboard_data():
+    #     # Example data for the dashboard
+    #     study_plans = StudyPlan.query.filter_by(user_id=current_user.id).all()
+    #     return jsonify({
+    #         'study_plans': [{'id': sp.id, 'title': sp.title} for sp in study_plans],
+    #         'study_durations': [{'id': sd.id, 'duration': sd.duration} for sd in study_durations],
+    #         'notifications': [{'id': n.id, 'content': n.content} for n in notifications]
+    #     })
     
     @app.route('/api/profile', methods=['GET'])
     @login_required
@@ -353,7 +414,7 @@ def init_routes(app):
         })
 
 
-    @app.route('api/profile', methods=['PUT'])
+    @app.route('/api/profile', methods=['PUT'])
     @login_required
     def update_profile():
         data = request.get_json()
