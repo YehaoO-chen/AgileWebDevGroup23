@@ -27,6 +27,22 @@ function loadMainContent(url) {
             'X-Requested-With': 'XMLHttpRequest'
         },
         success: function(data) {
+            try {
+                // Use jQuery to parse the HTML string and find the title element
+                const $html = $($.parseHTML(data, document, true)); // 'true' to include scripts if needed later
+                const titleText = $html.filter('title').text().trim();
+
+                // Check if the title matches the login page title
+                if (titleText === 'Login - ProcrastiNo') {
+                    console.log("Received login page content, redirecting to root.");
+                    // Redirect to the root URL (or login page if preferred)
+                    window.location.href = '/'; // Or window.location.href = '/login';
+                    return; // Stop further processing in this success handler
+                }
+            } catch (e) {
+                // If parsing fails, log error but proceed with caution
+                console.warn("Could not parse response HTML to check title:", e);
+            }
             // Replace the content of the <main> tag
             $('main').html(data);
             // Optional: Scroll to top or handle focus
