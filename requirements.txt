@@ -1,7 +1,18 @@
-Flask==2.3.2
-Flask-SQLAlchemy==3.0.5
-Flask-Login==0.6.2
-Flask-Migrate==4.0.4
-Flask-WTF==1.1.1
-WTForms==3.0.1
-Werkzeug==2.3.7
+alembic==1.15.2
+blinker @ file:///croot/blinker_1737448726027/work
+click @ file:///croot/click_1744271578095/work
+Flask @ file:///croot/flask_1737454299809/work
+Flask-Login==0.6.3
+Flask-Migrate==4.1.0
+Flask-SQLAlchemy==3.1.1
+greenlet==3.2.1
+itsdangerous @ file:///io/buildout/croot/itsdangerous_1732920215085/work
+Jinja2 @ file:///croot/jinja2_1741710844255/work
+Mako==1.3.10
+MarkupSafe @ file:///croot/markupsafe_1738584038848/work
+pillow==11.2.1
+setuptools==75.8.0
+SQLAlchemy==2.0.40
+typing_extensions==4.13.2
+Werkzeug @ file:///croot/werkzeug_1737448706492/work
+wheel==0.45.1
