@@ -1,44 +1,30 @@
 from flask_login import UserMixin
 from datetime import datetime, timezone
 from app.extensions import db, login_manager
-from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    security_answer = db.Column(db.String(255), nullable=False)
-    create_time = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def set_password(self, password):
-        # hash the password and store it
-        self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        # check the hashed password against the provided password
-        return check_password_hash(self.password, password)
-
-    def set_security_answer(self, answer):
-        # hash the security answer and store it
-        self.security_answer = generate_password_hash(answer)
-
-    def check_security_answer(self, answer):
-        # check the hashed security answer against the provided answer
-        return check_password_hash(self.security_answer, answer)
-
+    username = db.Column(db.String(150), unique=True, nullable=False,index=True)
+    password = db.Column(db.String(150), nullable=False)
+    security_answer = db.Column(db.String(150), nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    fullname = db.Column(db.String(150), nullable=True)
+    major = db.Column(db.String(50), nullable=True)
+    email = db.Column(db.String(150), unique=True, nullable=True)
+    phone = db.Column(db.String(20), unique=True, nullable=True)
+    address = db.Column(db.String(200), nullable=True)
+    student_id = db.Column(db.String(20), unique=True, nullable=True)
+    avatar = db.Column(db.String(200), nullable=True, default='')
     def __repr__(self):
-        return f'<User id={self.id}, username={self.username}>'
+        return f'<User {self.username}>'
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+# 添加到现有的models.py文件中
 
-
-# studyplan model
+# 学习计划模型
 class StudyPlan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -53,11 +39,11 @@ class StudyPlan(db.Model):
     def __repr__(self):
         return f'<StudyPlan {self.title}>'
 
-# study duration model
+# 学习时长记录模型
 class StudyDuration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    duration = db.Column(db.Float, nullable=False)
+    duration = db.Column(db.Float, nullable=False)  # 以分钟为单位
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
     stop_times = db.Column(db.Integer, default=0)
@@ -67,7 +53,9 @@ class StudyDuration(db.Model):
     def __repr__(self):
         return f'<StudyDuration {self.duration} minutes>'
 
-# notification model
+# 添加到models.py，作为分享功能的依赖
+
+# 通知模型（简化版，仅用于支持分享功能）
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
