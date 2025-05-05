@@ -38,35 +38,6 @@ def init_routes(app):
         return render_template('base.html', route='home', user=current_user)
 
 
-
-    @app.route('/login', methods=['GET', 'POST'])
-    def login():
-        # If the user is already logged in, redirect to the home page
-        if current_user.is_authenticated:
-            return redirect(url_for('index'))
-
-        if request.method == 'POST':
-            username = request.form['username']
-            password = request.form['password']
-
-            # Query the database for the user
-            user = User.query.filter_by(username=username).first()
-
-            # Check if the user exists
-            if not user:
-                flash('User not found. Please check your username or sign up.', 'danger')
-                return redirect(url_for('index'))
-
-            # Validate user credentials
-            if user.password == password:
-                login_user(user)
-                flash('Login successful', 'success')
-                return redirect(url_for('index'))
-            else:
-                flash('Invalid password. Please try again.', 'danger')
-
-        return render_template('login.html')
-
     # Logout route
     @app.route('/logout')
     @login_required
@@ -75,6 +46,7 @@ def init_routes(app):
         flash('You have been logged out', 'info')
         return redirect(url_for('login'))
 
+    # Signup route
     @app.route('/signup', methods=['GET', 'POST'])
     def signup():
         if request.method == 'POST':
@@ -83,18 +55,21 @@ def init_routes(app):
                 password = request.form['password']
                 security_answer = request.form['security_answer']
 
-                # Check if the username already exists in the database
+                # check if username is empty
                 existing_user = User.query.filter_by(username=username).first()
                 if existing_user:
                     flash('Username already exists', 'danger')
                     return redirect(url_for('signup'))
 
-                # Create a new user and add it to the database
-                new_user = User(username=username, password=password, security_answer=security_answer)
+                # hash the password and security answer
+                new_user = User(username=username)
+                new_user.set_password(password)
+                new_user.set_security_answer(security_answer)
+                
                 db.session.add(new_user)
                 db.session.commit()
                 
-                # Verify if the user was successfully added to the database
+                # verify if the user was created successfully
                 check_user = User.query.filter_by(username=username).first()
                 if check_user:
                     flash('Signup successful! Please log in.', 'success')
@@ -104,14 +79,42 @@ def init_routes(app):
                     return redirect(url_for('signup'))
                     
             except Exception as e:
-                # Rollback the transaction
                 db.session.rollback()
-                # Output the error message
                 flash(f'An error occurred: {str(e)}', 'danger')
                 return redirect(url_for('signup'))
 
         return render_template('signup.html')
 
+    # login route
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        # If the user is already logged in, redirect to the home page
+        if current_user.is_authenticated:
+            return redirect(url_for('home'))
+
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+
+            # look up the user in the database
+            user = User.query.filter_by(username=username).first()
+
+            # check if the user exists
+            if not user:
+                flash('User not found. Please check your username or sign up.', 'danger')
+                return redirect(url_for('login'))
+
+            # verify the password
+            if user.check_password(password):
+                login_user(user)
+                flash('Login successful', 'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid password. Please try again.', 'danger')
+
+        return render_template('login.html')
+
+    # reset password route
     @app.route('/reset', methods=['GET', 'POST'])
     def reset():
         if request.method == 'POST':
@@ -119,29 +122,29 @@ def init_routes(app):
             security_answer = request.form['security_answer']
             new_password = request.form['new_password']
 
-            # Query the database for the user
+            # look up the user in the database
             user = User.query.filter_by(username=username).first()
 
-            # Check if the user exists
+            # check if the user exists
             if not user:
                 flash('User not found. Please check your username.', 'danger')
                 return redirect(url_for('reset'))
 
-            # Validate the security answer
-            if user.security_answer != security_answer:
+            # verify the security answer
+            if user.check_security_answer(security_answer):
+                try:
+                    # hash the new password
+                    user.set_password(new_password)
+                    db.session.commit()
+                    flash('Password reset successful! You can now log in with your new password.', 'success')
+                    return redirect(url_for('login'))
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Error: {e}")
+                    flash('An error occurred while resetting your password. Please try again.', 'danger')
+                    return redirect(url_for('reset'))
+            else:
                 flash('Incorrect security answer. Please try again.', 'danger')
-                return redirect(url_for('reset'))
-
-            # Update the user's password
-            try:
-                user.password = new_password
-                db.session.commit()
-                flash('Password reset successful! You can now log in with your new password.', 'success')
-                return redirect(url_for('login'))
-            except Exception as e:
-                db.session.rollback()
-                print(f"Error: {e}")
-                flash('An error occurred while resetting your password. Please try again.', 'danger')
                 return redirect(url_for('reset'))
 
         return render_template('reset.html')
@@ -167,10 +170,6 @@ def init_routes(app):
         data_type = request.form.get('dataType')
         users = request.form.getlist('users[]')
     
-    # 这里添加处理分享逻辑
-    # 例如保存到数据库或发送通知
-    
-    # 返回成功响应
         return jsonify({
             'success': True,
             'message': f'成功分享{data_type}给{len(users)}位用户'
