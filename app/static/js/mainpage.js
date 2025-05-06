@@ -48,23 +48,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Ensure the animation is triggered once only when the page is loaded
-const setupArea = document.getElementById('setup-area');
-if (setupArea) {
-  setupArea.classList.add('animate');
-  setupArea.addEventListener('animationend', () => {
-    setupArea.classList.remove('animate');
-  });
-} 
-// Ensure the animation is triggered once only when the page is loaded
-const todoContainer = document.getElementById('todo-container');
-if (todoContainer) {
-  todoContainer.classList.add('animate');
-  todoContainer.addEventListener('animationend', () => {
-    todoContainer.classList.remove('animate');
-  });
-} 
-
 
 // update the input value
 function updateTimeFromInput(type) {
