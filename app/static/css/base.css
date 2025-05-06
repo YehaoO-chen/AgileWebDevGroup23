@@ -126,11 +126,13 @@ margin-bottom: 0.3rem;
 
 
 .nav-custom span, .dropdown-item {
-font-family: "Pixelify Sans", sans-serif, 'Segoe UI', sans-serif, Verdana;
+  font-family: "Quicksand", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
 font-size: .9rem;
 color: #856e60;
 line-height: 1.4rem;
-font-weight: 700;
 white-space: nowrap;
 }
 
