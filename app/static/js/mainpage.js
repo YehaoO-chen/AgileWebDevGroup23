@@ -48,6 +48,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+
 // update the input value
 function updateTimeFromInput(type) {
   const input = document.getElementById(`${type}-time`);
