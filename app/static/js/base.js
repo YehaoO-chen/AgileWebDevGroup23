@@ -65,14 +65,14 @@ $(document).ready(function() {
 
     // Define which paths should be loaded via AJAX initially.
     // Exclude paths like /login, /signup, /logout which are typically full page loads.
-    const ajaxLoadPaths = ['/timer', '/study_plan', '/dashboard', '/notification', '/profile'];
+    const ajaxLoadPaths = ['/mainpage', '/study_plan', '/dashboard', '/notification', '/profile'];
     // Determine the actual path to load content for (e.g., map '/' to '/home')
     let pathToLoad = currentPath;
     let activeLinkSelectorPath = currentPath;
 
     if (currentPath === '/') {
-        pathToLoad = '/timer';
-        activeLinkSelectorPath = '/timer';
+        pathToLoad = '/mainpage';
+        activeLinkSelectorPath = '/mainpage';
     }
 
     // Check if the determined path is one we should load via AJAX

@@ -15,6 +15,23 @@
   z-index: 999;
 }
 
+#setup-area.animate {
+  animation: fadeInFromTop 0.6s ease-in-out;
+}
+
+@keyframes fadeInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
 @media (max-width: 600px){
   #setup-area{
     display: none;
@@ -72,7 +89,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: rgba(20, 20, 20, 0.699);
-  padding: 40px 68px;
+  padding: 35px 50px;
   border-radius: 12px;
   box-shadow: 0 0 20px rgba(0,0,0,0.3);
   color: rgb(255, 255, 255);
@@ -235,6 +252,24 @@ input[type="number"] {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   z-index: 999;
 }
+
+/* Separate the animation to make it triggered only once when the page is loaded */
+.todo-container.animate {
+  animation: fadeInFromTop 0.4s ease-out;
+}
+
+@keyframes fadeInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px); 
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); 
+  }
+}
+
+
 
 .todo-header {
   display: flex;

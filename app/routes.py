@@ -35,7 +35,7 @@ def init_routes(app):
         # If the user is already logged in, redirect to the home page
         if not current_user.is_authenticated:
             return render_template('index.html')
-        return render_template('base.html', route='timer', user=current_user)
+        return render_template('base.html', route='mainpage', user=current_user)
 
 
 
@@ -168,16 +168,16 @@ def init_routes(app):
 
 
     # Main page route (requires login)
-    @app.route('/timer')
+    @app.route('/mainpage')
     @login_required
-    def timer():
+    def mainpage():
         user = current_user
         # Check if the request is an AJAX request (based on header set by JS)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render_template('timer.html', user=user, is_partial=True) # Pass a flag if needed
+            return render_template('mainpage.html', user=user, is_partial=True) # Pass a flag if needed
         else:
             # If normal request, render with the base template
-            return render_template('base.html', route='timer', user=user)
+            return render_template('base.html', route='mainpage', user=user)
 
     
     # Dashboard route (requires login)

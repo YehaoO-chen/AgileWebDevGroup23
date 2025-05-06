@@ -1,6 +1,6 @@
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/timer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mainpage.css') }}">
 {% endblock %}
 
 
@@ -59,8 +59,8 @@
           </div>
 
         <!-- Goal setup section -->
-        <div class="todo-container">
-          <div class="todo-header">
+        <div class="todo-container" id="todo-container">
+            <div class="todo-header">
             <input type="text" id="task-input" placeholder="Let's crush some tasks today!" />
             <button id="add-btn"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 256 256">
               <path fill="#fff" d="M34 64a6 6 0 0 1 6-6h176a6 6 0 0 1 0 12H40a6 6 0 0 1-6-6m6 70h176a6 6 0 0 0 0-12H40a6 6 0 0 0 0 12m104 52H40a6 6 0 0 0 0 12h104a6 6 0 0 0 0-12m88 0h-18v-18a6 6 0 0 0-12 0v18h-18a6 6 0 0 0 0 12h18v18a6 6 0 0 0 12 0v-18h18a6 6 0 0 0 0-12" />
@@ -92,5 +92,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mainpage.js') }}"></script>
 {% endblock %}
