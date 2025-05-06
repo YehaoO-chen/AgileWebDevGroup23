@@ -3,12 +3,35 @@ function updateNavbarAvatar() {
     const defaultAvatarUrl = 'https://st2.depositphotos.com/53447130/50476/v/450/depositphotos_504768188-stock-illustration-pixel-black-cat-image-vector.jpg';
     const AVATAR_STORAGE_KEY = 'userAvatarUrl'; // Same key used in profile.js
     const $navbarProfileImg = $('.dropdown-toggle .profile-img'); // Selector for the navbar image
+    console.log("check...."); // Optional log
 
     if ($navbarProfileImg.length) { // Check if the element exists
-        const storedAvatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
-        const finalUrl = storedAvatarUrl || defaultAvatarUrl; // Use stored URL or default
+        console.log("Navbar profile image element found."); // Optional log
+        $.ajax({
+            url: '/api/profile', // GET request to fetch user data
+            method: 'GET',
+            dataType: 'json',
+            success: function(user) {
+                
+                if (user.avatar && user.avatar !== defaultAvatarUrl && user.avatar !== '' && user.avatar !== 'default.jpg') {
+                    // Assuming avatar field stores filename like 'user_1_avatar.png'
+                    avatarSrc = `/static/uploads/${user.avatar}`; // Construct path
+                } else {
+                    //  avatarSrc = `/static/images/default_avatar.png`; // Or your actual default image path
+                     avatarSrc = defaultAvatarUrl; // Fallback to default avatar URL
+                }
+                console.log("Avatar source set to:", avatarSrc); // Optional log
+                console.log($navbarProfileImg)
+                $navbarProfileImg.attr('src', avatarSrc);
 
-        $navbarProfileImg.attr('src', finalUrl);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error loading profile:", textStatus, errorThrown);
+                showNotification('Failed to load profile data.', 'error');
+            }
+        });
+
+
 
     } else {
         $navbarProfileImg.attr('src', defaultAvatarUrl);
