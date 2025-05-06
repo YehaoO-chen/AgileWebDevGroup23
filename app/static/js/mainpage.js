@@ -1,8 +1,8 @@
 /* Timer widget JS */
 // Initialise the default value
-let focusTime = 50;
-let breakTime = 10;
-let remainingSeconds = 0;
+focusTime = 50;
+breakTime = 10;
+remainingSeconds = 0;
 let isFocus = true;
 let isPaused = false;
 let timer = null;
