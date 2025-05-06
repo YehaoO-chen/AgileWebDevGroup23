@@ -16,6 +16,97 @@ function updateNavbarAvatar() {
     }
 }
 
+// Function to initialize Study Plan functionality
+function initStudyPlan() {
+    // Get references to elements
+    const studyInput = document.getElementById('studyInput');
+    const addButton = document.getElementById('addButton');
+    const openTab = document.getElementById('openTab');
+    const completedTab = document.getElementById('completedTab');
+    const openTasks = document.getElementById('openTasks');
+    const completedTasks = document.getElementById('completedTasks');
+    
+    if (!studyInput || !addButton || !openTab || !completedTab || !openTasks || !completedTasks) {
+        console.warn('Study Plan elements not found, skipping initialization');
+        return; // Exit if elements not found
+    }
+    
+    console.log('Initializing Study Plan functionality');
+    
+    // Tab switching functionality
+    openTab.addEventListener('click', function() {
+        openTab.classList.add('active');
+        completedTab.classList.remove('active');
+        openTasks.style.display = 'block';
+        completedTasks.style.display = 'none';
+    });
+    
+    completedTab.addEventListener('click', function() {
+        completedTab.classList.add('active');
+        openTab.classList.remove('active');
+        completedTasks.style.display = 'block';
+        openTasks.style.display = 'none';
+    });
+    
+    // Add new task functionality
+    addButton.addEventListener('click', function() {
+        const taskText = studyInput.value.trim();
+        if (taskText) {
+            addTask(taskText);
+            studyInput.value = '';
+        }
+    });
+    
+    // Also allow Enter key to add task
+    studyInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const taskText = studyInput.value.trim();
+            if (taskText) {
+                addTask(taskText);
+                studyInput.value = '';
+            }
+        }
+    });
+    
+    // Function to add new task
+    function addTask(text) {
+        const taskItem = document.createElement('div');
+        taskItem.className = 'study-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'study-checkbox';
+        
+        const taskText = document.createElement('span');
+        taskText.className = 'study-text';
+        taskText.textContent = text;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+            </svg>
+        `;
+        
+        taskItem.appendChild(checkbox);
+        taskItem.appendChild(taskText);
+        taskItem.appendChild(deleteBtn);
+        
+        openTasks.appendChild(taskItem);
+    }
+}
+
+// Function to initialize page-specific functionality based on URL
+function initPageSpecificFunctionality(path) {
+    if (path.includes('/studyplan')) {
+        // Wait a brief moment for DOM to be fully ready after AJAX load
+        setTimeout(initStudyPlan, 50);
+    }
+    // Add more page-specific initializations as needed
+}
+
 // Function to load content into the main area via AJAX
 function loadMainContent(url) {
     $.ajax({
@@ -45,10 +136,36 @@ function loadMainContent(url) {
             }
             // Replace the content of the <main> tag
             $('main').html(data);
-            // Optional: Scroll to top or handle focus
+            
+            // Scroll to top or handle focus
             window.scrollTo(0, 0);
-            // Optional: Re-initialize any JS specific to the new content if needed
-            // e.g., if dashboard.js needs to run again after loading dashboard content
+            
+            // Initialize functionality specific to this page
+            initPageSpecificFunctionality(url);
+            
+            // Set up event delegation for checkbox changes
+            $(document).off('change', '.study-checkbox').on('change', '.study-checkbox', function() {
+                const taskItem = $(this).closest('.study-item')[0];
+                const openTasks = document.getElementById('openTasks');
+                const completedTasks = document.getElementById('completedTasks');
+                
+                if (!openTasks || !completedTasks) return;
+                
+                if ($(this).is(':checked')) {
+                    // Move to completed tasks
+                    openTasks.removeChild(taskItem);
+                    completedTasks.appendChild(taskItem);
+                } else {
+                    // Move back to open tasks
+                    completedTasks.removeChild(taskItem);
+                    openTasks.appendChild(taskItem);
+                }
+            });
+            
+            // Set up event delegation for delete buttons
+            $(document).off('click', '.delete-btn').on('click', '.delete-btn', function() {
+                $(this).closest('.study-item').remove();
+            });
         },
         error: function(jqXHR, textStatus, errorThrown) {
             console.error("Error loading content:", textStatus, errorThrown);
@@ -65,7 +182,7 @@ $(document).ready(function() {
 
     // Define which paths should be loaded via AJAX initially.
     // Exclude paths like /login, /signup, /logout which are typically full page loads.
-    const ajaxLoadPaths = ['/home', '/study_plan', '/dashboard', '/notification', '/profile'];
+    const ajaxLoadPaths = ['/home', '/study_plan', '/studyplan', '/dashboard', '/notification', '/profile'];
     // Determine the actual path to load content for (e.g., map '/' to '/home')
     let pathToLoad = currentPath;
     let activeLinkSelectorPath = currentPath;

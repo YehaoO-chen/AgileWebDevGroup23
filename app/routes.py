@@ -55,7 +55,7 @@ def init_routes(app):
             # Check if the user exists
             if not user:
                 flash('User not found. Please check your username or sign up.', 'danger')
-                return redirect(url_for('index'))
+                return redirect(url_for('login'))
 
             # Validate user credentials
             if user.password == password:
@@ -153,10 +153,11 @@ def init_routes(app):
         user = current_user
         # Check if the request is an AJAX request (based on header set by JS)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render_template('studyplan.html', user=user, is_partial=True) # Pass a flag if needed
+            # For AJAX requests, only render the content part of studyplan.html
+            return render_template('studyplan.html', user=user, is_ajax=True) 
         else:
-            # If normal request, render with the base template
-            return render_template('studyplan.html', user=user, is_partial=False) # Or just render normally
+            # If normal request, render normally with full base template
+            return render_template('studyplan.html', user=user)
 
 
     #Share route (requires login)
