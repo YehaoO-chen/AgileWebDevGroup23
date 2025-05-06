@@ -41,7 +41,6 @@ def init_routes(app):
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
-        # If the user is already logged in, redirect to the home page
         if current_user.is_authenticated:
             return redirect(url_for('index'))
 
@@ -55,10 +54,10 @@ def init_routes(app):
             # Check if the user exists
             if not user:
                 flash('User not found. Please check your username or sign up.', 'danger')
-                return redirect(url_for('index'))
+                return redirect(url_for('login'))
 
             # Validate user credentials
-            if user.password == password:
+            if user.check_password(password):
                 login_user(user)
                 flash('Login successful', 'success')
                 return redirect(url_for('index'))
@@ -79,6 +78,7 @@ def init_routes(app):
     def signup():
         if request.method == 'POST':
             try:
+                # Get form data
                 username = request.form['username']
                 password = request.form['password']
                 security_answer = request.form['security_answer']
@@ -93,20 +93,11 @@ def init_routes(app):
                 new_user = User(username=username, password=password, security_answer=security_answer)
                 db.session.add(new_user)
                 db.session.commit()
-                
-                # Verify if the user was successfully added to the database
-                check_user = User.query.filter_by(username=username).first()
-                if check_user:
-                    flash('Signup successful! Please log in.', 'success')
-                    return redirect(url_for('login'))
-                else:
-                    flash('Failed to create user. Please try again.', 'danger')
-                    return redirect(url_for('signup'))
-                    
+
+                flash('Signup successful! Please log in.', 'success')
+                return redirect(url_for('login'))
             except Exception as e:
-                # Rollback the transaction
                 db.session.rollback()
-                # Output the error message
                 flash(f'An error occurred: {str(e)}', 'danger')
                 return redirect(url_for('signup'))
 
@@ -128,19 +119,18 @@ def init_routes(app):
                 return redirect(url_for('reset'))
 
             # Validate the security answer
-            if user.security_answer != security_answer:
+            if not user.check_security_answer(security_answer):  # Use the check_security_answer method
                 flash('Incorrect security answer. Please try again.', 'danger')
                 return redirect(url_for('reset'))
 
             # Update the user's password
             try:
-                user.password = new_password
+                user.password = new_password  # This will automatically hash the password
                 db.session.commit()
                 flash('Password reset successful! You can now log in with your new password.', 'success')
                 return redirect(url_for('login'))
             except Exception as e:
                 db.session.rollback()
-                print(f"Error: {e}")
                 flash('An error occurred while resetting your password. Please try again.', 'danger')
                 return redirect(url_for('reset'))
 
