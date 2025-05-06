@@ -35,7 +35,7 @@ def init_routes(app):
         # If the user is already logged in, redirect to the home page
         if not current_user.is_authenticated:
             return render_template('index.html')
-        return render_template('base.html', route='home', user=current_user)
+        return render_template('base.html', route='mainpage', user=current_user)
 
 
 
@@ -166,17 +166,6 @@ def init_routes(app):
             'message': f'成功分享{data_type}给{len(users)}位用户'
         })
 
-    # Dashboard route
-    @app.route('/home')
-    @login_required
-    def home():
-        user = current_user
-        # Check if the request is an AJAX request (based on header set by JS)
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render_template('home.html', user=user, is_partial=True) # Pass a flag if needed
-        else:
-            # If normal request, render with the base template
-            return render_template('base.html', route='home', user=user)
 
     # Main page route (requires login)
     @app.route('/mainpage')
@@ -185,10 +174,6 @@ def init_routes(app):
         user = current_user
         # Check if the request is an AJAX request (based on header set by JS)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            # If AJAX, render *only* the content part (mainpage.html itself)
-            # Crucially, mainpage.html should NOT have {% extends 'base.html' %}
-            # OR, keep extends but render only the block (more complex)
-            # Easiest: Render the template directly without base.
             return render_template('mainpage.html', user=user, is_partial=True) # Pass a flag if needed
         else:
             # If normal request, render with the base template
