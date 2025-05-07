@@ -45,6 +45,31 @@ function loadMainContent(url) {
             }
             // Replace the content of the <main> tag
             $('main').html(data);
+
+            
+    // TODO:🌟 Initialization for JS everytimes the page is switched
+    if (url === '/mainpage') {
+        if (typeof initMainpageFeatures === 'function') {
+            initMainpageFeatures(); // ✅ 🟨 mainpage 初始化
+        }
+    }
+    if (url === '/studyplan') {
+        if (typeof initStudyplanFeatures === 'function') {
+            initStudyplanFeatures(); // ✅ 🟨 studyplan 初始化
+        }
+    }
+    if (url === '/dashboard') {
+        if (typeof initDashboardFeatures === 'function') {
+            initDashboardFeatures(); // ✅ 🟨 dashboard 初始化
+        }
+    }
+    
+    if (url === '/notification') {
+        if (typeof initNotificationFeatures === 'function') {
+            initNotificationFeatures(); // ✅ 🟨 notification 初始化（
+        }
+    }
+
             // Optional: Scroll to top or handle focus
             window.scrollTo(0, 0);
             // Optional: Re-initialize any JS specific to the new content if needed
