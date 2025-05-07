@@ -192,7 +192,9 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    // document.addEventListener('DOMContentLoaded', function() {
+
+    function initStudyplanFeatures() {
         // Get references to elements
         const studyInput = document.getElementById('studyInput');
         const addButton = document.getElementById('addButton');
@@ -288,6 +290,7 @@
             
             openTasks.appendChild(taskItem);
         }
-    });
+    // });
+    }
 </script>
 {% endblock %}

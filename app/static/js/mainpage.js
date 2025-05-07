@@ -63,6 +63,33 @@ window.addEventListener('DOMContentLoaded', () => {
       todoContainer.classList.remove('animate');
     });
   } 
+
+
+
+// TODO: ✅ GET: Load the task data from the backend and display it in the task list
+fetch('/api/task')
+.then(res => res.json())
+.then(tasks => {
+  tasks.forEach(task => {
+    const li = document.createElement('li');
+    li.className = 'task';
+    li.setAttribute('data-status', task.status === 1 ? 'completed' : 'active');
+    li.setAttribute('data-id', task.id); // task ID for later updates
+
+    li.innerHTML = `
+      <div class="task-content">
+        <input type="checkbox" class="task-checkbox" ${task.status === 1 ? 'checked' : ''} />
+        <span class="task-text ${task.status === 1 ? 'completed' : ''}">${task.title}</span>
+        <button class="expand-btn">${icon_down}</button>
+        <button class="delete-btn">${icon_delete}</button>
+      </div>
+    `;
+
+    taskList.appendChild(li);
+  });
+
+ });
+
 });
 
 
@@ -232,6 +259,19 @@ addBtn.addEventListener('click', () => {
 
   taskList.appendChild(li);
   input.value = '';
+
+
+    // ✅ TODO: POST： send the new task to the backend
+    fetch('/api/task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ title: taskText })
+    }).catch(() => {
+      console.warn("⚠️ 后端没响应，任务只存在前端");
+    });
+
 });
 
 
@@ -239,8 +279,8 @@ taskList.addEventListener('change', e => {
   if (e.target.classList.contains('task-checkbox')) {
     const task = e.target.closest('li');
     const span = task.querySelector('.task-text');
-
     const isChecked = e.target.checked;
+
     task.setAttribute('data-status', isChecked ? 'completed' : 'active');
     span.classList.toggle('completed', isChecked);
 
@@ -258,6 +298,16 @@ taskList.addEventListener('change', e => {
     if (!isChecked && currentFilter === 'completed') {
       task.style.display = 'none';
     }
+
+       // ✅ TODO: Sync： send the updated task status to the backend
+       const taskId = task.dataset.id;
+       fetch(`/api/task/${taskId}`, {
+         method: 'PUT',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ status: isChecked ? 1 : 0 })
+       }).catch(() => {
+         console.warn('⚠️ 无法同步任务状态到后端');
+       }); 
   }
 });
 

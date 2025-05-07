@@ -146,7 +146,7 @@ def init_routes(app):
             return render_template('studyplan.html', user=user, is_partial=True) # Pass a flag if needed
         else:
             # If normal request, render with the base template
-            return render_template('studyplan.html', user=user, is_partial=False) # Or just render normally
+            return render_template('base.html', route='studyplan', user=user) # Or just render normally
 
 
     #Share route (requires login)
