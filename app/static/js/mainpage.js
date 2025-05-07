@@ -76,8 +76,35 @@ function initMainpageFeatures() {
       `;
       taskList.appendChild(li);
     });
+  } 
+
+
+
+// TODO: ✅ GET: Load the task data from the backend and display it in the task list
+fetch('/api/task')
+.then(res => res.json())
+.then(tasks => {
+  tasks.forEach(task => {
+    const li = document.createElement('li');
+    li.className = 'task';
+    li.setAttribute('data-status', task.status === 1 ? 'completed' : 'active');
+    li.setAttribute('data-id', task.id); // task ID for later updates
+
+    li.innerHTML = `
+      <div class="task-content">
+        <input type="checkbox" class="task-checkbox" ${task.status === 1 ? 'checked' : ''} />
+        <span class="task-text ${task.status === 1 ? 'completed' : ''}">${task.title}</span>
+        <button class="expand-btn">${icon_down}</button>
+        <button class="delete-btn">${icon_delete}</button>
+      </div>
+    `;
+
+    taskList.appendChild(li);
   });
 
+ });
+
+});
 
 
 
