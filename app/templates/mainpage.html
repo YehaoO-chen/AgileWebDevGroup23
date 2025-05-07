@@ -84,11 +84,46 @@
       </div>
 
         <!-- TODO: background section -->
-        <!-- <div class="bg-change">
-            <h2>Background Color Change</h2>
-            <button id="bg-color-btn" class="btn btn-info">Change Background Color</button>
-        </div>
-     </div> -->
+        
+  <!-- GIF div -->
+  <div id="bg-gif" style="background-image: url('{{ url_for('static', filename='gifs/1.gif') }}');"></div>
+
+<!-- control pannel -->
+<div class="audio-widget" id="audio-widget">
+    <div>
+      <button id="toggle-mute">Unmute</button>
+    </div>
+  
+    <label for="volume-range">Volume:</label>
+    <input type="range" id="volume-range" min="0" max="1" step="0.01" value="0" />
+  
+    <label for="bg-select">Background:</label>
+    <select id="bg-select">
+      <option value="1.gif">1</option>
+      <option value="2.gif">2</option>
+      <option value="3.gif">3</option>
+      <option value="4.gif">4</option>
+      <option value="5.gif">5</option>
+      <option value="6.gif">6</option>
+    </select>
+  
+    <label for="music-select">Music:</label>
+    <select id="music-select">
+      <option value="Hiphoplofi.mp3">Lofi</option>
+      <option value="forest.mp3">Forest</option>
+      <option value="rainsound.mp3">Rain</option>
+      <option value="RainyLofi.mp3">RainyLofi</option>
+      <option value="thunder.mp3">Thunder</option>
+      <option value="wind.mp3">Wind</option>
+      <option value="guitar.mp3">Guitar Music</option>
+      <option value="thunderstorm.mp3">Thunder storm</option>
+    </select>
+  
+    <audio id="bg-audio" autoplay muted loop>
+      <source src="{{ url_for('static', filename='audio/Hiphoplofi.mp3') }}" type="audio/mp3" />
+      Your browser does not support audio.
+    </audio>
+  </div>
 
 {% endblock %}
 

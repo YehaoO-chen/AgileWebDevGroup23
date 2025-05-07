@@ -1,4 +1,3 @@
-
 /* This is for the main functional pages */
 /* Timer section CSS */
 #setup-area {
@@ -139,7 +138,7 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -60%); }
+  from { opacity: 0; transform: translate(-50%, -50%); }
   to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
@@ -236,6 +235,7 @@ input[type="number"] {
   }
 }
 
+
 /* Goal Setting section CSS */
 
 .todo-container {
@@ -248,7 +248,7 @@ input[type="number"] {
   padding: 16px;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  z-index: 999;
+  z-index: 900;
 }
 
 /* Separate the animation to make it triggered only once when the page is loaded */
@@ -421,4 +421,86 @@ input[type="number"] {
 
 .delete-btn:hover {
   transform: scale(1.2);
+}
+
+/* Background pannel CSS */
+#bg-gif {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: -1;
+}
+
+.audio-widget {
+  position: fixed;
+  top: 180px;
+  right: 120px;
+  background-color: rgba(20, 20, 20, 0.699);
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  color: white;
+  padding: 15px;
+  border-radius: 12px;
+  font-family: sans-serif;
+}
+
+@media (max-width: 950px){
+.audio-widget{
+  display: none;
+}
+}
+
+@media (max-height: 400px){
+.audio-widget{
+    display: none;
+  }
+}
+
+.audio-widget.animate {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.audio-widget button {
+  background: #ffffff22;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  margin-right: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.audio-widget input[type="range"],
+.audio-widget select {
+  vertical-align: middle;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.audio-widget label {
+  display: block;
+  margin-top: 10px;
+}
+
+.audio-widget button {
+display: block;
+margin: 0 auto;
 }
