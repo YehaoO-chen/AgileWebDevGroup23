@@ -94,7 +94,12 @@
   z-index: 999;
   display: none;
   min-width: 160px;
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeInFloating 0.3s ease-in-out;
+}
+
+@keyframes fadeInFloating {
+  from { opacity: 0; transform: translate(-50%, -50%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
 @media (max-width: 600px){
@@ -135,11 +140,6 @@
 
 .floating-controls .back-btn {
   background-color: #999;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -50%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
 .floating-controls button {
