@@ -47,3 +47,5 @@ migrations/
 # Static files generated during runtime
 staticfiles/
 app/static/uploads/
+
+seed_data.py
