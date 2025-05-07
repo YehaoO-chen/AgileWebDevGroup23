@@ -1,11 +1,13 @@
 /* Timer widget JS */
 // Initialise the default value
+(function () {
 focusTime = 50;
 breakTime = 10;
 remainingSeconds = 0;
 let isFocus = true;
 let isPaused = false;
 let timer = null;
+})();
 
 function setTimeValue(type, value) {
   // Restricting the minimum and maximum input value (if the input value is less than 1, then change to 1; if is more than 180, then change to 1)

@@ -1,288 +1,106 @@
 {% block extra_css %}
-<style>
-    .page-title {
-        text-align: center;
-        color: #C38D60;
-        margin-bottom: 30px;
-        font-size: 32px;
-    }
-    
-    .stats-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 40px;
-        flex-wrap: wrap;
-    }
-    
-    .stat-card {
-        background-color: #F3E7DD;
-        border-radius: 10px;
-        padding: 20px;
-        width: 23%;
-        text-align: center;
-    }
-    
-    .stat-label {
-        font-size: 16px;
-        color: #333;
-        margin-bottom: 10px;
-    }
-    
-    .stat-value {
-        font-size: 40px;
-        font-weight: bold;
-        color: #C38D60;
-    }
-    
-    .filters-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 30px;
-    }
-    
-    .filter-label {
-        color: #C38D60;
-        font-size: 16px;
-    }
-    
-    .charts-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 40px;
-        flex-wrap: wrap;
-    }
-    
-    .chart-container {
-        width: 48%;
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        height: 350px;
-    }
-    
-    .btn-container {
-        text-align: center;
-        margin: 30px 0;
-    }
-    
-    .share-btn {
-        background-color: #C38D60;
-        color: white;
-        border: none;
-        border-radius: 20px;
-        padding: 10px 30px;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    
-    .share-btn:hover {
-        background-color: #b07a50;
-    }
-    
-    /* Modal styles */
-    .modal-content {
-        background-color: #c69c6d;
-        border-radius: 8px;
-        padding: 15px;
-    }
-    
-    .modal-header {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-    
-    .modal-title {
-        width: 100%;
-        text-align: center;
-        font-size: 24px;
-        color: #000;
-    }
-    
-    .modal-body {
-        padding: 20px 15px;
-    }
-    
-    .section-title {
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    
-    .radio-option {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-    
-    .radio-option input[type="radio"] {
-        margin-right: 10px;
-        transform: scale(1.2);
-    }
-    
-    .select-container {
-        position: relative;
-        margin-bottom: 15px;
-    }
-    
-    .form-select {
-        border-radius: 20px;
-        padding: 10px;
-    }
-    
-    .selected-users {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 10px;
-    }
-    
-    .user-tag {
-        display: flex;
-        align-items: center;
-        background-color: white;
-        border-radius: 20px;
-        padding: 5px 12px;
-        font-size: 14px;
-    }
-    
-    .remove-user {
-        margin-left: 8px;
-        cursor: pointer;
-        color: #888;
-        font-size: 16px;
-    }
-    
-    .modal-footer {
-        border-top: none;
-        justify-content: center;
-        padding-top: 0;
-    }
-    
-    .btn-done {
-        background-color: #26a69a;
-        color: white;
-        border-radius: 20px;
-        padding: 8px 30px;
-    }
-    
-    .btn-cancel {
-        background-color: white;
-        color: black;
-        border-radius: 20px;
-        padding: 8px 30px;
-    }
-    
-    @media (max-width: 768px) {
-        .stat-card {
-            width: 48%;
-            margin-bottom: 15px;
-        }
-        
-        .chart-container {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
 
 {% block content %}
-<h1 class="page-title">Data Analysis</h1>
+<div class="dashboard-container">
+    <!-- <div class="dashboard-header">
+        <h1>Data Analysis</h1>
+        <div class="copyright">© 2025 CIST5505 Group 23</div>
+    </div> -->
 
-<div class="stats-row">
-    <div class="stat-card">
-        <div class="stat-label">Total Duration(Minutes)</div>
-        <div class="stat-value">50</div>
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>Total Duration(Minutes)</h3>
+            <div class="stat-value" id="total-duration">0</div>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Today Learning (Minutes)</h3>
+            <div class="stat-value" id="today-learning">0</div>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Average Duration(Minutes)</h3>
+            <div class="stat-value" id="average-duration">0</div>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Today Learning (Minutes)</h3>
+            <div class="stat-value" id="today-learning-2">0</div>
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Today Learning (Minutes)</div>
-        <div class="stat-value">20</div>
+    
+    <div class="filter-section">
+        <div class="filter-label">
+            Filter: 
+            <select id="period-filter" class="form-select">
+                <option value="day">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+            </select>
+        </div>
+        <div class="filter-right">
+            Filter: 
+            <select id="chart-type-filter" class="form-select">
+                <option value="duration" selected>Duration</option>
+                <option value="task">Tasks</option>
+            </select>
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Average Duration(Minutes)</div>
-        <div class="stat-value">15</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-label">Today Learning (Minutes)</div>
-        <div class="stat-value">20</div>
-    </div>
-</div>
-
-<div class="filters-row">
-    <div>
-        <span class="filter-label">Filter : This Month</span>
-    </div>
-    <div>
-        <span class="filter-label">Filter : This Month</span>
-    </div>
-</div>
-
-<div class="charts-row">
+    
     <div class="chart-container">
-        <canvas id="studyPlanChart"></canvas>
+        <canvas id="study-chart"></canvas>
     </div>
-    <div class="chart-container">
-        <canvas id="studyDurationChart"></canvas>
+    
+    <div class="share-container">
+        <button id="share-button" class="btn" onclick="openShareModal()">Share</button>
     </div>
-</div>
-
-<div class="btn-container">
-    <button type="button" class="share-btn" data-bs-toggle="modal" data-bs-target="#shareModal">
-        Share
-    </button>
 </div>
 
 <!-- Share Modal -->
 <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" style="background-color: #40ADA2; color: white; border-radius: 10px 10px 0 0;">
                 <h5 class="modal-title" id="shareModalLabel">Share Your Study Data</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form id="shareForm">
-                    <div class="mb-4">
-                        <h3 class="section-title">1. Select data you want to share</h3>
-                        <div class="radio-option">
-                            <input type="radio" id="totalStudyTime" name="dataType" value="totalStudyTime" checked>
-                            <label for="totalStudyTime">Total study time</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="averageStudyTime" name="dataType" value="averageStudyTime">
-                            <label for="averageStudyTime">Average study time</label>
+            <div class="modal-body" style="padding: 20px;">
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">1. Select data you want to share</h6>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="dataType" id="totalTime" value="totalTime" checked>
+                        <label class="form-check-label" for="totalTime">Total study time</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="dataType" id="averageTime" value="averageTime">
+                        <label class="form-check-label" for="averageTime">Average study time</label>
+                    </div>
+                </div>
+                
+                <div>
+                    <h6 class="fw-bold mb-3">2. Select users you want to share</h6>
+                    <div class="mb-3">
+                        <input type="text" id="userSearchInput" class="form-control" placeholder="Search users...">
+                    </div>
+                    <div id="userList" class="border rounded p-2 mb-3" style="max-height: 200px; overflow-y: auto;">
+                        <div class="d-flex align-items-center justify-content-center p-3">
+                            <div class="spinner-border spinner-border-sm text-secondary me-2" role="status"></div>
+                            <span>Loading users...</span>
                         </div>
                     </div>
-                    
                     <div>
-                        <h3 class="section-title">2. Select users you want to share</h3>
-                        <div class="select-container">
-                            <select class="form-select" id="userSelect">
-                                <option value="" disabled selected>Select users</option>
-                                <option value="alice">Alice</option>
-                                <option value="bob">Bob</option>
-                                <option value="celia">Celia</option>
-                                <option value="david">David</option>
-                                <option value="betty">Betty</option>
-                            </select>
-                        </div>
-                        
-                        <div class="selected-users" id="selectedUsers">
-                            <div class="user-tag">
-                                Celia
-                                <span class="remove-user" data-user="celia">✕</span>
-                            </div>
-                            <div class="user-tag">
-                                Betty
-                                <span class="remove-user" data-user="betty">✕</span>
-                            </div>
+                        <label class="fw-bold mb-2">Selected users:</label>
+                        <div id="selectedUsers" class="d-flex flex-wrap gap-2">
+                            <span id="noUsersSelected" class="text-muted small">No users selected</span>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-done" id="doneButton">Done</button>
-                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="doneButton" onclick="shareData()">Done</button>
             </div>
         </div>
     </div>
@@ -290,222 +108,405 @@
 {% endblock %}
 
 {% block extra_js %}
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // check Chart.js 
-    window.onload = function() {
-        console.log('Window loaded');
-        if (typeof Chart === 'undefined') {
-            console.error('Chart.js fail');
-            alert('Chart libraries are not loaded correctly, some functions may not be available');
-            return;
+// Global variables for user selection
+let allUsers = [];
+let selectedUserIds = [];
+
+// Expose the loadDashboardData function to the window object for base.js to call
+window.loadDashboardData = function() {
+    console.log('Loading dashboard data');
+    
+    const periodFilter = document.getElementById('period-filter');
+    const chartTypeFilter = document.getElementById('chart-type-filter');
+    
+    if (!periodFilter || !chartTypeFilter) {
+        console.error('Filter elements not found in the DOM');
+        return;
+    }
+    
+    const period = periodFilter.value;
+    const chartType = chartTypeFilter.value;
+    
+    console.log(`Fetching data for period: ${period}, chart type: ${chartType}`);
+    
+    // Fetch duration data
+    fetch(`/api/dashboard/duration?period=${period}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Duration data received:', data);
+            
+            // Update stats
+            document.getElementById('total-duration').textContent = Math.round(data.total_study_time || 0);
+            document.getElementById('today-learning').textContent = Math.round(data.today_study_time || 0);
+            document.getElementById('today-learning-2').textContent = Math.round(data.today_study_time || 0);
+            document.getElementById('average-duration').textContent = Math.round(data.avg_study_time || 0);
+            
+            // Render chart if duration type selected
+            if (chartType === 'duration') {
+                renderDurationChart(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching duration data:', error);
+        });
+    
+    // Fetch task data if task chart selected
+    if (chartType === 'task') {
+        fetch(`/api/dashboard/task?period=${period}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Task data received:', data);
+                renderTaskChart(data);
+            })
+            .catch(error => {
+                console.error('Error fetching task data:', error);
+            });
+    }
+};
+
+// Function to render duration chart
+function renderDurationChart(data) {
+    console.log('Rendering duration chart with data:', data);
+    const chartCanvas = document.getElementById('study-chart');
+    
+    if (!chartCanvas) {
+        console.error('Chart canvas element not found');
+        return;
+    }
+    
+    const ctx = chartCanvas.getContext('2d');
+    
+    // Clear any existing chart
+    if (window.studyChart) {
+        window.studyChart.destroy();
+    }
+    
+    // Process data for the chart
+    const studyDurationsByDay = data.study_durations_by_day || {};
+    const labels = [];
+    const values = [];
+    
+    // Sort dates and extract data
+    const sortedDates = Object.keys(studyDurationsByDay).sort();
+    for (const date of sortedDates) {
+        // Format date for display
+        const displayDate = new Date(date).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric'
+        });
+        labels.push(displayDate);
+        values.push(studyDurationsByDay[date]);
+    }
+    
+    // If no data, show empty chart
+    if (labels.length === 0) {
+        labels.push('No data');
+        values.push(0);
+    }
+    
+    console.log('Chart data prepared:', {labels, values});
+    
+    // Create chart
+    window.studyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Study Minutes',
+                data: values,
+                backgroundColor: 'rgba(64, 173, 162, 0.7)',
+                borderColor: 'rgba(64, 173, 162, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Minutes'
+                    }
+                }
+            }
         }
-        
-        console.log('Chart.js ready:', typeof Chart);
-        
-        // wait dom 
-        setTimeout(function() {
-            // initial
-            initializeCharts();
+    });
+    
+    console.log('Chart created successfully');
+}
+
+// Function to render task chart
+function renderTaskChart(data) {
+    console.log('Rendering task chart with data:', data);
+    const chartCanvas = document.getElementById('study-chart');
+    
+    if (!chartCanvas) {
+        console.error('Chart canvas element not found');
+        return;
+    }
+    
+    const ctx = chartCanvas.getContext('2d');
+    
+    // Clear any existing chart
+    if (window.studyChart) {
+        window.studyChart.destroy();
+    }
+    
+    const taskSummary = data.task_summary || { open: 0, completed: 0, deleted: 0 };
+    
+    // Create chart
+    window.studyChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Open Tasks', 'Completed Tasks', 'Deleted Tasks'],
+            datasets: [{
+                data: [taskSummary.open, taskSummary.completed, taskSummary.deleted],
+                backgroundColor: [
+                    'rgba(255, 206, 86, 0.7)',  // Yellow for open
+                    'rgba(75, 192, 192, 0.7)',  // Green for completed
+                    'rgba(255, 99, 132, 0.7)'   // Red for deleted
+                ],
+                borderColor: [
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    console.log('Task chart created successfully');
+}
+
+// Function to open share modal
+function openShareModal() {
+    console.log('Opening share modal');
+    
+    // Reset selections
+    selectedUserIds = [];
+    document.getElementById('noUsersSelected').style.display = 'block';
+    document.getElementById('selectedUsers').innerHTML = '<span id="noUsersSelected" class="text-muted small">No users selected</span>';
+    
+    // Initialize and show modal
+    try {
+        const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+        loadUsers();
+        shareModal.show();
+    } catch (error) {
+        console.error('Error showing modal:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+// Function to load users
+function loadUsers() {
+    console.log('Loading users');
+    const userList = document.getElementById('userList');
+    
+    userList.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center p-3">
+            <div class="spinner-border spinner-border-sm text-secondary me-2" role="status"></div>
+            <span>Loading users...</span>
+        </div>
+    `;
+    
+    fetch('/api/users')
+        .then(response => response.json())
+        .then(users => {
+            console.log('Users loaded:', users);
+            allUsers = users;
             
-            // 
-            setupUserSelection();
+            if (users.length === 0) {
+                userList.innerHTML = `<p class="text-center text-muted p-3">No users available</p>`;
+                return;
+            }
             
-            // 
-            setupDoneButton();
-        }, 200);
+            // Render user list
+            userList.innerHTML = '';
+            
+            users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'form-check mb-2';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input';
+                checkbox.id = `user-${user.id}`;
+                checkbox.value = user.id;
+                
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        if (!selectedUserIds.includes(user.id)) {
+                            selectedUserIds.push(user.id);
+                            updateSelectedUsers();
+                        }
+                    } else {
+                        selectedUserIds = selectedUserIds.filter(id => id !== user.id);
+                        updateSelectedUsers();
+                    }
+                });
+                
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `user-${user.id}`;
+                label.textContent = user.username;
+                
+                userItem.appendChild(checkbox);
+                userItem.appendChild(label);
+                userList.appendChild(userItem);
+            });
+            
+            // Setup search functionality
+            const searchInput = document.getElementById('userSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    filterUsers(searchTerm);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading users:', error);
+            userList.innerHTML = `<p class="text-center text-danger p-3">Error loading users</p>`;
+        });
+}
+
+// Filter users based on search term
+function filterUsers(searchTerm) {
+    const userCheckboxes = document.querySelectorAll('#userList .form-check');
+    
+    userCheckboxes.forEach(item => {
+        const label = item.querySelector('.form-check-label');
+        const username = label.textContent.toLowerCase();
+        
+        if (username.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Update selected users display
+function updateSelectedUsers() {
+    const selectedUsersContainer = document.getElementById('selectedUsers');
+    const noUsersSelected = document.getElementById('noUsersSelected');
+    
+    if (selectedUserIds.length === 0) {
+        selectedUsersContainer.innerHTML = '<span id="noUsersSelected" class="text-muted small">No users selected</span>';
+        return;
+    }
+    
+    selectedUsersContainer.innerHTML = '';
+    
+    selectedUserIds.forEach(userId => {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) return;
+        
+        const tag = document.createElement('span');
+        tag.className = 'badge bg-info text-dark me-2 mb-2';
+        tag.style.display = 'inline-flex';
+        tag.style.alignItems = 'center';
+        tag.style.padding = '5px 10px';
+        tag.style.borderRadius = '16px';
+        
+        tag.innerHTML = `
+            ${user.username}
+            <button type="button" class="btn-close btn-close-white ms-2" 
+                    style="font-size: 0.5rem;" aria-label="Remove"
+                    onclick="removeUser(${userId})"></button>
+        `;
+        
+        selectedUsersContainer.appendChild(tag);
+    });
+}
+
+// Remove user from selection
+function removeUser(userId) {
+    const checkbox = document.getElementById(`user-${userId}`);
+    if (checkbox) checkbox.checked = false;
+    
+    selectedUserIds = selectedUserIds.filter(id => id !== userId);
+    updateSelectedUsers();
+}
+
+// Share data with selected users
+function shareData() {
+    console.log('Share data function called');
+    
+    if (selectedUserIds.length === 0) {
+        alert('Please select at least one user to share with.');
+        return;
+    }
+    
+    const dataType = document.querySelector('input[name="dataType"]:checked').value;
+    
+    console.log('Sharing data:', dataType, 'with users:', selectedUserIds);
+    
+    // Prepare data to send
+    const data = {
+        dataType: dataType,
+        users: selectedUserIds
     };
     
-    // 
-    function initializeCharts() {
-        try {
-            // pie
-            const pieCtx = document.getElementById('studyPlanChart');
-            if (pieCtx) {
-                console.log('Creating pie chart...');
-                const planStatusChart = new Chart(pieCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Open', 'Completed', 'Deleted', 'In Progress', 'Late'],
-                        datasets: [{
-                            data: [5, 3, 1, 4, 2],
-                            backgroundColor: [
-                                'rgba(23, 96, 120, 0.9)',
-                                'rgba(40, 140, 160, 0.9)',
-                                'rgba(70, 190, 180, 0.9)',
-                                'rgba(40, 210, 170, 0.9)',
-                                'rgba(90, 220, 190, 0.9)'
-                            ],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            title: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            } else {
-                console.error('can not find');
-            }
+    // Send share request
+    fetch('/api/share', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('Share response status:', response.status);
+        return response.json();
+    })
+    .then(result => {
+        console.log('Share result:', result);
+        
+        if (result.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('shareModal'));
+            if (modal) modal.hide();
             
-            // bar
-            const barCtx = document.getElementById('studyDurationChart');
-            if (barCtx) {
-                console.log('Creating bar chart...');
-                const studyDurationChart = new Chart(barCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
-                        datasets: [{
-                            label: 'Study Duration (Minutes)',
-                            data: [45, 30, 60, 80, 40],
-                            backgroundColor: [
-                                'rgba(23, 96, 120, 0.9)',
-                                'rgba(40, 140, 160, 0.9)',
-                                'rgba(70, 190, 180, 0.9)',
-                                'rgba(40, 210, 170, 0.9)',
-                                'rgba(90, 220, 190, 0.9)'
-                            ],
-                            borderWidth: 0,
-                            barThickness: 40
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    display: false
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            title: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            } else {
-                console.error('can not find');
-            }
-            
-            console.log('Charts initialized');
-            
-        } catch (error) {
-            console.error('Error initializing charts:', error);
+            // Show success message
+            alert('Data shared successfully! Recipients will see it in their notifications.');
+        } else {
+            alert('Failed to share data: ' + (result.message || 'Unknown error'));
         }
+    })
+    .catch(error => {
+        console.error('Error sharing data:', error);
+        alert('An error occurred while sharing data.');
+    });
+}
+
+// Load chart data when page loads directly
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, calling loadDashboardData()');
+    
+    // Call our dashboard loader function if we're on the dashboard page
+    if (typeof window.loadDashboardData === 'function') {
+        window.loadDashboardData();
     }
     
-    // 
-    function setupUserSelection() {
-        const userSelect = document.getElementById('userSelect');
-        const selectedUsers = document.getElementById('selectedUsers');
-        
-        if (userSelect && selectedUsers) {
-            userSelect.addEventListener('change', function() {
-                const selectedUser = this.value;
-                const selectedOption = this.options[this.selectedIndex];
-                
-                if (selectedUser) {
-                    // 
-                    if (!document.querySelector(`.remove-user[data-user="${selectedUser}"]`)) {
-                        const userTag = document.createElement('div');
-                        userTag.className = 'user-tag';
-                        userTag.innerHTML = `
-                            ${selectedOption.text}
-                            <span class="remove-user" data-user="${selectedUser}">✕</span>
-                        `;
-                        selectedUsers.appendChild(userTag);
-                        
-                        // 
-                        this.selectedIndex = 0;
-                    }
-                }
-            });
-            
-            // 
-            selectedUsers.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-user')) {
-                    e.target.parentElement.remove();
-                }
-            });
-        }
-    }
+    // Set up filter event listeners
+    const periodFilter = document.getElementById('period-filter');
+    const chartTypeFilter = document.getElementById('chart-type-filter');
     
-    // 
-    function setupDoneButton() {
-        const doneButton = document.getElementById('doneButton');
-        
-        if (doneButton) {
-            doneButton.addEventListener('click', function() {
-                try {
-                    // 
-                    const shareModal = document.getElementById('shareModal');
-                    
-                    //
-                    let modalInstance;
-                    if (window.bootstrap && typeof bootstrap.Modal !== 'undefined') {
-                        modalInstance = bootstrap.Modal.getInstance(shareModal);
-                        
-                        if (!modalInstance) {
-                            modalInstance = new bootstrap.Modal(shareModal);
-                        }
-                        
-                        // 
-                        modalInstance.hide();
-                    } else {
-                        // 
-                        if (window.jQuery) {
-                            jQuery(shareModal).modal('hide');
-                        } else {
-                            // 
-                            shareModal.classList.remove('show');
-                            shareModal.style.display = 'none';
-                            
-                            // 
-                            const modalBackdrops = document.getElementsByClassName('modal-backdrop');
-                            if (modalBackdrops.length > 0) {
-                                for (let i = 0; i < modalBackdrops.length; i++) {
-                                    modalBackdrops[i].remove();
-                                }
-                            }
-                            
-                            // remove body overflow hidden
-                            document.body.classList.remove('modal-open');
-                            document.body.style.overflow = '';
-                            document.body.style.paddingRight = '';
-                        }
-                    }
-                    
-                    // 
-                    console.log('Share form submitted');
-                    alert('Data shared successfully!');
-                    
-                } catch (error) {
-                    console.error('Error in doneButton handler:', error);
-                }
-            });
-        }
-    }
+    if (periodFilter) periodFilter.addEventListener('change', window.loadDashboardData);
+    if (chartTypeFilter) chartTypeFilter.addEventListener('change', window.loadDashboardData);
+});
+
 </script>
 {% endblock %}
