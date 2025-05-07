@@ -1,80 +1,475 @@
-{% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
+{% if not is_partial %}   {% extends "base.html" %} {% endif %}  
+
+{% block extra_css %}
+<style>
+  /* Container layout adjustments */
+  .container-fluid {
+    padding: 1.5rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  /* Stats cards */
+  .stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-card {
+    flex: 1;
+    min-width: 200px;
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: center;
+  }
+  
+  .stat-card h3 {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #40ADA2;
+  }
+  
+  /* Filter area */
+  .filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .filter-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+  
+  .filter-dropdown {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    color: #40ADA2;
+    background-color: white;
+    font-size: 0.9rem;
+  }
+  
+  /* Message card with fixed height */
+  .card.shadow {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    background: white;
+    height: calc(100vh - 200px); /* Adjusted height without refresh button */
+  }
+  
+  .card-body {
+    padding: 0 !important;
+    height: 100%;
+    position: relative;
+  }
+  
+  /* Chat container with scrollbar */
+  .chat-container {
+    height: 100%;
+    overflow-y: auto; /* This creates the scrollbar */
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem !important;
+  }
+  
+  /* Customize scrollbar */
+  .chat-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .chat-container::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 4px;
+  }
+  
+  .chat-container::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 4px;
+  }
+  
+  .chat-container::-webkit-scrollbar-thumb:hover {
+    background: #b0b0b0;
+  }
+  
+  /* Message styling */
+  .message-wrapper {
+    display: flex;
+    margin-bottom: 0.75rem;
+    max-width: 85%;
+    position: relative;
+  }
+  
+  .message-received {
+    align-self: flex-start;
+    margin-left: 0.5rem;
+  }
+  
+  .message-sent {
+    align-self: flex-end;
+    margin-right: 0.5rem;
+  }
+  
+  .message-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .message-received .message-bubble {
+    background-color: #f8f9fa;
+    border-top-left-radius: 2px;
+  }
+  
+  .message-sent .message-bubble {
+    background-color: #40ADA2;
+    color: white;
+    border-top-right-radius: 2px;
+  }
+  
+  .message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+  }
+  
+  .message-received .message-header {
+    color: #495057;
+  }
+  
+  .message-sent .message-header {
+    color: rgba(255,255,255,0.9);
+    justify-content: flex-end;
+  }
+  
+  .message-content {
+    word-break: break-word;
+    font-weight: 500;
+  }
+  
+  .message-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  .message-received .message-footer {
+    color: #6c757d;
+  }
+  
+  .message-sent .message-footer {
+    color: rgba(255,255,255,0.8);
+  }
+  
+  /* Date divider */
+  .date-divider {
+    display: flex;
+    align-items: center;
+    margin: 0.75rem 0;
+    color: #6c757d;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+  
+  .date-divider::before,
+  .date-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .date-divider::before {
+    margin-right: 0.5rem;
+  }
+  
+  .date-divider::after {
+    margin-left: 0.5rem;
+  }
+  
+  .timestamp {
+    white-space: nowrap;
+  }
+  
+  /* Loading and empty states */
+  .spinner-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+  
+  #emptyState {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .container-fluid {
+      padding: 1rem;
+    }
+    
+    .stats-container {
+      gap: 0.5rem;
+    }
+    
+    .stat-card {
+      min-width: calc(50% - 0.5rem);
+      padding: 0.75rem;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+    }
+    
+    .message-wrapper {
+      max-width: 95%;
+    }
+    
+    .card.shadow {
+      height: calc(100vh - 180px);
+    }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="container notification-container">
-    <h1 class="text-center mb-4">Notification</h1>
-    
-    <!-- Notification items -->
-    <div class="notification-list">
-        <!-- Notification 1 -->
-        <div class="notification-card">
-            <div class="notification-header">
-                <h5>User Celia Wong shared you a study message</h5>
-                <button class="delete-btn" aria-label="Delete notification">
-                    <i class="trash-icon"></i>
-                </button>
-            </div>
-            <div class="notification-body">
-                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
-            </div>
-            <div class="notification-footer">
-                <span class="notification-time">Apr 20 12:00 pm</span>
-            </div>
-        </div>
-
-        <!-- Notification 2 -->
-        <div class="notification-card">
-            <div class="notification-header">
-                <h5>User Celia Wong shared you a study message</h5>
-                <button class="delete-btn" aria-label="Delete notification">
-                    <i class="trash-icon"></i>
-                </button>
-            </div>
-            <div class="notification-body">
-                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
-            </div>
-            <div class="notification-footer">
-                <span class="notification-time">Apr 20 12:00 pm</span>
-            </div>
-        </div>
-
-        <!-- Notification 3 -->
-        <div class="notification-card">
-            <div class="notification-header">
-                <h5>User Celia Wong shared you a study message</h5>
-                <button class="delete-btn" aria-label="Delete notification">
-                    <i class="trash-icon"></i>
-                </button>
-            </div>
-            <div class="notification-body">
-                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
-            </div>
-            <div class="notification-footer">
-                <span class="notification-time">Apr 20 12:00 pm</span>
-            </div>
-        </div>
-
-        <!-- Notification 4 -->
-        <div class="notification-card">
-            <div class="notification-header">
-                <h5>User Celia Wong shared you a study message</h5>
-                <button class="delete-btn" aria-label="Delete notification">
-                    <i class="trash-icon"></i>
-                </button>
-            </div>
-            <div class="notification-body">
-                <p>Hi, Alex, I studied 2 hours this week, 20 hours 50 minutes this month.</p>
-            </div>
-            <div class="notification-footer">
-                <span class="notification-time">Apr 20 12:00 pm</span>
-            </div>
-        </div>
+<div class="container-fluid">
+  <div class="stats-container">
+    <div class="stat-card">
+      <h3>Total Notifications</h3>
+      <div class="stat-value" id="total-notifications">0</div>
     </div>
+    
+    <div class="stat-card">
+      <h3>Received</h3>
+      <div class="stat-value" id="received-count">0</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>Sent</h3>
+      <div class="stat-value" id="sent-count">0</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>Today</h3>
+      <div class="stat-value" id="today-count">0</div>
+    </div>
+  </div>
+  
+  <div class="filter-container">
+    <div class="filter-label">Filter:</div>
+    <select class="filter-dropdown">
+      <option>All Notifications</option>
+      <option>Today</option>
+      <option>This Week</option>
+      <option>Sent</option>
+      <option>Received</option>
+    </select>
+  </div>
+
+  <div class="card shadow">
+    <div class="card-body">
+      <div id="notificationList" class="chat-container">
+        <div class="spinner-container">
+          <div class="spinner-border" role="status" style="color: #40ADA2;"></div>
+          <p class="mt-2 text-muted">Loading notifications...</p>
+        </div>
+      </div>
+      
+      <div id="emptyState" class="d-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="#dee2e6" viewBox="0 0 16 16">
+          <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+          <path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6zm0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+        </svg>
+        <p class="mt-3 text-muted">No messages to display.</p>
+        <p class="text-muted small">When you send or receive notifications, they will appear here.</p>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+{% block extra_js %}
+<script>
+window.loadNotifications = async function () {
+    const list = document.getElementById('notificationList');
+    const emptyState = document.getElementById('emptyState');
+    const totalNotificationsEl = document.getElementById('total-notifications');
+    const receivedCountEl = document.getElementById('received-count');
+    const sentCountEl = document.getElementById('sent-count');
+    const todayCountEl = document.getElementById('today-count');
+    
+    list.innerHTML = `
+      <div class="spinner-container">
+        <div class="spinner-border text-secondary" style="color: #40ADA2;"></div>
+        <p class="mt-2 text-muted">Loading notifications...</p>
+      </div>
+    `;
+    
+    emptyState.classList.add('d-none');
+    
+    try {
+        const [receivedRes, sentRes] = await Promise.all([
+            fetch('/api/notifications/received'),
+            fetch('/api/notifications/sent')
+        ]);
+        
+        const received = await receivedRes.json();
+        const sent = await sentRes.json();
+        
+        const all = [
+            ...(received.map(n => ({ ...n, type: 'received' }))),
+            ...(sent.map(n => ({ ...n, type: 'sent' })))
+        ].sort((a, b) => new Date(b.send_time) - new Date(a.send_time));
+        
+        // Update stats
+        totalNotificationsEl.textContent = all.length;
+        receivedCountEl.textContent = received.length;
+        sentCountEl.textContent = sent.length;
+        
+        // Count today's notifications
+        const today = new Date().toLocaleDateString();
+        const todayCount = all.filter(item => 
+            new Date(item.send_time).toLocaleDateString() === today
+        ).length;
+        todayCountEl.textContent = todayCount;
+        
+        if (all.length === 0) {
+            list.innerHTML = '';
+            emptyState.classList.remove('d-none');
+            return;
+        }
+        
+        list.innerHTML = '';
+        
+        // Group messages by date
+        const groupedByDate = {};
+        
+        all.forEach(item => {
+            const date = new Date(item.send_time);
+            const dateStr = date.toLocaleDateString();
+            
+            if (!groupedByDate[dateStr]) {
+                groupedByDate[dateStr] = [];
+            }
+            
+            groupedByDate[dateStr].push(item);
+        });
+        
+        // Sort dates in descending order (newest first)
+        const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
+            return new Date(b) - new Date(a);
+        });
+        
+        // Render messages by date groups
+        sortedDates.forEach(dateStr => {
+            const messages = groupedByDate[dateStr];
+            
+            // Add date divider
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            let dateLabel;
+            if (dateStr === today.toLocaleDateString()) {
+                dateLabel = 'Today';
+            } else if (dateStr === yesterday.toLocaleDateString()) {
+                dateLabel = 'Yesterday';
+            } else {
+                dateLabel = new Date(dateStr).toLocaleDateString(undefined, { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            }
+            
+            const dateDivider = document.createElement('div');
+            dateDivider.className = 'date-divider';
+            dateDivider.textContent = dateLabel;
+            list.appendChild(dateDivider);
+            
+            // Add messages for this date
+            messages.forEach(item => {
+                const date = new Date(item.send_time);
+                const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `message-wrapper message-${item.type === 'sent' ? 'sent' : 'received'}`;
+                
+                const isSent = item.type === 'sent';
+                const userText = isSent 
+                    ? `To ${item.receiver_username}` 
+                    : `From ${item.sender_username}`;
+                
+                messageWrapper.innerHTML = `
+                    <div class="message-bubble">
+                        <div class="message-header">
+                            <strong>${userText}</strong>
+                        </div>
+                        <div class="message-content">${item.content}</div>
+                        <div class="message-footer">
+                            <span class="timestamp">${timeStr}</span>
+                        </div>
+                    </div>
+                `;
+                
+                list.appendChild(messageWrapper);
+            });
+        });
+        
+        // Scroll to top to show most recent messages first
+        list.scrollTop = 0;
+        
+    } catch (err) {
+        console.error('Error loading notifications:', err);
+        list.innerHTML = `
+            <div class="alert alert-danger m-3">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Failed to load notifications. Please try again later.
+            </div>
+        `;
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.loadNotifications === 'function') {
+        window.loadNotifications();
+    }
+    
+    // Add filter functionality (placeholder - would need backend implementation)
+    const filterDropdown = document.querySelector('.filter-dropdown');
+    if (filterDropdown) {
+        filterDropdown.addEventListener('change', function() {
+            // Placeholder for filter functionality
+            console.log('Filter changed to:', this.value);
+            // Here you would typically call a filtered version of loadNotifications
+        });
+    }
+});
+</script>
 {% endblock %}

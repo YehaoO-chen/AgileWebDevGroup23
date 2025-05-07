@@ -1,52 +1,85 @@
 /* Timer widget JS */
 // Initialise the default value
+(function () {
 focusTime = 50;
 breakTime = 10;
 remainingSeconds = 0;
 let isFocus = true;
 let isPaused = false;
 let timer = null;
+})();
 
-function setTimeValue(type, value) {
-  // Restricting the minimum and maximum input value (if the input value is less than 1, then change to 1; if is more than 180, then change to 1)
+// 🟨 新增：将所有 mainpage 初始化逻辑包裹成函数供 base.js 调用
+function initMainpageFeatures() {
+
+    // Restricting the minimum and maximum input value (if the input value is less than 1, then change to 1; if is more than 180, then change to 1)
   // Ensure the input does not exceed the scope
-  value = Math.max(1, Math.min(180, value));
-  // Match the selected type of time (Focus or Break) with its id
-  const input = document.getElementById(`${type}-time`);
-  input.value = value;
-
-  if (type === 'focus') {
-    focusTime = value;
-  } else {
-    breakTime = value;
+  function setTimeValue(type, value) {
+    value = Math.max(1, Math.min(180, value));
+      // Match the selected type of time (Focus or Break) with its id
+    const input = document.getElementById(`${type}-time`);
+    input.value = value;
+    if (type === 'focus') focusTime = value;
+    else breakTime = value;
   }
-}
-
-// Function for the "+" & "-" adjust buttons
-function adjustTime(type, delta) {
-  const currentValue = type === 'focus' ? focusTime : breakTime;
-  setTimeValue(type, currentValue + delta);
-}
-
-// Function for the users to mannually adjust the time 
-function sanitizeInput(input, type) {
-  // Restrict the maximum length of input (3 digits) and screen out all the non-digit input
-  input.value = input.value.replace(/[^\d]/g, '').slice(0, 3); 
-
-  // Because 'getElementById' method always returns string, therefore, use ParseInt() to change it into integer
-  let value = parseInt(input.value, 10);
-  if (isNaN(value)) return;
-
-  setTimeValue(type, value);
-}
-
-//  ensure whenever the user types, it gets cleaned and limited 3 digits
-window.addEventListener('DOMContentLoaded', () => {
+  
+  // Function for the "+" & "-" adjust buttons
+  function adjustTime(type, delta) {
+    const currentValue = type === 'focus' ? focusTime : breakTime;
+    setTimeValue(type, currentValue + delta);
+  }
+  
+  // Function for the users to mannually adjust the time 
+  function sanitizeInput(input, type) {
+      // Restrict the maximum length of input (3 digits) and screen out all the non-digit input
+    input.value = input.value.replace(/[^\d]/g, '').slice(0, 3);
+    // Because 'getElementById' method always returns string, therefore, use ParseInt() to change it into integer
+    let value = parseInt(input.value, 10);
+    if (isNaN(value)) return;
+    setTimeValue(type, value);
+  }
+  
   ['focus', 'break'].forEach(type => {
     const input = document.getElementById(`${type}-time`);
-    input.addEventListener('input', () => sanitizeInput(input, type));
+    if (input) input.addEventListener('input', () => sanitizeInput(input, type));
   });
-});
+  
+  const setupArea = document.getElementById('setup-area');
+  if (setupArea) {
+    setupArea.classList.add('animate');
+    setupArea.addEventListener('animationend', () => setupArea.classList.remove('animate'));
+  }
+  
+  const todoContainer = document.getElementById('todo-container');
+  if (todoContainer) {
+    todoContainer.classList.add('animate');
+    todoContainer.addEventListener('animationend', () => todoContainer.classList.remove('animate'));
+  }
+  
+
+  // TODO: ✅ GET: Load the task data from the backend and display it in the task list
+  fetch('/api/task')
+  .then(res => res.json())
+  .then(tasks => {
+    tasks.forEach(task => {
+      const li = document.createElement('li');
+      li.className = 'task';
+      li.setAttribute('data-status', task.status === 1 ? 'completed' : 'active');
+      li.setAttribute('data-id', task.id);
+      li.innerHTML = `
+        <div class="task-content">
+          <input type="checkbox" class="task-checkbox" ${task.status === 1 ? 'checked' : ''} />
+          <span class="task-text ${task.status === 1 ? 'completed' : ''}">${task.title}</span>
+          <button class="expand-btn">${icon_down}</button>
+          <button class="delete-btn">${icon_delete}</button>
+        </div>
+      `;
+      taskList.appendChild(li);
+    });
+  });
+
+
+
 
 
 // update the input value
@@ -215,6 +248,19 @@ addBtn.addEventListener('click', () => {
 
   taskList.appendChild(li);
   input.value = '';
+
+
+    // ✅ TODO: POST： send the new task to the backend
+    fetch('/api/task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ title: taskText })
+    }).catch(() => {
+      console.warn("⚠️ 后端没响应，任务只存在前端");
+    });
+
 });
 
 
@@ -222,8 +268,8 @@ taskList.addEventListener('change', e => {
   if (e.target.classList.contains('task-checkbox')) {
     const task = e.target.closest('li');
     const span = task.querySelector('.task-text');
-
     const isChecked = e.target.checked;
+
     task.setAttribute('data-status', isChecked ? 'completed' : 'active');
     span.classList.toggle('completed', isChecked);
 
@@ -241,6 +287,16 @@ taskList.addEventListener('change', e => {
     if (!isChecked && currentFilter === 'completed') {
       task.style.display = 'none';
     }
+
+       // ✅ TODO: Sync： send the updated task status to the backend
+       const taskId = task.dataset.id;
+       fetch(`/api/task/${taskId}`, {
+         method: 'PUT',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ status: isChecked ? 1 : 0 })
+       }).catch(() => {
+         console.warn('⚠️ 无法同步任务状态到后端');
+       }); 
   }
 });
 
@@ -303,4 +359,5 @@ taskList.addEventListener('click', e => {
     task.remove();
   }
 
-});
+});}
+

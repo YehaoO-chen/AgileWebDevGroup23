@@ -1,32 +1,45 @@
-// notification.js
-document.addEventListener('DOMContentLoaded', function() {
-    // 获取所有删除按钮
-    const deleteButtons = document.querySelectorAll('.delete-btn');
-    
-    // 为每个删除按钮添加点击事件
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // 获取当前通知卡片
-            const notificationCard = this.closest('.notification-card');
-            
-            // 添加淡出动画
-            notificationCard.style.opacity = '0';
-            notificationCard.style.transform = 'translateX(100px)';
-            notificationCard.style.transition = 'opacity 0.3s, transform 0.3s';
-            
-            // 动画结束后移除元素
-            setTimeout(() => {
-                notificationCard.remove();
-                
-                // 如果没有通知了，显示一个空状态
-                const notificationList = document.querySelector('.notification-list');
-                if (notificationList.children.length === 0) {
-                    const emptyState = document.createElement('div');
-                    emptyState.className = 'empty-state';
-                    emptyState.innerHTML = '<p>No notifications to display.</p>';
-                    notificationList.appendChild(emptyState);
-                }
-            }, 300);
-        });
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    loadAllNotifications();
 });
+
+function loadAllNotifications() {
+    const container = document.getElementById('notificationList');
+    container.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center p-3">
+            <div class="spinner-border text-secondary" role="status"></div>
+        </div>
+    `;
+
+    Promise.all([
+        fetch('/api/notifications/received').then(res => res.json()),
+        fetch('/api/notifications/sent').then(res => res.json())
+    ])
+    .then(([received, sent]) => {
+        container.innerHTML = '';
+
+        if (received.length === 0 && sent.length === 0) {
+            container.innerHTML = `<p class="text-center text-muted p-3">No notifications found.</p>`;
+            return;
+        }
+
+        [...received.map(n => ({ ...n, type: 'received' })), ...sent.map(n => ({ ...n, type: 'sent' }))]
+            .sort((a, b) => new Date(b.send_time) - new Date(a.send_time))
+            .forEach(item => {
+                const card = document.createElement('div');
+                card.className = `notification-card ${item.type}`;
+                const direction = item.type === 'received'
+                    ? `<strong>From:</strong> ${item.sender_username}`
+                    : `<strong>To:</strong> ${item.receiver_username}`;
+                card.innerHTML = `
+                    <p>${direction}</p>
+                    <p>${item.content}</p>
+                    <p class="text-muted small">${new Date(item.send_time).toLocaleString()}</p>
+                `;
+                container.appendChild(card);
+            });
+    })
+    .catch(err => {
+        console.error('Error loading notifications:', err);
+        container.innerHTML = `<p class="text-danger text-center">Failed to load notifications.</p>`;
+    });
+}
