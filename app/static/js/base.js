@@ -33,6 +33,7 @@ function loadMainContent(url) {
             // Update the main content
             $('main').html(data);
 
+
             // Find and execute all inline scripts
             $html.filter('script').each(function () {
                 const newScript = document.createElement('script');
@@ -90,6 +91,19 @@ function loadMainContent(url) {
             }
             
 
+            
+    // TODO:🌟 Initialization for JS everytimes the page is switched
+    if (url === '/mainpage') {
+        if (typeof initMainpageFeatures === 'function') {
+            initMainpageFeatures(); // ✅ 🟨 mainpage 初始化
+        }
+    }
+    if (url === '/studyplan') {
+        if (typeof initStudyplanFeatures === 'function') {
+            initStudyplanFeatures(); // ✅ 🟨 studyplan 初始化
+        }
+    }
+    
             window.scrollTo(0, 0);
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -104,7 +118,12 @@ $(document).ready(function () {
     
     updateNavbarAvatar();
     const currentPath = location.pathname;
-    const ajaxLoadPaths = ['/mainpage', '/study_plan', '/dashboard', '/notification', '/profile'];
+
+    // Define which paths should be loaded via AJAX initially.
+    // Exclude paths like /login, /signup, /logout which are typically full page loads.
+    const ajaxLoadPaths = ['/mainpage', '/studyplan', '/dashboard', '/notification', '/profile'];
+    // Determine the actual path to load content for (e.g., map '/' to '/home')
+
     let pathToLoad = currentPath;
     let activeLinkSelectorPath = currentPath;
 
