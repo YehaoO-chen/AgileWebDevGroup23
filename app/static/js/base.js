@@ -34,63 +34,6 @@ function loadMainContent(url) {
             $('main').html(data);
 
 
-            // Find and execute all inline scripts
-            $html.filter('script').each(function () {
-                const newScript = document.createElement('script');
-                if (this.src) {
-                    newScript.src = this.src;
-                } else {
-                    newScript.textContent = this.textContent;
-                }
-                document.body.appendChild(newScript);
-            });
-
-            // Call page-specific initialization functions
-            if (url === '/notification' && typeof window.loadNotifications === 'function') {
-                console.log('Calling loadNotifications() function');
-                window.loadNotifications();
-            }
-            
-            if (url === '/dashboard' && typeof window.loadDashboardData === 'function') {
-                console.log('Calling loadDashboardData() function');
-                window.loadDashboardData();
-            }
-
-            // Load page-specific script files if needed
-            if (url === '/notification' && typeof window.loadNotifications === 'undefined') {
-                console.log('Loading external notification.js file');
-                const script = document.createElement('script');
-                script.src = '/static/js/notification.js';
-                script.onload = function() {
-                    if (typeof window.loadNotifications === 'function') {
-                        window.loadNotifications();
-                    }
-                };
-                document.body.appendChild(script);
-            }
-            
-            // Load dashboard.js if needed
-            if (url === '/dashboard') {
-                const script = document.createElement('script');
-                script.src = '/static/js/dashboard.js';
-                script.onload = function () {
-                    console.log('dashboard.js loaded');
-                    if (typeof window.loadDashboardData === 'function') {
-                        window.loadDashboardData();
-                    } else {
-                        console.error('loadDashboardData function not found');
-                    }
-            
-                    if (typeof window.bindDashboardFilters === 'function') {
-                        window.bindDashboardFilters();
-                    } else {
-                        console.error('bindDashboardFilters function not found');
-                    }
-                };
-                document.body.appendChild(script);
-            }
-            
-
             
     // TODO:🌟 Initialization for JS everytimes the page is switched
     if (url === '/mainpage') {
@@ -103,7 +46,19 @@ function loadMainContent(url) {
             initStudyplanFeatures(); // ✅ 🟨 studyplan 初始化
         }
     }
+    if (url === '/dashboard') {
+        if (typeof initDashboardFeatures === 'function') {
+            initDashboardFeatures(); // ✅ 🟨 dashboard 初始化
+        }
+    }
     
+    if (url === '/notification') {
+        if (typeof initNotificationFeatures === 'function') {
+            initNotificationFeatures(); // ✅ 🟨 notification 初始化（
+        }
+    }
+
+
             window.scrollTo(0, 0);
         },
         error: function (jqXHR, textStatus, errorThrown) {

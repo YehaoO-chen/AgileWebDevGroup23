@@ -76,35 +76,9 @@ function initMainpageFeatures() {
       `;
       taskList.appendChild(li);
     });
-  } 
-
-
-
-// TODO: ✅ GET: Load the task data from the backend and display it in the task list
-fetch('/api/task')
-.then(res => res.json())
-.then(tasks => {
-  tasks.forEach(task => {
-    const li = document.createElement('li');
-    li.className = 'task';
-    li.setAttribute('data-status', task.status === 1 ? 'completed' : 'active');
-    li.setAttribute('data-id', task.id); // task ID for later updates
-
-    li.innerHTML = `
-      <div class="task-content">
-        <input type="checkbox" class="task-checkbox" ${task.status === 1 ? 'checked' : ''} />
-        <span class="task-text ${task.status === 1 ? 'completed' : ''}">${task.title}</span>
-        <button class="expand-btn">${icon_down}</button>
-        <button class="delete-btn">${icon_delete}</button>
-      </div>
-    `;
-
-    taskList.appendChild(li);
   });
 
- });
 
-});
 
 
 
@@ -385,84 +359,5 @@ taskList.addEventListener('click', e => {
     task.remove();
   }
 
-});
+});}
 
-window.startTimer = startTimer;
-window.pauseTimer = pauseTimer;
-window.resetTimer = resetTimer;
-window.backToSetup = backToSetup;
-window.closePopup = closePopup;
-window.takeBreak = takeBreak;
-window.ContinueFocus = ContinueFocus;
-window.adjustTime = adjustTime;
-window.updateTimeFromInput = updateTimeFromInput;
-
-
-/* Background changing JS */
-const bgDiv = document.getElementById('bg-gif');
-const bgSelect = document.getElementById('bg-select');
-const musicSelect = document.getElementById('music-select');
-const audio = document.getElementById('bg-audio');
-const volumeSlider = document.getElementById('volume-range');
-const toggleMuteBtn = document.getElementById('toggle-mute');
-
-if (bgDiv && bgSelect && musicSelect && audio && volumeSlider && toggleMuteBtn) {
-  let lastVolume = 0.3;
-
-  audio.muted = true;
-  audio.volume = 0;
-  volumeSlider.value = 0;
-  toggleMuteBtn.textContent = 'Unmute';
-
-  bgSelect.addEventListener('change', () => {
-    const selectedGif = bgSelect.value;
-    bgDiv.style.backgroundImage = `url('/static/gifs/${selectedGif}')`;
-  });
-
-  musicSelect.addEventListener('change', () => {
-    const selectedMusic = musicSelect.value;
-    audio.src = `/static/audio/${selectedMusic}`;
-    if (!audio.muted) {
-      audio.play().catch(err => console.warn("Autoplay restriction:", err));
-    }
-  });
-
-  volumeSlider.addEventListener('input', () => {
-    const vol = parseFloat(volumeSlider.value);
-    audio.volume = vol;
-
-    if (vol === 0) {
-      audio.muted = true;
-      toggleMuteBtn.textContent = 'Unmute';
-    } else {
-      lastVolume = vol;
-      audio.muted = false;
-      toggleMuteBtn.textContent = 'Mute';
-    }
-  });
-
-  toggleMuteBtn.addEventListener('click', () => {
-    if (audio.muted) {
-      audio.muted = false;
-      audio.volume = lastVolume;
-      volumeSlider.value = lastVolume;
-      audio.play().catch(err => console.warn("Autoplay restriction:", err));
-      toggleMuteBtn.textContent = 'Mute';
-    } else {
-      lastVolume = audio.volume;
-      audio.muted = true;
-      audio.volume = 0;
-      volumeSlider.value = 0;
-      toggleMuteBtn.textContent = 'Unmute';
-    }
-  });
-
-  const background = document.getElementById('audio-widget');
-  if (background) {
-    background.classList.add('animate');
-    background.addEventListener('animationend', () => {
-      background.classList.remove('animate');
-    });
-  }
-}
-}
