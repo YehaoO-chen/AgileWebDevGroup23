@@ -1,11 +1,13 @@
 /* Timer widget JS */
 // Initialise the default value
+(function () {
 focusTime = 50;
 breakTime = 10;
 remainingSeconds = 0;
 let isFocus = true;
 let isPaused = false;
 let timer = null;
+})();
 
 // 🟨 新增：将所有 mainpage 初始化逻辑包裹成函数供 base.js 调用
 function initMainpageFeatures() {
@@ -75,6 +77,7 @@ function initMainpageFeatures() {
       taskList.appendChild(li);
     });
   });
+
 
 
 
@@ -357,3 +360,4 @@ taskList.addEventListener('click', e => {
   }
 
 });}
+

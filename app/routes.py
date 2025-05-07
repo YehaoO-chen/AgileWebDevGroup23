@@ -2,12 +2,15 @@ import os
 from sqlite3 import IntegrityError
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 from werkzeug.utils import secure_filename
 from sqlalchemy import func
 from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
 from PIL import Image # Import Pillow Image module
+
+
+
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
@@ -151,20 +154,15 @@ def init_routes(app):
 
     #Share route (requires login)
 
-    @app.route('/share')
-    @login_required
-    def share():
-        data_type = request.form.get('dataType')
-        users = request.form.getlist('users[]')
-    
-    # 这里添加处理分享逻辑
-    # 例如保存到数据库或发送通知
-    
-    # 返回成功响应
-        return jsonify({
-            'success': True,
-            'message': f'成功分享{data_type}给{len(users)}位用户'
-        })
+    # @app.route('/share')
+    # @login_required
+    # def share():
+    #     data_type = request.form.get('dataType')
+    #     users = request.form.getlist('users[]')
+    #     return jsonify({
+    #         'success': True,
+    #         'message': f'successfully {data_type}to {len(users)} user'
+    #     })
 
 
     # Main page route (requires login)
@@ -197,13 +195,11 @@ def init_routes(app):
     @app.route('/notification')
     @login_required
     def notification():
-        user = current_user
-        # Check if the request is an AJAX request (based on header set by JS)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render_template('notification.html', user=user, is_partial=True) # Pass a flag if needed
+            return render_template('notification.html', user=current_user, is_partial=True)
         else:
-            # If normal request, render with the base template
-            return render_template('base.html', route='notification', user=user)
+            return render_template('base.html', route='notification', user=current_user)
+
 
     
     #Profile route
@@ -377,125 +373,108 @@ def init_routes(app):
         })
     
 
+
     @app.route('/api/dashboard/duration', methods=['GET'])
     @login_required
     def get_dashboard_data():
-        period = request.args.get('period', 'week') # get period ，default 'week'
-        # cal start date
-        now = datetime.now(datetime.timezone.utc)
-        start_date = None
+        period = request.args.get('period', 'week')
+        now = datetime.utcnow()  # ✅  offset-naive 
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
 
+        # offset-naive
         if period == 'day':
-            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            start_date = today_start
         elif period == 'week':
-            start_date = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+            start_date = today_start - timedelta(days=now.weekday())
         elif period == 'month':
-            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'quarter':
-            current_quarter = (now.month - 1) // 3 + 1
-            start_month = (current_quarter - 1) * 3 + 1
-            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'half_year':
-            start_month = 1 if now.month <= 6 else 7
-            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'year':
-            start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+            start_date = today_start.replace(day=1)
         else:
             return jsonify({'error': 'Invalid period specified'}), 400
 
+        
         study_durations = StudyDuration.query.filter(
             StudyDuration.user_id == current_user.id,
             StudyDuration.start_time >= start_date
         ).all()
-        #cal total study time in minutes
+
         total_study_time = sum(sd.duration for sd in study_durations)
+        avg_study_time = total_study_time / len(study_durations) if study_durations else 0
+        today_study_time = sum(
+            sd.duration for sd in study_durations
+            if sd.start_time >= today_start and sd.start_time < today_end
+        )
 
-        #cal avg study time in minutes
-        if len(study_durations) > 0:
-            avg_study_time = total_study_time / len(study_durations)
-        else:
-            avg_study_time = 0
-        
-        #cal today study time in minutes
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
-        today_study_time = sum(sd.duration for sd in study_durations if sd.start_time >= today_start and sd.end_time <= today_end)
-
-        #cal each day study time in minutes during period
+        # day
         study_durations_by_day = {}
         for sd in study_durations:
-            day = sd.start_time.date()
-            if day not in study_durations_by_day:
-                study_durations_by_day[day] = 0
-            study_durations_by_day[day] += sd.duration
- 
-        # study_plans = StudyPlan.query.filter_by(user_id=current_user.id).all()
+            day = sd.start_time.date().isoformat()
+            study_durations_by_day[day] = study_durations_by_day.get(day, 0) + sd.duration
 
         return jsonify({
             'period': period,
-            'start_date': start_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'end_date': now.strftime('%Y-%m-%d %H:%M:%S'),
             'total_study_time': total_study_time,
             'avg_study_time': avg_study_time,
             'today_study_time': today_study_time,
             'study_durations_by_day': study_durations_by_day
         })
-    
+
+
+
     @app.route('/api/dashboard/task', methods=['GET'])
     @login_required
-    def get_dashboard_task_data(): # Renamed function
-        period = request.args.get('period', 'week') # get period, default 'week'
+    def get_dashboard_task_data():
+        try:
+            period = request.args.get('period', 'week')
+            now = datetime.now()  # ✅ offset-naive
+            start_date = None
 
-        # Calculate start date based on period (same logic as above)
-        now = datetime.now(datetime.timezone.utc) # Use timezone-aware datetime
-        start_date = None
+            if period == 'day':
+                start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            elif period == 'week':
+                start_date = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+            elif period == 'month':
+                start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            elif period == 'quarter':
+                current_quarter = (now.month - 1) // 3 + 1
+                start_month = (current_quarter - 1) * 3 + 1
+                start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
+            elif period == 'half_year':
+                start_month = 1 if now.month <= 6 else 7
+                start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
+            elif period == 'year':
+                start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+            else:
+                return jsonify({'error': 'Invalid period specified'}), 400
 
-        if period == 'day':
-            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'week':
-            start_date = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'month':
-            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'quarter':
-            current_quarter = (now.month - 1) // 3 + 1
-            start_month = (current_quarter - 1) * 3 + 1
-            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'half_year':
-            start_month = 1 if now.month <= 6 else 7
-            start_date = now.replace(month=start_month, day=1, hour=0, minute=0, second=0, microsecond=0)
-        elif period == 'year':
-            start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-        else:
-            return jsonify({'error': 'Invalid period specified'}), 400
-
-        # Query StudyPlan counts grouped by status within the period
-        # Filter based on create_time >= start_date
-        status_counts = db.session.query(
+            status_counts = db.session.query(
                 StudyPlan.status,
                 func.count(StudyPlan.id)
             ).filter(
                 StudyPlan.user_id == current_user.id,
-                StudyPlan.create_time >= start_date # Filter plans created within the period
-            ).group_by(
-                StudyPlan.status
-            ).all()
+                StudyPlan.create_time >= start_date 
+            ).group_by(StudyPlan.status).all()
 
-        # Format the results into a dictionary {status_code: count}
-        # Initialize with 0 counts for all statuses
-        plan_summary = {0: 0, 1: 0, 2: 0}
-        for status, count in status_counts:
-            if status in plan_summary: # Ensure status is valid (0, 1, or 2)
-                plan_summary[status] = count
+            plan_summary = {0: 0, 1: 0, 2: 0}
+            for status, count in status_counts:
+                if status in plan_summary:
+                    plan_summary[status] = count
 
-        return jsonify({
-            'period': period,
-            'start_date': start_date.isoformat(), # Optionally return the calculated start date
-            'task_summary': {
-                'open': plan_summary.get(0, 0),
-                'completed': plan_summary.get(1, 0),
-                'deleted': plan_summary.get(2, 0)
-            }
-        })
+            return jsonify({
+                'period': period,
+                'start_date': start_date.strftime('%Y-%m-%d %H:%M:%S'),
+                'task_summary': {
+                    'open': plan_summary.get(0, 0),
+                    'completed': plan_summary.get(1, 0),
+                    'deleted': plan_summary.get(2, 0)
+                }
+            })
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': 'Server error', 'detail': str(e)}), 500
+
     
     @app.route('/api/profile', methods=['GET'])
     @login_required
@@ -676,5 +655,173 @@ def init_routes(app):
                 return jsonify({'success': False, 'error': f'Failed to save file: {str(e)}'}), 500
         else:
             return jsonify({'success': False, 'error': 'File type not allowed'}), 400
+    
+    
+    @app.route('/api/users', methods=['GET'])
+    @login_required
+    def get_users():
+        try:
+            # Get all users except the current user
+            users = User.query.filter(User.id != current_user.id).all()
+            print(f"Found {len(users)} users for sharing")
+            
+            result = [{
+                'id': user.id,
+                'username': user.username
+            } for user in users]
+            
+            return jsonify(result)
+        except Exception as e:
+            print(f"Error getting users: {str(e)}")
+            return jsonify([]), 500
 
+    @app.route('/api/share', methods=['POST'])
+    @login_required
+    def share_data():
+        try:
+            print("Share data API called")
+            data = request.get_json()
+            
+            if not data:
+                print("No data received in request")
+                return jsonify({
+                    'success': False,
+                    'message': 'No data received'
+                }), 400
+                
+            data_type = data.get('dataType')
+            user_ids = data.get('users', [])
+            
+            print(f"Received dataType: {data_type}, users: {user_ids}")
+            
+            if not data_type or not user_ids:
+                print("Missing required data")
+                return jsonify({
+                    'success': False,
+                    'message': 'Missing required data'
+                }), 400
+            
+            # Get content based on data type
+            shared_content = ""
+            if data_type == 'totalTime':
+                # Query total study time
+                total_time = db.session.query(db.func.sum(StudyDuration.duration))\
+                    .filter(StudyDuration.user_id == current_user.id).scalar() or 0
+                shared_content = f"{current_user.username} shared their total study time: {total_time} minutes"
+            elif data_type == 'averageTime':
+                # Query average study time
+                result = db.session.query(
+                    db.func.avg(StudyDuration.duration).label('avg_duration')
+                ).filter(StudyDuration.user_id == current_user.id).first()
+                avg_time = round(result.avg_duration) if result and result.avg_duration else 0
+                shared_content = f"{current_user.username} shared their average study time: {avg_time} minutes per session"
+            
+            # Create notifications for each recipient
+            notifications_created = 0
+            for user_id in user_ids:
+                try:
+                    user_id = int(user_id)  # Ensure user_id is an integer
+                    
+                    # Check if user exists
+                    user = User.query.get(user_id)
+                    if not user:
+                        print(f"User with ID {user_id} not found")
+                        continue
+                    
+                    notification = Notification(
+                        sender_id=current_user.id,
+                        receiver_id=user_id,
+                        content=shared_content,
+                        status=0  # Unread
+                    )
+                    db.session.add(notification)
+                    notifications_created += 1
+                    print(f"Added notification for user_id {user_id}")
+                except (ValueError, TypeError) as e:
+                    print(f"Invalid user_id: {user_id}, error: {str(e)}")
+                    continue
+            
+            if notifications_created > 0:
+                db.session.commit()
+                print(f"Successfully created {notifications_created} notifications")
+                return jsonify({
+                    'success': True,
+                    'message': f'Successfully shared {data_type} with {notifications_created} user(s)'
+                })
+            else:
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'message': 'No valid users to share with'
+                }), 400
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error sharing data: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({
+                'success': False,
+                'message': f'An error occurred: {str(e)}'
+            }), 500
+            
+    @app.route('/api/notifications/sent', methods=['GET'])
+    @login_required
+    def get_sent_notifications():
+        try:
+            # 获取当前用户发送的通知，按时间倒序排列
+            notifications = Notification.query.filter_by(
+                sender_id=current_user.id
+            ).order_by(
+                Notification.send_time.desc()
+            ).all()
+            
+            print(f"用户 {current_user.id} 有 {len(notifications)} 条发送的通知")
+            
+            # 格式化通知数据
+            result = []
+            for notification in notifications:
+                receiver = User.query.get(notification.receiver_id)
+                receiver_name = receiver.username if receiver else "未知用户"
+                print(f"通知 ID: {notification.id}, 接收者: {receiver_name}, 内容: {notification.content}")
+                
+                result.append({
+                    'id': notification.id,
+                    'content': notification.content,
+                    'receiver_id': notification.receiver_id,
+                    'receiver_username': receiver_name,
+                    'send_time': notification.send_time.isoformat(),
+                    'status': notification.status
+                })
+            
+            print(f"API将返回 {len(result)} 条发送通知的记录")
+            return jsonify(result)
+        except Exception as e:
+            print(f"获取发送通知时出错: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify([]), 500
+        
+        
+    @app.route('/api/notifications/received', methods=['GET'])
+    @login_required
+    def get_received_notifications():
+        notifications = Notification.query.filter_by(
+            receiver_id=current_user.id
+        ).order_by(Notification.send_time.desc()).all()
 
+        result = []
+        for notification in notifications:
+            sender = User.query.get(notification.sender_id)
+            result.append({
+                'id': notification.id,
+                'content': notification.content,
+                'sender_id': sender.id if sender else None,
+                'sender_username': sender.username if sender else "Unknown",
+                'send_time': notification.send_time.isoformat(),
+                'status': notification.status
+            })
+
+        return jsonify(result)
+
+    
