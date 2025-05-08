@@ -1,13 +1,13 @@
 /* Timer widget JS */
 // Initialise the default value
-(function () {
-focusTime = 50;
-breakTime = 10;
-remainingSeconds = 0;
+// (function () {
+let focusTime = 50;
+let breakTime = 10;
+let remainingSeconds = 0;
 let isFocus = true;
 let isPaused = false;
 let timer = null;
-})();
+// })();
 
 // 🟨 新增：将所有 mainpage 初始化逻辑包裹成函数供 base.js 调用
 function initMainpageFeatures() {
@@ -88,6 +88,7 @@ function updateTimeFromInput(type) {
 }
 
 function startTimer() {
+  console.log("开始计时器", { focusTime, breakTime, remainingSeconds });
   updateTimeFromInput('focus');
   updateTimeFromInput('break');
 
@@ -153,15 +154,74 @@ function backToSetup() {
   resetTimer();
 }
 
+
+// function showPopup() {
+//   console.log("showPopup被调用", { isFocus, focusTime, breakTime });
+//   const times = isFocus ? focusTime : breakTime;
+//   const formatted = `${String(times).padStart(2, '0')}:00`; 
+//   const emoji = "🎉"
+
+//   document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
+//   document.getElementById('popup-window').style.display = 'block';
+//   document.getElementById('floating-timer').classList.remove('show');
+
+// }
+
 function showPopup() {
-  const times = isFocus ? focusTime : breakTime;
-  const formatted = `${String(times).padStart(2, '0')}:00`; 
-  const emoji = "🎉"
-
-  document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
-  document.getElementById('popup-window').style.display = 'block';
-  document.getElementById('floating-timer').classList.remove('show');
-
+  console.log("===== showPopup函数开始执行 =====");
+  try {
+    console.log("读取变量:", { isFocus, focusTime, breakTime });
+    const times = isFocus ? focusTime : breakTime;
+    const formatted = `${String(times).padStart(2, '0')}:00`; 
+    const emoji = "🎉";
+    console.log("格式化时间:", formatted);
+    
+    // 添加发送学习时间数据的代码
+    if (isFocus) {  
+      console.log("条件isFocus为true，将发送学习数据");
+      const requestData = { 
+        duration: focusTime,
+        start_time: new Date().toISOString()
+      };
+      console.log("请求数据准备完成:", requestData);
+      
+      try {
+        console.log("开始发送fetch请求...");
+        fetch('/api/study_time', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+        .then(response => {
+          console.log("收到响应:", response.status, response.statusText);
+          return response.json();
+        })
+        .then(data => {
+          console.log('API返回数据:', data);
+        })
+        .catch(err => {
+          console.error("fetch过程中出错:", err);
+        });
+        console.log("fetch请求已发出");
+      } catch (fetchError) {
+        console.error("发起fetch请求时出错:", fetchError);
+      }
+    } else {
+      console.log("条件isFocus为false，不发送学习数据");
+    }
+    
+    console.log("开始更新DOM元素");
+    document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
+    document.getElementById('popup-window').style.display = 'block';
+    document.getElementById('floating-timer').classList.remove('show');
+    console.log("DOM元素更新完成");
+    
+  } catch (error) {
+    console.error("showPopup函数执行出错:", error);
+  }
+  console.log("===== showPopup函数执行结束 =====");
 }
 
 function closePopup() {
@@ -173,7 +233,6 @@ function takeBreak() {
   document.getElementById('popup-window').style.display='none';
   document.getElementById('floating-timer').classList.add('show');
 
-
   isFocus = false;
   isPaused = false;
   remainingSeconds = breakTime * 60;
@@ -182,7 +241,6 @@ function takeBreak() {
   
   timer = setInterval(() => {
     if (!isPaused) {
-
       remainingSeconds--;
       updateCountdownDisplay();
 
@@ -191,7 +249,6 @@ function takeBreak() {
         timer = null;
         document.getElementById('floating-timer').classList.remove('show');
         document.getElementById('break-window').style.display='block';
-        
       }
     }
   }, 1000);
