@@ -9,7 +9,7 @@ let isPaused = false;
 let timer = null;
 // })();
 
-// 🟨 新增：将所有 mainpage 初始化逻辑包裹成函数供 base.js 调用
+
 function initMainpageFeatures() {
 
     // Restricting the minimum and maximum input value (if the input value is less than 1, then change to 1; if is more than 180, then change to 1)
@@ -88,7 +88,7 @@ function updateTimeFromInput(type) {
 }
 
 function startTimer() {
-  console.log("开始计时器", { focusTime, breakTime, remainingSeconds });
+  console.log("start record", { focusTime, breakTime, remainingSeconds });
   updateTimeFromInput('focus');
   updateTimeFromInput('break');
 
@@ -156,7 +156,7 @@ function backToSetup() {
 
 
 // function showPopup() {
-//   console.log("showPopup被调用", { isFocus, focusTime, breakTime });
+//   console.log("showPopup", { isFocus, focusTime, breakTime });
 //   const times = isFocus ? focusTime : breakTime;
 //   const formatted = `${String(times).padStart(2, '0')}:00`; 
 //   const emoji = "🎉"
@@ -168,25 +168,25 @@ function backToSetup() {
 // }
 
 function showPopup() {
-  console.log("===== showPopup函数开始执行 =====");
+  console.log("===== showPopup start run =====");
   try {
-    console.log("读取变量:", { isFocus, focusTime, breakTime });
+    console.log("read varis:", { isFocus, focusTime, breakTime });
     const times = isFocus ? focusTime : breakTime;
     const formatted = `${String(times).padStart(2, '0')}:00`; 
     const emoji = "🎉";
-    console.log("格式化时间:", formatted);
+    console.log("Formatting time:", formatted);
     
     // 添加发送学习时间数据的代码
     if (isFocus) {  
-      console.log("条件isFocus为true，将发送学习数据");
+      console.log("isforce = ture send");
       const requestData = { 
         duration: focusTime,
         start_time: new Date().toISOString()
       };
-      console.log("请求数据准备完成:", requestData);
+      console.log("require:", requestData);
       
       try {
-        console.log("开始发送fetch请求...");
+        console.log("fetch send ...");
         fetch('/api/study_time', {
           method: 'POST',
           headers: {
@@ -195,33 +195,33 @@ function showPopup() {
           body: JSON.stringify(requestData)
         })
         .then(response => {
-          console.log("收到响应:", response.status, response.statusText);
+          console.log("receive response:", response.status, response.statusText);
           return response.json();
         })
         .then(data => {
-          console.log('API返回数据:', data);
+          console.log('API:', data);
         })
         .catch(err => {
-          console.error("fetch过程中出错:", err);
+          console.error("fetch process wrong:", err);
         });
-        console.log("fetch请求已发出");
+        console.log("fetch send");
       } catch (fetchError) {
-        console.error("发起fetch请求时出错:", fetchError);
+        console.error("fetch wrong:", fetchError);
       }
     } else {
-      console.log("条件isFocus为false，不发送学习数据");
+      console.log("isFocus=false，dont send");
     }
     
-    console.log("开始更新DOM元素");
+    console.log("DOM");
     document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
     document.getElementById('popup-window').style.display = 'block';
     document.getElementById('floating-timer').classList.remove('show');
-    console.log("DOM元素更新完成");
+    console.log("DOM finished");
     
   } catch (error) {
-    console.error("showPopup函数执行出错:", error);
+    console.error("showPopup wrong:", error);
   }
-  console.log("===== showPopup函数执行结束 =====");
+  console.log("===== showPopup end =====");
 }
 
 function closePopup() {
@@ -314,7 +314,7 @@ addBtn.addEventListener('click', () => {
       },
       body: JSON.stringify({ title: taskText })
     }).catch(() => {
-      console.warn("⚠️ 后端没响应，任务只存在前端");
+      console.warn("⚠️ ");
     });
 
 });
@@ -351,7 +351,7 @@ taskList.addEventListener('change', e => {
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ status: isChecked ? 1 : 0 })
        }).catch(() => {
-         console.warn('⚠️ 无法同步任务状态到后端');
+         console.warn('⚠️ ');
        }); 
   }
 });
