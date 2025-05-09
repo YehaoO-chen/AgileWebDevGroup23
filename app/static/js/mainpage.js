@@ -1,15 +1,15 @@
 /* Timer widget JS */
 // Initialise the default value
-(function () {
-focusTime = 50;
-breakTime = 10;
-remainingSeconds = 0;
+// (function () {
+let focusTime = 50;
+let breakTime = 10;
+let remainingSeconds = 0;
 let isFocus = true;
 let isPaused = false;
 let timer = null;
-})();
+// })();
 
-// 🟨 新增：将所有 mainpage 初始化逻辑包裹成函数供 base.js 调用
+
 function initMainpageFeatures() {
 
     // Restricting the minimum and maximum input value (if the input value is less than 1, then change to 1; if is more than 180, then change to 1)
@@ -89,6 +89,7 @@ function updateTimeFromInput(type) {
 }
 
 function startTimer() {
+  console.log("start record", { focusTime, breakTime, remainingSeconds });
   updateTimeFromInput('focus');
   updateTimeFromInput('break');
 
@@ -154,15 +155,74 @@ function backToSetup() {
   resetTimer();
 }
 
+
+// function showPopup() {
+//   console.log("showPopup", { isFocus, focusTime, breakTime });
+//   const times = isFocus ? focusTime : breakTime;
+//   const formatted = `${String(times).padStart(2, '0')}:00`; 
+//   const emoji = "🎉"
+
+//   document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
+//   document.getElementById('popup-window').style.display = 'block';
+//   document.getElementById('floating-timer').classList.remove('show');
+
+// }
+
 function showPopup() {
-  const times = isFocus ? focusTime : breakTime;
-  const formatted = `${String(times).padStart(2, '0')}:00`; 
-  const emoji = "🎉"
-
-  document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
-  document.getElementById('popup-window').style.display = 'block';
-  document.getElementById('floating-timer').classList.remove('show');
-
+  console.log("===== showPopup start run =====");
+  try {
+    console.log("read varis:", { isFocus, focusTime, breakTime });
+    const times = isFocus ? focusTime : breakTime;
+    const formatted = `${String(times).padStart(2, '0')}:00`; 
+    const emoji = "🎉";
+    console.log("Formatting time:", formatted);
+    
+    // 添加发送学习时间数据的代码
+    if (isFocus) {  
+      console.log("isforce = ture send");
+      const requestData = { 
+        duration: focusTime,
+        start_time: new Date().toISOString()
+      };
+      console.log("require:", requestData);
+      
+      try {
+        console.log("fetch send ...");
+        fetch('/api/study_time', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+        .then(response => {
+          console.log("receive response:", response.status, response.statusText);
+          return response.json();
+        })
+        .then(data => {
+          console.log('API:', data);
+        })
+        .catch(err => {
+          console.error("fetch process wrong:", err);
+        });
+        console.log("fetch send");
+      } catch (fetchError) {
+        console.error("fetch wrong:", fetchError);
+      }
+    } else {
+      console.log("isFocus=false，dont send");
+    }
+    
+    console.log("DOM");
+    document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
+    document.getElementById('popup-window').style.display = 'block';
+    document.getElementById('floating-timer').classList.remove('show');
+    console.log("DOM finished");
+    
+  } catch (error) {
+    console.error("showPopup wrong:", error);
+  }
+  console.log("===== showPopup end =====");
 }
 
 function closePopup() {
@@ -174,7 +234,6 @@ function takeBreak() {
   document.getElementById('popup-window').style.display='none';
   document.getElementById('floating-timer').classList.add('show');
 
-
   isFocus = false;
   isPaused = false;
   remainingSeconds = breakTime * 60;
@@ -183,7 +242,6 @@ function takeBreak() {
   
   timer = setInterval(() => {
     if (!isPaused) {
-
       remainingSeconds--;
       updateCountdownDisplay();
 
@@ -192,7 +250,6 @@ function takeBreak() {
         timer = null;
         document.getElementById('floating-timer').classList.remove('show');
         document.getElementById('break-window').style.display='block';
-        
       }
     }
   }, 1000);
@@ -258,7 +315,7 @@ addBtn.addEventListener('click', () => {
       },
       body: JSON.stringify({ title: taskText })
     }).catch(() => {
-      console.warn("⚠️ 后端没响应，任务只存在前端");
+      console.warn("⚠️ ");
     });
 
 });
@@ -295,7 +352,7 @@ taskList.addEventListener('change', e => {
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ status: isChecked ? 1 : 0 })
        }).catch(() => {
-         console.warn('⚠️ 无法同步任务状态到后端');
+         console.warn('⚠️ ');
        }); 
   }
 });
