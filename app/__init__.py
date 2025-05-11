@@ -39,5 +39,7 @@ def create_app(config_class=None):
     # Import and register routes
     from app import routes
     routes.init_routes(app)
-
+    from app import apis
+    apis.init_apis(app)
+    
     return app

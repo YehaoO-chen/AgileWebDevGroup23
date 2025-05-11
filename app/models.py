@@ -57,7 +57,6 @@ def load_user(user_id):
 class StudyPlan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.String(200), nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
     complete_time = db.Column(db.DateTime, nullable=True)
