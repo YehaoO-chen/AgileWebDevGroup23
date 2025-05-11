@@ -7,8 +7,6 @@ from app import db
 from sqlalchemy import func
 
 def init_api_dashboard(app):
-
-
     @app.route('/api/dashboard/duration', methods=['GET'])
     @login_required
     def get_dashboard_data():

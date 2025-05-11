@@ -225,7 +225,17 @@
     height: 100%;
     width: 100%;
   }
-  
+  .message-wrapper .unread-dot {
+    position: absolute;
+    top: -5px; /* Adjust as needed */
+    left: -5px; /* Adjust as needed */
+    width: 10px;
+    height: 10px;
+    background-color: #40ADA2; /* Your theme color for unread */
+    border-radius: 50%;
+    border: 1px solid white; /* Optional: for better visibility against bubble */
+    z-index: 1;
+}
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .container-fluid {
@@ -314,162 +324,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-window.loadNotifications = async function () {
-    const list = document.getElementById('notificationList');
-    const emptyState = document.getElementById('emptyState');
-    const totalNotificationsEl = document.getElementById('total-notifications');
-    const receivedCountEl = document.getElementById('received-count');
-    const sentCountEl = document.getElementById('sent-count');
-    const todayCountEl = document.getElementById('today-count');
-    
-    list.innerHTML = `
-      <div class="spinner-container">
-        <div class="spinner-border text-secondary" style="color: #40ADA2;"></div>
-        <p class="mt-2 text-muted">Loading notifications...</p>
-      </div>
-    `;
-    
-    emptyState.classList.add('d-none');
-    
-    try {
-        const [receivedRes, sentRes] = await Promise.all([
-            fetch('/api/notifications/received'),
-            fetch('/api/notifications/sent')
-        ]);
-        
-        const received = await receivedRes.json();
-        const sent = await sentRes.json();
-        
-        const all = [
-            ...(received.map(n => ({ ...n, type: 'received' }))),
-            ...(sent.map(n => ({ ...n, type: 'sent' })))
-        ].sort((a, b) => new Date(b.send_time) - new Date(a.send_time));
-        
-        // Update stats
-        totalNotificationsEl.textContent = all.length;
-        receivedCountEl.textContent = received.length;
-        sentCountEl.textContent = sent.length;
-        
-        // Count today's notifications
-        const today = new Date().toLocaleDateString();
-        const todayCount = all.filter(item => 
-            new Date(item.send_time).toLocaleDateString() === today
-        ).length;
-        todayCountEl.textContent = todayCount;
-        
-        if (all.length === 0) {
-            list.innerHTML = '';
-            emptyState.classList.remove('d-none');
-            return;
-        }
-        
-        list.innerHTML = '';
-        
-        // Group messages by date
-        const groupedByDate = {};
-        
-        all.forEach(item => {
-            const date = new Date(item.send_time);
-            const dateStr = date.toLocaleDateString();
-            
-            if (!groupedByDate[dateStr]) {
-                groupedByDate[dateStr] = [];
-            }
-            
-            groupedByDate[dateStr].push(item);
-        });
-        
-        // Sort dates in descending order (newest first)
-        const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-            return new Date(b) - new Date(a);
-        });
-        
-        // Render messages by date groups
-        sortedDates.forEach(dateStr => {
-            const messages = groupedByDate[dateStr];
-            
-            // Add date divider
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            let dateLabel;
-            if (dateStr === today.toLocaleDateString()) {
-                dateLabel = 'Today';
-            } else if (dateStr === yesterday.toLocaleDateString()) {
-                dateLabel = 'Yesterday';
-            } else {
-                dateLabel = new Date(dateStr).toLocaleDateString(undefined, { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-            }
-            
-            const dateDivider = document.createElement('div');
-            dateDivider.className = 'date-divider';
-            dateDivider.textContent = dateLabel;
-            list.appendChild(dateDivider);
-            
-            // Add messages for this date
-            messages.forEach(item => {
-                const date = new Date(item.send_time);
-                const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                const messageWrapper = document.createElement('div');
-                messageWrapper.className = `message-wrapper message-${item.type === 'sent' ? 'sent' : 'received'}`;
-                
-                const isSent = item.type === 'sent';
-                const userText = isSent 
-                    ? `To ${item.receiver_username}` 
-                    : `From ${item.sender_username}`;
-                
-                messageWrapper.innerHTML = `
-                    <div class="message-bubble">
-                        <div class="message-header">
-                            <strong>${userText}</strong>
-                        </div>
-                        <div class="message-content">${item.content}</div>
-                        <div class="message-footer">
-                            <span class="timestamp">${timeStr}</span>
-                        </div>
-                    </div>
-                `;
-                
-                list.appendChild(messageWrapper);
-            });
-        });
-        
-        // Scroll to top to show most recent messages first
-        list.scrollTop = 0;
-        
-    } catch (err) {
-        console.error('Error loading notifications:', err);
-        list.innerHTML = `
-            <div class="alert alert-danger m-3">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                Failed to load notifications. Please try again later.
-            </div>
-        `;
-    }
-};
+<script src="{{ url_for('static', filename='js/notification.js') }}"></script>
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window.loadNotifications === 'function') {
-        window.loadNotifications();
-    }
-    
-    // Add filter functionality (placeholder - would need backend implementation)
-    const filterDropdown = document.querySelector('.filter-dropdown');
-    if (filterDropdown) {
-        filterDropdown.addEventListener('change', function() {
-            // Placeholder for filter functionality
-            console.log('Filter changed to:', this.value);
-            // Here you would typically call a filtered version of loadNotifications
-        });
-    }
-});
-</script>
 {% endblock %}

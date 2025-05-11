@@ -1,4 +1,5 @@
-$(document).ready(function() {
+function initStudyplanFeatures() {
+    console.log("Initializing study plan features...");
     const $studyInput = $('#studyInput');
     const $addButton = $('#addButton');
     const $openTasksContainer = $('#openTasks');
@@ -171,4 +172,4 @@ $(document).ready(function() {
 
     // Initial load of open tasks
     loadStudyPlans(0);
-});
+}

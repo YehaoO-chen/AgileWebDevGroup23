@@ -30,7 +30,7 @@
           <div id="floating-timer" class="floating-timer">
             <div class="timer_text" id="countdown-display">00:00</div>
             <div class="floating-controls">
-              <button is="pause-btn">
+              <button id="pause-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                 <path id="pause-path" fill="#fff" d="M23 2v20h-1v1h-7v-1h-1V2h1V1h7v1zM9 2h1v20H9v1H2v-1H1V2h1V1h7z" />
             </svg></button>
@@ -86,7 +86,7 @@
         <!-- TODO: background section -->
         
   <!-- GIF div -->
-  <div id="bg-gif" style="background-image: url('{{ url_for('static', filename='gifs/chill.gif') }}');"></div>
+  <div id="bg-gif" style="background-image: url('{{ url_for("static", filename="gifs/chill.gif") }}');"></div>
 
 <!-- control pannel -->
 <div class="audio-widget" id="audio-widget">

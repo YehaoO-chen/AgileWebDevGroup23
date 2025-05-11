@@ -8,7 +8,9 @@ let isFocus = true;
 let isPaused = false;
 let timer = null;
 // })();
-
+let pauseCount = 0;
+let currentSessionStartTime = null;
+let currentSessionInitialFocusTime = 0; // To store focusTime at the start of a session
 
 
 
@@ -51,28 +53,7 @@ let timer = null;
     todoContainer.classList.add('animate');
     todoContainer.addEventListener('animationend', () => todoContainer.classList.remove('animate'));
   }
-  
 
-  // TODO: ✅ GET: Load the task data from the backend and display it in the task list
-  fetch('/api/dashboard/task')
-  .then(res => res.json())
-  .then(tasks => {
-    tasks.forEach(task => {
-      const li = document.createElement('li');
-      li.className = 'task';
-      li.setAttribute('data-status', task.status === 1 ? 'completed' : 'active');
-      li.setAttribute('data-id', task.id);
-      li.innerHTML = `
-        <div class="task-content">
-          <input type="checkbox" class="task-checkbox" ${task.status === 1 ? 'checked' : ''} />
-          <span class="task-text ${task.status === 1 ? 'completed' : ''}">${task.title}</span>
-          <button class="expand-btn">${icon_down}</button>
-          <button class="delete-btn">${icon_delete}</button>
-        </div>
-      `;
-      taskList.appendChild(li);
-    });
-  });
 
 // update the input value
 function updateTimeFromInput(type) {
@@ -80,7 +61,62 @@ function updateTimeFromInput(type) {
   sanitizeInput(input, type); 
 }
 
+function formatIsoToDateTimeString(isoString) {
+    if (!isoString) return null;
+    const date = new Date(isoString);
+
+    const year = date.getUTCFullYear();
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    const hours = date.getUTCHours().toString().padStart(2, '0');
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+
+async function sendStudyDurationToServer(durationMinutes, startTimeIso, endTimeIso,  stopTimesCount) {
+    if (durationMinutes <= 0) {
+        console.log("Study duration is zero or less, not sending to server.");
+        return;
+    }
+    const formattedStartTime = formatIsoToDateTimeString(startTimeIso);
+    const formattedEndTime = formatIsoToDateTimeString(endTimeIso);
+
+    if (!formattedStartTime || !formattedEndTime) {
+        console.error("Failed to format date strings. Aborting send.");
+        return;
+    }
+
+    const requestData = {
+        duration: durationMinutes,    // in minutes
+        start_time: formattedStartTime, // ISO string
+        end_time: formattedEndTime,     // ISO string
+        stop_times: stopTimesCount
+    };
+    console.log("Sending study duration data to /api/studyduration:", requestData);
+    try {
+        const response = await fetch('/api/studyduration', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+                // Add CSRF token header here if needed by your backend
+            },
+            body: JSON.stringify(requestData)
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+            console.log('Study duration recorded successfully:', data);
+        } else {
+            console.error('Failed to record study duration:', data.message || response.statusText);
+        }
+    } catch (error) {
+        console.error("Error sending study duration data:", error);
+    }
+}
 function startTimer() {
+  pauseCount = 0;
   console.log("start record", { focusTime, breakTime, remainingSeconds });
   updateTimeFromInput('focus');
   updateTimeFromInput('break');
@@ -90,6 +126,14 @@ function startTimer() {
  
 
   if (timer) return;
+  
+ if (isFocus) {
+    currentSessionStartTime = new Date();
+    currentSessionInitialFocusTime = focusTime; // Capture the focus time for this session
+    pauseCount = 0; // Reset pause count for the new focus session
+  } else {
+    currentSessionStartTime = null; // Not a focus session, or break session starting
+  }
   
   if (remainingSeconds === 0) {
     remainingSeconds = (isFocus ? focusTime : breakTime) * 60;
@@ -103,6 +147,10 @@ function startTimer() {
       if (remainingSeconds <= 0) {
         clearInterval(timer);
         timer = null;
+        // get current time and convert to ISO string
+        const endTime = new Date();
+        const endTimeIso = endTime.toISOString();
+        sendStudyDurationToServer(currentSessionInitialFocusTime, currentSessionStartTime.toISOString(), endTimeIso,pauseCount);
         showPopup();
         
       }
@@ -116,6 +164,9 @@ function pauseTimer() {
     const pausePath = document.getElementById('pause-path');
     
     if (isPaused) {
+        if (isFocus && currentSessionStartTime) { // Only increment pauseCount during an active focus session
+            pauseCount++;
+        }        
         pausePath.setAttribute("d", "M22 11v2h-1v1h-1v1h-2v1h-2v1h-1v1h-2v1h-2v1h-1v1H8v1H6v1H3v-1H2V2h1V1h3v1h2v1h2v1h1v1h2v1h2v1h1v1h2v1h2v1h1v1z");
       } else {
         pausePath.setAttribute("d", "M23 2v20h-1v1h-7v-1h-1V2h1V1h7v1zM9 2h1v20H9v1H2v-1H1V2h1V1h7z");
@@ -125,9 +176,24 @@ function pauseTimer() {
 function resetTimer() {
   clearInterval(timer);
   timer = null;
+
+  // If a focus session was active, record the time spent before resetting
+  if (isFocus && currentSessionStartTime) {
+    const elapsedSeconds = (currentSessionInitialFocusTime * 60) - remainingSeconds;
+    if (elapsedSeconds > 0) {
+        const durationMinutes = Math.round(elapsedSeconds / 60);
+        // get current time and convert to ISO string
+        const endTime = new Date();
+        const endTimeIso = endTime.toISOString();
+        sendStudyDurationToServer(durationMinutes, currentSessionStartTime.toISOString(), endTimeIso, pauseCount);
+    }
+  }
+  
+  currentSessionStartTime = null; // Reset session tracking
   isPaused = false;
   remainingSeconds = 0;
-  isFocus = true;
+  isFocus = true; // Default back to focus mode
+  // pauseCount will be reset by startTimer if a new focus session begins
   updateCountdownDisplay();
 
   document.getElementById('floating-timer').classList.remove('show');
@@ -147,69 +213,28 @@ function backToSetup() {
   resetTimer();
 }
 
-
-// function showPopup() {
-//   console.log("showPopup", { isFocus, focusTime, breakTime });
-//   const times = isFocus ? focusTime : breakTime;
-//   const formatted = `${String(times).padStart(2, '0')}:00`; 
-//   const emoji = "🎉"
-
-//   document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
-//   document.getElementById('popup-window').style.display = 'block';
-//   document.getElementById('floating-timer').classList.remove('show');
-
-// }
-
 function showPopup() {
   console.log("===== showPopup start run =====");
   try {
-    console.log("read varis:", { isFocus, focusTime, breakTime });
-    const times = isFocus ? focusTime : breakTime;
+    console.log("read varis:", { isFocus, focusTime, breakTime, currentSessionStartTime, currentSessionInitialFocusTime, pauseCount });
+    const times = isFocus ? currentSessionInitialFocusTime : breakTime; // Use initial focus time for display
     const formatted = `${String(times).padStart(2, '0')}:00`; 
     const emoji = "🎉";
     console.log("Formatting time:", formatted);
     
-    // 添加发送学习时间数据的代码
-    if (isFocus) {  
-      console.log("isforce = ture send");
-      const requestData = { 
-        duration: focusTime,
-        start_time: new Date().toISOString()
-      };
-      console.log("require:", requestData);
-      
-      try {
-        console.log("fetch send ...");
-        fetch('/api/study_time', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestData)
-        })
-        .then(response => {
-          console.log("receive response:", response.status, response.statusText);
-          return response.json();
-        })
-        .then(data => {
-          console.log('API:', data);
-        })
-        .catch(err => {
-          console.error("fetch process wrong:", err);
-        });
-        console.log("fetch send");
-      } catch (fetchError) {
-        console.error("fetch wrong:", fetchError);
-      }
+    if (isFocus && currentSessionStartTime) {  
+      console.log("isFocus = true, sending study duration");
+      // Duration is the initially set focus time for the completed session
+      currentSessionStartTime = null; // Reset session tracking after recording
     } else {
-      console.log("isFocus=false，dont send");
+      console.log("Not a focus session or session already recorded/reset, not sending study duration.");
     }
     
-    console.log("DOM");
+    console.log("DOM updates for popup");
     document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
     document.getElementById('popup-window').style.display = 'block';
     document.getElementById('floating-timer').classList.remove('show');
-    console.log("DOM finished");
+    console.log("DOM updates finished");
     
   } catch (error) {
     console.error("showPopup wrong:", error);
@@ -640,3 +665,4 @@ taskList.addEventListener('click', e => {
 
 
 }
+
