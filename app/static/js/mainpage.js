@@ -295,127 +295,251 @@ document.querySelectorAll('#close-btn').forEach(btn => {
 });
 
 
-/* Goal setting widget JS */
-const input = document.getElementById('task-input');
-const addBtn = document.getElementById('add-btn');
-const taskList = document.querySelector('.task-list');
-const filters = document.querySelectorAll('.filter');
+ /* Goal setting widget JS (Task List) */
+    const taskInput = document.getElementById('task-input');
+    const addBtn = document.getElementById('add-btn');
+    const taskList = document.querySelector('.task-list');
+    const filters = document.querySelectorAll('.filter');
 
-addBtn.addEventListener('click', () => {
-  const taskText = input.value.trim();
-  if (taskText === '') return;
+    // --- Helper function to create a task list item ---
+    function createTaskElement(task) {
+        const li = document.createElement('li');
+        li.className = 'task';
+        // Use studyplan's status: 0 for active/open, 1 for completed
+        li.setAttribute('data-status', task.status === 1 ? 'completed' : 'active');
+        li.setAttribute('data-id', task.id); // Store the task ID from the backend
 
-  const li = document.createElement('li');
-  li.classList.add('task');
-  li.setAttribute('data-status', 'active');
-
-  li.innerHTML = `
-    <div class="task-content">
-      <input type="checkbox" class="task-checkbox" />
-      <span class="task-text">${taskText}</span>
-      <button class="expand-btn">${icon_down}</button>
-      <button class="delete-btn">${icon_delete}</button>
-    </div>
-  `;
-
-  taskList.appendChild(li);
-  input.value = '';
-
-
-    // ✅ TODO: POST： send the new task to the backend
-    fetch('/api/task', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ title: taskText })
-    }).catch(() => {
-      console.warn("⚠️ ");
-    });
-
-});
-
-
-taskList.addEventListener('change', e => {
-  if (e.target.classList.contains('task-checkbox')) {
-    const task = e.target.closest('li');
-    const span = task.querySelector('.task-text');
-    const isChecked = e.target.checked;
-
-    task.setAttribute('data-status', isChecked ? 'completed' : 'active');
-    span.classList.toggle('completed', isChecked);
-
-    const activeFilter = document.querySelector('.filter.active');
-    const currentFilter = activeFilter?.getAttribute('data-filter');
-
-    if (isChecked && currentFilter === 'all') {
-      taskList.appendChild(task);
+        li.innerHTML = `
+            <div class="task-content">
+                <input type="checkbox" class="task-checkbox" ${task.status === 1 ? 'checked' : ''} />
+                <span class="task-text ${task.status === 1 ? 'completed' : ''}">${task.content}</span>
+                <button class="expand-btn">${icon_down}</button>
+                <button class="delete-btn">${icon_delete}</button>
+            </div>
+        `;
+        return li;
     }
 
-    if (isChecked && currentFilter === 'active') {
-      task.style.display = 'none';
+    // --- Load tasks from the backend (Study Plans with status 0 or 1) ---
+    function loadTasks() {
+        taskList.innerHTML = ''; // Clear existing tasks
+        // Fetch non-deleted study plans (status 0: open, status 1: completed)
+        // The API /api/studyplan by default excludes status 2 (deleted)
+        fetch('/api/studyplan')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success && data.study_plans) {
+                    data.study_plans.forEach(plan => {
+                        const li = createTaskElement(plan);
+                        taskList.appendChild(li);
+                    });
+                    applyCurrentFilter(); // Re-apply filter after loading
+                } else {
+                    console.warn("Could not load tasks:", data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching tasks:", error);
+                taskList.innerHTML = '<li>Error loading tasks. Please try again.</li>';
+            });
     }
 
-    if (!isChecked && currentFilter === 'completed') {
-      task.style.display = 'none';
+
+    // --- Add Task (Study Plan) ---
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            const taskText = taskInput.value.trim();
+            if (taskText === '') return;
+
+            // POST to studyplan API
+            fetch('/api/studyplan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add CSRF token header if your app uses it for POST/PUT/DELETE
+                },
+                body: JSON.stringify({ content: taskText }) // 'content' matches StudyPlan model
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.message || `HTTP error! status: ${res.status}`) });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success && data.study_plan) {
+                    const li = createTaskElement(data.study_plan);
+                    taskList.appendChild(li);
+                    taskInput.value = '';
+                    applyCurrentFilter(); // Apply filter to new task
+                } else {
+                    console.warn("Failed to add task:", data.message);
+                    alert("Error: " + (data.message || "Could not add task."));
+                }
+            })
+            .catch(error => {
+                console.error("Error adding task:", error);
+                alert("Error: " + error.message);
+            });
+        });
     }
 
-       // ✅ TODO: Sync： send the updated task status to the backend
-       const taskId = task.dataset.id;
-       fetch(`/api/task/${taskId}`, {
-         method: 'PUT',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ status: isChecked ? 1 : 0 })
-       }).catch(() => {
-         console.warn('⚠️ ');
-       }); 
-  }
-});
+
+    // --- Handle Checkbox Toggle (Update Task Status) and Delete Task ---
+    if (taskList) {
+        taskList.addEventListener('click', e => { // Changed from 'change' to 'click' for checkboxes for better responsiveness
+            const target = e.target;
+
+            // --- Checkbox Toggle ---
+            if (target.classList.contains('task-checkbox')) {
+                const taskElement = target.closest('li.task');
+                const taskId = taskElement.dataset.id;
+                const isChecked = target.checked;
+                const newStatus = isChecked ? 1 : 0; // 1 for completed, 0 for open
+
+                fetch(`/api/studyplan/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add CSRF token header if needed
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        // Revert checkbox on error before throwing
+                        target.checked = !isChecked;
+                        return res.json().then(err => { throw new Error(err.message || `HTTP error! status: ${res.status}`) });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success && data.study_plan) {
+                        taskElement.setAttribute('data-status', newStatus === 1 ? 'completed' : 'active');
+                        taskElement.querySelector('.task-text').classList.toggle('completed', newStatus === 1);
+                        applyCurrentFilter(); // Re-apply filter to show/hide task if necessary
+                    } else {
+                        console.warn("Failed to update task status:", data.message);
+                        alert("Error: " + (data.message || "Could not update task."));
+                        target.checked = !isChecked; // Revert checkbox
+                    }
+                })
+                .catch(error => {
+                    console.error("Error updating task status:", error);
+                    alert("Error: " + error.message);
+                    target.checked = !isChecked; // Revert checkbox
+                });
+            }
+
+            // --- Delete Task ---
+            const deleteButton = target.closest('.delete-btn');
+            if (deleteButton) {
+                const taskElement = deleteButton.closest('li.task');
+                const taskId = taskElement.dataset.id;
+
+                if (confirm('Are you sure you want to delete this task?')) {
+                    fetch(`/api/studyplan/${taskId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            // Add CSRF token header if needed
+                        }
+                    })
+                    .then(res => {
+                        if (!res.ok) {
+                             return res.json().then(err => { throw new Error(err.message || `HTTP error! status: ${res.status}`) });
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            taskElement.remove();
+                        } else {
+                            console.warn("Failed to delete task:", data.message);
+                            alert("Error: " + (data.message || "Could not delete task."));
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error deleting task:", error);
+                        alert("Error: " + error.message);
+                    });
+                }
+            }
+
+            // --- Expand Button (existing logic) ---
+            const expandBtn = target.closest('.expand-btn');
+            if (expandBtn) {
+                const task = expandBtn.closest('.task');
+                task.classList.toggle('expanded');
+                expandBtn.innerHTML = task.classList.contains('expanded') ? icon_up : icon_down;
+            }
+        });
+    }
 
 
+    // --- Filter Tasks ---
+    function applyCurrentFilter() {
+        const activeFilterButton = document.querySelector('.filter.active');
+        if (activeFilterButton) {
+            const filterType = activeFilterButton.getAttribute('data-filter');
+            document.querySelectorAll('.task-list .task').forEach(task => {
+                const status = task.getAttribute('data-status');
+                if (filterType === 'all') {
+                    task.style.display = 'flex';
+                } else {
+                    task.style.display = status === filterType ? 'flex' : 'none';
+                }
+            });
+        }
+    }
 
-filters.forEach(button => {
-  button.addEventListener('click', () => {
-    document.querySelector('.filter.active').classList.remove('active');
-    button.classList.add('active');
+    if (filters) {
+        filters.forEach(button => {
+            button.addEventListener('click', () => {
+                const currentActive = document.querySelector('.filter.active');
+                if (currentActive) {
+                    currentActive.classList.remove('active');
+                }
+                button.classList.add('active');
+                applyCurrentFilter();
+            });
+        });
+    }
 
-    const filter = button.getAttribute('data-filter');
-    document.querySelectorAll('.task').forEach(task => {
-      const status = task.getAttribute('data-status');
-      if (filter === 'all') {
-        task.style.display = 'flex';
-      } else {
-        task.style.display = status === filter ? 'flex' : 'none';
-      }
-    });
-  });
-});
+    // --- Toggle Task List Visibility (existing logic) ---
+    const toggleListBtn = document.getElementById('toggle-task-list');
+    const taskListContainer = document.querySelector('.task-list'); // Ensure this selector is correct
 
+    if (toggleListBtn && taskListContainer) {
+        toggleListBtn.addEventListener('click', () => {
+            taskListContainer.classList.toggle('hidden');
+            toggleListBtn.textContent = taskListContainer.classList.contains('hidden')
+                ? 'Show Tasks' // Or your preferred text
+                : 'Hide Tasks'; // Or your preferred text
+        });
+    }
 
-const toggleListBtn = document.getElementById('toggle-task-list');
-const taskListContainer = document.querySelector('.task-list');
+    // --- Icons (existing logic) ---
+    const icon_up = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24 ">
+      <path fill="#fff" d="M20 15v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-2v1h-1v1H9v1H8v1H7v1H6v1H5v-1H4v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1V9h1V8h2v1h1v1h1v1h1v1h1v1h1v1h1v1z" />
+    </svg>`;
 
-toggleListBtn.addEventListener('click', () => {
-  taskListContainer.classList.toggle('hidden');
-  toggleListBtn.textContent = taskListContainer.classList.contains('hidden')
-    ? 'Show'
-    : 'Hide';
-});
+    const icon_down = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+      <path fill="#fff" d="M20 8v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5V9H4V8h1V7h1v1h1v1h1v1h1v1h1v1h1v1h2v-1h1v-1h1v-1h1V9h1V8h1V7h1v1z" />
+    </svg>`;
 
+    const icon_delete = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+    <path fill="#fff" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM8 9h8v10H8zm7.5-5l-1-1h-5l-1 1H5v2h14V4z" />
+    </svg>`;
 
-const icon_up = `
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24 ">
-  <path fill="#fff" d="M20 15v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-2v1h-1v1H9v1H8v1H7v1H6v1H5v-1H4v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1V9h1V8h2v1h1v1h1v1h1v1h1v1h1v1h1v1z" />
-</svg>`;
-
-const icon_down = `
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
-  <path fill="#fff" d="M20 8v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1H9v-1H8v-1H7v-1H6v-1H5V9H4V8h1V7h1v1h1v1h1v1h1v1h1v1h1v1h2v-1h1v-1h1v-1h1V9h1V8h1V7h1v1z" />
-</svg>`;    
-
-const icon_delete = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
-<path fill="#fff" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM8 9h8v10H8zm7.5-5l-1-1h-5l-1 1H5v2h14V4z" />
-</svg>`;
+    // --- Initial Load of Tasks ---
+    loadTasks();
 
 taskList.addEventListener('click', e => {
   const expandBtn = e.target.closest('.expand-btn');

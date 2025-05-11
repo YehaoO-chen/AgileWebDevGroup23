@@ -14,7 +14,8 @@ $(document).ready(function() {
 
 
     function updateAvatarDisplayAndStorage(url) {
-        const finalUrl = url || defaultAvatarUrl; // Use default if url is null/empty
+        const finalUrl = url ; 
+        
         $profilePhotoImg.attr('src', finalUrl);
         $navbarProfileImg.attr('src', finalUrl);
         if (url && url !== defaultAvatarUrl) {
@@ -39,12 +40,6 @@ $(document).ready(function() {
 
     // --- Load Initial Profile Data ---
     function loadProfileData() {
-        const storedAvatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
-        if (storedAvatarUrl) {
-             updateAvatarDisplayAndStorage(storedAvatarUrl); // Update images immediately
-        } else {
-             updateAvatarDisplayAndStorage(null); // Use default if nothing stored
-        }
 
         $.ajax({
             url: '/api/profile', // GET request to fetch user data
@@ -74,8 +69,9 @@ $(document).ready(function() {
                 } else {
                     //  avatarSrc = `/static/images/default_avatar.png`; // Or your actual default image path
                      avatarSrc = defaultAvatarUrl; // Fallback to default avatar URL
+                     localStorage.removeItem(AVATAR_STORAGE_KEY); // Remove if default or invalid
                 }
-                 $profilePhotoImg.attr('src', avatarSrc);
+                updateAvatarDisplayAndStorage(avatarSrc); // Update images immediately
 
                 // Update header fields specifically if they differ (e.g., using fullname vs username)
                 $('#profileName').text(user.fullname || user.username);
