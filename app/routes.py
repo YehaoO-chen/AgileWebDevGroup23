@@ -824,4 +824,33 @@ def init_routes(app):
 
         return jsonify(result)
 
-    
+    @app.route('/api/study_time', methods=['POST'])
+    @login_required
+    def record_study_time():
+        print("Received study time data:", request.json)
+        try:
+            data = request.json
+            
+            # 解析开始时间
+            start_time = datetime.fromisoformat(data['start_time'].replace('Z', '+00:00'))
+            
+            # 计算结束时间（开始时间 + 持续时间）
+            end_time = start_time + timedelta(minutes=data['duration'])
+            
+            study_duration = StudyDuration(
+                user_id=current_user.id,
+                start_time=start_time,
+                end_time=end_time,  # 添加结束时间
+                duration=data['duration']
+            )
+            
+            print("Created study duration record:", study_duration)
+            db.session.add(study_duration)
+            db.session.commit()
+            print("Successfully saved to database")
+            
+            return jsonify({'success': True, 'message': 'Study time recorded successfully'})
+        except Exception as e:
+            print("Error saving study time:", str(e))
+            db.session.rollback()
+            return jsonify({'success': False, 'message': str(e)}), 500

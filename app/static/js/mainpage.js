@@ -1,16 +1,16 @@
 /* Timer widget JS */
 // Initialise the default value
-(function () {
-focusTime = 50;
-breakTime = 10;
-remainingSeconds = 0;
+// (function () {
+let focusTime = 50;
+let breakTime = 10;
+let remainingSeconds = 0;
 let isFocus = true;
 let isPaused = false;
 let timer = null;
-})();
+// })();
 
-// 🟨 新增：将所有 mainpage 初始化逻辑包裹成函数供 base.js 调用
-function initMainpageFeatures() {
+
+
 
     // Restricting the minimum and maximum input value (if the input value is less than 1, then change to 1; if is more than 180, then change to 1)
   // Ensure the input does not exceed the scope
@@ -39,10 +39,6 @@ function initMainpageFeatures() {
     setTimeValue(type, value);
   }
   
-  ['focus', 'break'].forEach(type => {
-    const input = document.getElementById(`${type}-time`);
-    if (input) input.addEventListener('input', () => sanitizeInput(input, type));
-  });
   
   const setupArea = document.getElementById('setup-area');
   if (setupArea) {
@@ -58,7 +54,7 @@ function initMainpageFeatures() {
   
 
   // TODO: ✅ GET: Load the task data from the backend and display it in the task list
-  fetch('/api/task')
+  fetch('/api/dashboard/task')
   .then(res => res.json())
   .then(tasks => {
     tasks.forEach(task => {
@@ -78,10 +74,6 @@ function initMainpageFeatures() {
     });
   });
 
-
-
-
-
 // update the input value
 function updateTimeFromInput(type) {
   const input = document.getElementById(`${type}-time`);
@@ -89,6 +81,7 @@ function updateTimeFromInput(type) {
 }
 
 function startTimer() {
+  console.log("start record", { focusTime, breakTime, remainingSeconds });
   updateTimeFromInput('focus');
   updateTimeFromInput('break');
 
@@ -154,15 +147,74 @@ function backToSetup() {
   resetTimer();
 }
 
+
+// function showPopup() {
+//   console.log("showPopup", { isFocus, focusTime, breakTime });
+//   const times = isFocus ? focusTime : breakTime;
+//   const formatted = `${String(times).padStart(2, '0')}:00`; 
+//   const emoji = "🎉"
+
+//   document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
+//   document.getElementById('popup-window').style.display = 'block';
+//   document.getElementById('floating-timer').classList.remove('show');
+
+// }
+
 function showPopup() {
-  const times = isFocus ? focusTime : breakTime;
-  const formatted = `${String(times).padStart(2, '0')}:00`; 
-  const emoji = "🎉"
-
-  document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
-  document.getElementById('popup-window').style.display = 'block';
-  document.getElementById('floating-timer').classList.remove('show');
-
+  console.log("===== showPopup start run =====");
+  try {
+    console.log("read varis:", { isFocus, focusTime, breakTime });
+    const times = isFocus ? focusTime : breakTime;
+    const formatted = `${String(times).padStart(2, '0')}:00`; 
+    const emoji = "🎉";
+    console.log("Formatting time:", formatted);
+    
+    // 添加发送学习时间数据的代码
+    if (isFocus) {  
+      console.log("isforce = ture send");
+      const requestData = { 
+        duration: focusTime,
+        start_time: new Date().toISOString()
+      };
+      console.log("require:", requestData);
+      
+      try {
+        console.log("fetch send ...");
+        fetch('/api/study_time', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+        .then(response => {
+          console.log("receive response:", response.status, response.statusText);
+          return response.json();
+        })
+        .then(data => {
+          console.log('API:', data);
+        })
+        .catch(err => {
+          console.error("fetch process wrong:", err);
+        });
+        console.log("fetch send");
+      } catch (fetchError) {
+        console.error("fetch wrong:", fetchError);
+      }
+    } else {
+      console.log("isFocus=false，dont send");
+    }
+    
+    console.log("DOM");
+    document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
+    document.getElementById('popup-window').style.display = 'block';
+    document.getElementById('floating-timer').classList.remove('show');
+    console.log("DOM finished");
+    
+  } catch (error) {
+    console.error("showPopup wrong:", error);
+  }
+  console.log("===== showPopup end =====");
 }
 
 function closePopup() {
@@ -174,7 +226,6 @@ function takeBreak() {
   document.getElementById('popup-window').style.display='none';
   document.getElementById('floating-timer').classList.add('show');
 
-
   isFocus = false;
   isPaused = false;
   remainingSeconds = breakTime * 60;
@@ -183,7 +234,6 @@ function takeBreak() {
   
   timer = setInterval(() => {
     if (!isPaused) {
-
       remainingSeconds--;
       updateCountdownDisplay();
 
@@ -192,7 +242,6 @@ function takeBreak() {
         timer = null;
         document.getElementById('floating-timer').classList.remove('show');
         document.getElementById('break-window').style.display='block';
-        
       }
     }
   }, 1000);
@@ -222,6 +271,29 @@ function ContinueFocus() {
   }, 1000);
 
 }
+
+// Wrapping all logic in a single function ensures it runs only after the DOM is fully loaded.
+// This avoids errors from trying to access elements that don’t yet exist.
+function initMainpageFeatures() {
+
+['focus', 'break'].forEach(type => {
+  const input = document.getElementById(`${type}-time`);
+  if (input) input.addEventListener('input', () => sanitizeInput(input, type));
+});
+
+document.getElementById('focus-minus')?.addEventListener('click', () => adjustTime('focus', -1));
+document.getElementById('focus-plus')?.addEventListener('click', () => adjustTime('focus', 1));
+document.getElementById('break-minus')?.addEventListener('click', () => adjustTime('break', -1));
+document.getElementById('break-plus')?.addEventListener('click', () => adjustTime('break', 1));
+document.getElementById('start-btn')?.addEventListener('click', startTimer);
+document.getElementById('pause-btn')?.addEventListener('click', pauseTimer);
+document.getElementById('reset-btn')?.addEventListener('click', resetTimer);
+document.getElementById('break-btn')?.addEventListener('click', takeBreak);
+document.getElementById('continue-btn')?.addEventListener('click', ContinueFocus);
+document.querySelectorAll('#close-btn').forEach(btn => {
+  btn.addEventListener('click', closePopup);
+});
+
 
 /* Goal setting widget JS */
 const input = document.getElementById('task-input');
@@ -258,7 +330,7 @@ addBtn.addEventListener('click', () => {
       },
       body: JSON.stringify({ title: taskText })
     }).catch(() => {
-      console.warn("⚠️ 后端没响应，任务只存在前端");
+      console.warn("⚠️ ");
     });
 
 });
@@ -295,7 +367,7 @@ taskList.addEventListener('change', e => {
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ status: isChecked ? 1 : 0 })
        }).catch(() => {
-         console.warn('⚠️ 无法同步任务状态到后端');
+         console.warn('⚠️ ');
        }); 
   }
 });
@@ -359,5 +431,88 @@ taskList.addEventListener('click', e => {
     task.remove();
   }
 
-});}
+});
 
+/* Background widget JS */
+    const bgDiv = document.getElementById('bg-gif');
+    const bgSelect = document.getElementById('bg-select');
+    const musicSelect = document.getElementById('music-select');
+    const audio = document.getElementById('bg-audio');
+    const volumeSlider = document.getElementById('volume-range');
+    const toggleMuteBtn = document.getElementById('toggle-mute');
+    
+    let lastVolume = 0.3; // default volume when unmuted
+    
+    // initial setup - mute the audio and set volume to 0
+    audio.muted = true;
+    audio.volume = 0;
+    volumeSlider.value = 0;
+    toggleMuteBtn.textContent = 'Unmute';
+    
+    // 背景切换
+    bgSelect.addEventListener('change', () => {
+      bgDiv.style.backgroundImage = `url('/static/gifs/${bgSelect.value}')`;
+    });
+    
+    // 音乐切换
+    musicSelect.addEventListener('change', () => {
+      audio.src =  `/static/audio/${musicSelect.value}`;
+      if (!audio.muted) {
+        audio.play().catch(err => console.warn("Autoplay restriction:", err));
+      }
+    });
+    
+    // 音量调节
+    volumeSlider.addEventListener('input', () => {
+      const vol = parseFloat(volumeSlider.value);
+      audio.volume = vol;
+    
+      if (vol === 0) {
+        audio.muted = true;
+        toggleMuteBtn.textContent = 'Unmute';
+      } else {
+        lastVolume = vol; // 记住用户设置的音量
+        audio.muted = false;
+        toggleMuteBtn.textContent = 'Mute';
+
+        // ensure audio plays if not muted
+        if (audio.paused) {
+        audio.play().catch(err => console.warn("Autoplay blocked:", err));
+    }
+
+    lastVolume = vol;
+      }
+    });
+    
+    // 静音切换按钮
+    toggleMuteBtn.addEventListener('click', () => {
+      if (audio.muted) {
+        // 取消静音：恢复上次音量
+        audio.muted = false;
+        audio.volume = lastVolume;
+        volumeSlider.value = lastVolume;
+        audio.play().catch(err => console.warn("Autoplay restriction:", err));
+        toggleMuteBtn.textContent = 'Mute';
+      } else {
+        // 静音：记住当前音量并设为0
+        lastVolume = audio.volume;
+        audio.muted = true;
+        audio.volume = 0;
+        volumeSlider.value = 0;
+        toggleMuteBtn.textContent = 'Unmute';
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+    const background = document.getElementById('audio-widget');
+    if (background) {
+    background.classList.add('animate');
+    background.addEventListener('animationend', () => {
+      background.classList.remove('animate');
+    });
+  } 
+    
+}); 
+
+
+}

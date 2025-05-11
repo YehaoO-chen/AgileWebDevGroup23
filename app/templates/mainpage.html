@@ -10,31 +10,31 @@
         <div id="setup-area">
             <h3 class="timer_text">Focus time (min)</h3>
             <div class="time-selector">
-              <button class="round-btn" onclick="adjustTime('focus', -1)">−</button>
+              <button class="round-btn" id="focus-minus">−</button>
               <input type="number" id="focus-time" min="1" max="180" value="50" onchange="updateTimeFromInput('focus')">
-              <button class="round-btn" onclick="adjustTime('focus', 1)">＋</button>
+              <button class="round-btn" id="focus-plus">＋</button>
             </div>
         
             <h3 class="timer_text">Break time (min)</h3>
             <div class="time-selector">
-              <button onclick="adjustTime('break', -1)">−</button>
+              <button id="break-minus">−</button>
               <input type="number" id="break-time" min="1" max="180" value="10" onchange="updateTimeFromInput('break')">
-              <button onclick="adjustTime('break', 1)">＋</button>
+              <button id="break-plus">＋</button>
             </div>
 
         
-            <button class="timer_text" onclick="startTimer()">Start</button>
+            <button class="timer_text" id="start-btn">Start</button>
           </div> 
         
           <!-- floating-timer -->
           <div id="floating-timer" class="floating-timer">
             <div class="timer_text" id="countdown-display">00:00</div>
             <div class="floating-controls">
-              <button onclick="pauseTimer()">
+              <button is="pause-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                 <path id="pause-path" fill="#fff" d="M23 2v20h-1v1h-7v-1h-1V2h1V1h7v1zM9 2h1v20H9v1H2v-1H1V2h1V1h7z" />
             </svg></button>
-              <button onclick="resetTimer()"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
+              <button id="reset-btn"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
                 <path fill="#fff" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" />
             </svg></button>
             </div>
@@ -45,16 +45,16 @@
             <div id="completed_time" class="timer_text">00:00</div>
             <div id="completed_text" class="timer_text">🎉 congratulations! 🎉<br> you've been working hard! </div>
             <div class="popup_close">
-                <button class="timer_text" onclick="takeBreak()">Take a Break</button>
-                <button class="timer_text" onclick="closePopup()">Close</button>
+                <button class="timer_text" id="break-btn">Take a Break</button>
+                <button class="timer_text" id="close-btn">Close</button>
             </div>
           </div>
 
           <div id="break-window" class="break-window">
             <div id="completed_break" class="timer_text">Did you have a good stretch? Wanna continue?</div>
             <div class="break_btn">
-                <button class="timer_text" onclick="ContinueFocus()">Yes</button>
-                <button class="timer_text" onclick="closePopup()">Close</button>
+                <button class="timer_text" id="continue-btn">Yes</button>
+                <button class="timer_text" id="close-btn">Close</button>
             </div>
           </div>
 
@@ -86,7 +86,7 @@
         <!-- TODO: background section -->
         
   <!-- GIF div -->
-  <div id="bg-gif" style="background-image: url('{{ url_for('static', filename='gifs/1.gif') }}');"></div>
+  <div id="bg-gif" style="background-image: url('{{ url_for('static', filename='gifs/chill.gif') }}');"></div>
 
 <!-- control pannel -->
 <div class="audio-widget" id="audio-widget">
@@ -99,12 +99,12 @@
   
     <label for="bg-select">Background:</label>
     <select id="bg-select">
-      <option value="1.gif">1</option>
-      <option value="2.gif">2</option>
-      <option value="3.gif">3</option>
-      <option value="4.gif">4</option>
-      <option value="5.gif">5</option>
-      <option value="6.gif">6</option>
+      <option value="chill.gif">Cozy</option>
+      <option value="forest.gif">Forest</option>
+      <option value="rainycamp.gif">Rainy Day</option>
+      <option value="fox.gif">Fox Shrine</option>
+      <option value="fireplace.gif">Fireplace</option>
+      <option value="sunset.gif">Sunset</option>
     </select>
   
     <label for="music-select">Music:</label>
