@@ -73,7 +73,7 @@ class StudyDuration(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     duration = db.Column(db.Float, nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
-    end_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=True)
     stop_times = db.Column(db.Integer, default=0)
     
     user = db.relationship('User', backref=db.backref('study_durations', lazy=True))
