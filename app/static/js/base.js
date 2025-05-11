@@ -64,23 +64,31 @@ function loadMainContent(url) {
     if (url === '/mainpage') {
         if (typeof initMainpageFeatures === 'function') {
             initMainpageFeatures(); // ✅ 🟨 mainpage 初始化
-        }
+        }else {
+                    console.warn("initMainpageFeatures function not found for /mainpage, but was expected.");
+                }
     }
     if (url === '/studyplan') {
         if (typeof initStudyplanFeatures === 'function') {
             initStudyplanFeatures(); // ✅ 🟨 studyplan 初始化
-        }
+        }else {
+                    console.warn("initStudyplanFeatures function not found for /studyplan, but was expected.");
+                }
     }
     if (url === '/dashboard') {
         if (typeof initDashboardFeatures === 'function') {
             initDashboardFeatures(); // ✅ 🟨 dashboard 初始化
-        }
+        }else {
+                    console.warn("initDashboardFeatures function not found for /dashboard, but was expected.");
+                }
     }
     
     if (url === '/notification') {
         if (typeof initNotificationFeatures === 'function') {
             initNotificationFeatures(); // ✅ 🟨 notification 初始化（
-        }
+        }else {
+                    console.warn("initNotificationFeatures function not found for /notification, but was expected.");
+                }
     }
 
 

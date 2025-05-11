@@ -24,11 +24,7 @@
             <h3>Average Duration(Minutes)</h3>
             <div class="stat-value" id="average-duration">0</div>
         </div>
-        
-        <div class="stat-card">
-            <h3>Today Learning (Minutes)</h3>
-            <div class="stat-value" id="today-learning-2">0</div>
-        </div>
+
     </div>
     
     <div class="filter-section">
@@ -40,11 +36,11 @@
                 <option value="month">This Month</option>
             </select>
         </div>
-        <div class="filter-right">
-            Filter: 
+        <div class="filter-label" style="margin-left: 20px;"> 
+            Chart Type:
             <select id="chart-type-filter" class="form-select">
-                <option value="duration" selected>Duration</option>
-                <option value="task">Tasks</option>
+                <option value="duration" selected>Study Duration</option>
+                <option value="task">Task Summary</option>
             </select>
         </div>
     </div>
@@ -111,200 +107,67 @@
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Global variables for user selection
 let allUsers = [];
 let selectedUserIds = [];
-
-// Expose the loadDashboardData function to the window object for base.js to call
-window.loadDashboardData = function() {
-    console.log('Loading dashboard data');
-    
-    const periodFilter = document.getElementById('period-filter');
-    const chartTypeFilter = document.getElementById('chart-type-filter');
-    
-    if (!periodFilter || !chartTypeFilter) {
-        console.error('Filter elements not found in the DOM');
-        return;
+let currentUserUsername = ''; // To store current user's username
+// Function to fetch current user's username (call this once)
+async function fetchCurrentUserUsername() {
+    if (currentUserUsername) return; // Already fetched
+    try {
+        const response = await fetch('/api/profile'); // Assuming /api/profile returns username
+        if (response.ok) {
+            const userData = await response.json();
+            currentUserUsername = userData.username || 'A user';
+        } else {
+            currentUserUsername = 'A user'; // Fallback
+        }
+    } catch (error) {
+        console.error('Error fetching current user username:', error);
+        currentUserUsername = 'A user'; // Fallback
     }
-    
-    const period = periodFilter.value;
-    const chartType = chartTypeFilter.value;
-    
-    console.log(`Fetching data for period: ${period}, chart type: ${chartType}`);
-    
-    // Fetch duration data
-    fetch(`/api/dashboard/duration?period=${period}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Duration data received:', data);
-            
-            // Update stats
-            document.getElementById('total-duration').textContent = Math.round(data.total_study_time || 0);
-            document.getElementById('today-learning').textContent = Math.round(data.today_study_time || 0);
-            document.getElementById('today-learning-2').textContent = Math.round(data.today_study_time || 0);
-            document.getElementById('average-duration').textContent = Math.round(data.avg_study_time || 0);
-            
-            // Render chart if duration type selected
-            if (chartType === 'duration') {
-                renderDurationChart(data);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching duration data:', error);
-        });
-    
-    // Fetch task data if task chart selected
-    if (chartType === 'task') {
-        fetch(`/api/dashboard/task?period=${period}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Task data received:', data);
-                renderTaskChart(data);
-            })
-            .catch(error => {
-                console.error('Error fetching task data:', error);
-            });
+}
+window.initDashboardPage = function() {
+    if (typeof initDashboardFeatures === 'function') {
+        initDashboardFeatures(); // Call the main dashboard chart/stats loader
+    } else {
+        console.error('initDashboardFeatures function not found in dashboard.js');
+        // Fallback or direct call to the old loadDashboardData if necessary
+        // For example, if the old script's loadDashboardData is still relevant:
+        // if (typeof window.loadDashboardData === 'function') {
+        //     window.loadDashboardData();
+        // }
     }
+    fetchCurrentUserUsername(); // Fetch username when dashboard page initializes
 };
-
-// Function to render duration chart
-function renderDurationChart(data) {
-    console.log('Rendering duration chart with data:', data);
-    const chartCanvas = document.getElementById('study-chart');
-    
-    if (!chartCanvas) {
-        console.error('Chart canvas element not found');
-        return;
-    }
-    
-    const ctx = chartCanvas.getContext('2d');
-    
-    // Clear any existing chart
-    if (window.studyChart) {
-        window.studyChart.destroy();
-    }
-    
-    // Process data for the chart
-    const studyDurationsByDay = data.study_durations_by_day || {};
-    const labels = [];
-    const values = [];
-    
-    // Sort dates and extract data
-    const sortedDates = Object.keys(studyDurationsByDay).sort();
-    for (const date of sortedDates) {
-        // Format date for display
-        const displayDate = new Date(date).toLocaleDateString(undefined, {
-            month: 'short',
-            day: 'numeric'
-        });
-        labels.push(displayDate);
-        values.push(studyDurationsByDay[date]);
-    }
-    
-    // If no data, show empty chart
-    if (labels.length === 0) {
-        labels.push('No data');
-        values.push(0);
-    }
-    
-    console.log('Chart data prepared:', {labels, values});
-    
-    // Create chart
-    window.studyChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Study Minutes',
-                data: values,
-                backgroundColor: 'rgba(64, 173, 162, 0.7)',
-                borderColor: 'rgba(64, 173, 162, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Minutes'
-                    }
-                }
-            }
-        }
-    });
-    
-    console.log('Chart created successfully');
-}
-
-// Function to render task chart
-function renderTaskChart(data) {
-    console.log('Rendering task chart with data:', data);
-    const chartCanvas = document.getElementById('study-chart');
-    
-    if (!chartCanvas) {
-        console.error('Chart canvas element not found');
-        return;
-    }
-    
-    const ctx = chartCanvas.getContext('2d');
-    
-    // Clear any existing chart
-    if (window.studyChart) {
-        window.studyChart.destroy();
-    }
-    
-    const taskSummary = data.task_summary || { open: 0, completed: 0, deleted: 0 };
-    
-    // Create chart
-    window.studyChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Open Tasks', 'Completed Tasks', 'Deleted Tasks'],
-            datasets: [{
-                data: [taskSummary.open, taskSummary.completed, taskSummary.deleted],
-                backgroundColor: [
-                    'rgba(255, 206, 86, 0.7)',  // Yellow for open
-                    'rgba(75, 192, 192, 0.7)',  // Green for completed
-                    'rgba(255, 99, 132, 0.7)'   // Red for deleted
-                ],
-                borderColor: [
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-    
-    console.log('Task chart created successfully');
-}
-
 // Function to open share modal
 function openShareModal() {
     console.log('Opening share modal');
     
     // Reset selections
     selectedUserIds = [];
-    document.getElementById('noUsersSelected').style.display = 'block';
-    document.getElementById('selectedUsers').innerHTML = '<span id="noUsersSelected" class="text-muted small">No users selected</span>';
+    if (document.getElementById('noUsersSelected')) {
+        document.getElementById('noUsersSelected').style.display = 'block';
+    }
+    if (document.getElementById('selectedUsers')) {
+        document.getElementById('selectedUsers').innerHTML = '<span id="noUsersSelected" class="text-muted small">No users selected</span>';
+    }
+    if (document.getElementById('userSearchInput')) {
+        document.getElementById('userSearchInput').value = ''; // Clear search
+    }
     
     // Initialize and show modal
     try {
-        const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
-        loadUsers();
+        const shareModalElement = document.getElementById('shareModal');
+        if (!shareModalElement) {
+            console.error('Share modal element not found');
+            return;
+        }
+        const shareModal = bootstrap.Modal.getInstance(shareModalElement) || new bootstrap.Modal(shareModalElement);
+        loadUsers(); // Load users each time modal is opened to get fresh list
         shareModal.show();
     } catch (error) {
         console.error('Error showing modal:', error);
-        alert('Error: ' + error.message);
+        alert('Error opening share dialog: ' + error.message);
     }
 }
 
@@ -312,6 +175,7 @@ function openShareModal() {
 function loadUsers() {
     console.log('Loading users');
     const userList = document.getElementById('userList');
+    if (!userList) return;
     
     userList.innerHTML = `
         <div class="d-flex align-items-center justify-content-center p-3">
@@ -320,19 +184,23 @@ function loadUsers() {
         </div>
     `;
     
-    fetch('/api/users')
-        .then(response => response.json())
+    fetch('/api/users') // This API is in profile.py
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(users => {
             console.log('Users loaded:', users);
-            allUsers = users;
+            allUsers = users; // Store all fetched users
             
-            if (users.length === 0) {
-                userList.innerHTML = `<p class="text-center text-muted p-3">No users available</p>`;
+            if (!Array.isArray(users) || users.length === 0) {
+                userList.innerHTML = `<p class="text-center text-muted p-3">No other users available to share with.</p>`;
                 return;
             }
             
-            // Render user list
-            userList.innerHTML = '';
+            userList.innerHTML = ''; // Clear spinner/message
             
             users.forEach(user => {
                 const userItem = document.createElement('div');
@@ -343,17 +211,18 @@ function loadUsers() {
                 checkbox.className = 'form-check-input';
                 checkbox.id = `user-${user.id}`;
                 checkbox.value = user.id;
+                // Ensure checkbox reflects current selection if modal is re-opened (though selections are reset now)
+                checkbox.checked = selectedUserIds.includes(user.id); 
                 
                 checkbox.addEventListener('change', function() {
                     if (this.checked) {
                         if (!selectedUserIds.includes(user.id)) {
                             selectedUserIds.push(user.id);
-                            updateSelectedUsers();
                         }
                     } else {
                         selectedUserIds = selectedUserIds.filter(id => id !== user.id);
-                        updateSelectedUsers();
                     }
+                    updateSelectedUsers();
                 });
                 
                 const label = document.createElement('label');
@@ -366,7 +235,6 @@ function loadUsers() {
                 userList.appendChild(userItem);
             });
             
-            // Setup search functionality
             const searchInput = document.getElementById('userSearchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
@@ -377,7 +245,7 @@ function loadUsers() {
         })
         .catch(error => {
             console.error('Error loading users:', error);
-            userList.innerHTML = `<p class="text-center text-danger p-3">Error loading users</p>`;
+            userList.innerHTML = `<p class="text-center text-danger p-3">Error loading users. Please try again.</p>`;
         });
 }
 
@@ -387,12 +255,9 @@ function filterUsers(searchTerm) {
     
     userCheckboxes.forEach(item => {
         const label = item.querySelector('.form-check-label');
-        const username = label.textContent.toLowerCase();
-        
-        if (username.includes(searchTerm)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
+        if (label) {
+            const username = label.textContent.toLowerCase();
+            item.style.display = username.includes(searchTerm) ? 'block' : 'none';
         }
     });
 }
@@ -400,14 +265,17 @@ function filterUsers(searchTerm) {
 // Update selected users display
 function updateSelectedUsers() {
     const selectedUsersContainer = document.getElementById('selectedUsers');
-    const noUsersSelected = document.getElementById('noUsersSelected');
-    
+    const noUsersSelectedSpan = document.getElementById('noUsersSelected'); // Get the span directly
+
+    if (!selectedUsersContainer) return;
+
     if (selectedUserIds.length === 0) {
+        // Ensure the "No users selected" span is the only content and is visible
         selectedUsersContainer.innerHTML = '<span id="noUsersSelected" class="text-muted small">No users selected</span>';
         return;
     }
     
-    selectedUsersContainer.innerHTML = '';
+    selectedUsersContainer.innerHTML = ''; // Clear previous tags
     
     selectedUserIds.forEach(userId => {
         const user = allUsers.find(u => u.id === userId);
@@ -423,7 +291,7 @@ function updateSelectedUsers() {
         tag.innerHTML = `
             ${user.username}
             <button type="button" class="btn-close btn-close-white ms-2" 
-                    style="font-size: 0.5rem;" aria-label="Remove"
+                    style="font-size: 0.5rem; filter: brightness(0.8);" aria-label="Remove"
                     onclick="removeUser(${userId})"></button>
         `;
         
@@ -432,15 +300,15 @@ function updateSelectedUsers() {
 }
 
 // Remove user from selection
-function removeUser(userId) {
-    const checkbox = document.getElementById(`user-${userId}`);
+function removeUser(userIdToRemove) {
+    const checkbox = document.getElementById(`user-${userIdToRemove}`);
     if (checkbox) checkbox.checked = false;
     
-    selectedUserIds = selectedUserIds.filter(id => id !== userId);
+    selectedUserIds = selectedUserIds.filter(id => id !== userIdToRemove);
     updateSelectedUsers();
 }
 
-// Share data with selected users
+// Share data with selected users by sending notifications
 function shareData() {
     console.log('Share data function called');
     
@@ -449,63 +317,89 @@ function shareData() {
         return;
     }
     
-    const dataType = document.querySelector('input[name="dataType"]:checked').value;
-    
-    console.log('Sharing data:', dataType, 'with users:', selectedUserIds);
-    
-    // Prepare data to send
-    const data = {
-        dataType: dataType,
-        users: selectedUserIds
-    };
-    
-    // Send share request
-    fetch('/api/share', {
+    const dataTypeElement = document.querySelector('input[name="dataType"]:checked');
+    if (!dataTypeElement) {
+        alert('Please select the type of data to share.');
+        return;
+    }
+    const dataTypeValue = dataTypeElement.value;
+    let dataTypeText = "study data"; // Default
+    if (dataTypeValue === "totalTime") {
+        dataTypeText = "Total Study Time";
+    } else if (dataTypeValue === "averageTime") {
+        dataTypeText = "Average Study Time";
+    }
+
+    const notificationMessage = `shared their '${dataTypeText}' dashboard insights with you.`;
+
+    console.log('Sharing data type:', dataTypeText, 'with user IDs:', selectedUserIds);
+    console.log('Notification message:', notificationMessage);
+
+    const doneButton = document.getElementById('doneButton');
+    doneButton.disabled = true;
+    doneButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sharing...';
+
+    fetch('/api/notification', { // Using your notification API endpoint
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            // Add CSRF token header here if your app uses them for POST requests
+            // 'X-CSRFToken': getCookie('csrftoken') // Example for Django
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+            receiver_ids: selectedUserIds,
+            content: notificationMessage
+        })
     })
     .then(response => {
-        console.log('Share response status:', response.status);
-        return response.json();
+        // Regardless of ok status, try to parse JSON, as error might be in JSON format
+        return response.json().then(data => ({ ok: response.ok, status: response.status, data }));
     })
     .then(result => {
-        console.log('Share result:', result);
-        
-        if (result.success) {
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('shareModal'));
-            if (modal) modal.hide();
-            
-            // Show success message
-            alert('Data shared successfully! Recipients will see it in their notifications.');
+        console.log('Share API response:', result);
+        doneButton.disabled = false;
+        doneButton.textContent = 'Done';
+
+        if (result.ok && result.data.success) {
+            const modalElement = document.getElementById('shareModal');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            }
+            alert('Dashboard insights shared successfully via notification!');
         } else {
-            alert('Failed to share data: ' + (result.message || 'Unknown error'));
+            alert('Failed to share dashboard insights: ' + (result.data.message || `HTTP Error ${result.status}` || 'Unknown error'));
         }
     })
     .catch(error => {
         console.error('Error sharing data:', error);
-        alert('An error occurred while sharing data.');
+        doneButton.disabled = false;
+        doneButton.textContent = 'Done';
+        alert('An error occurred while sharing data. Please try again.');
     });
 }
 
-// Load chart data when page loads directly
+// Load dashboard features and set up event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, calling loadDashboardData()');
+    console.log('Dashboard DOM loaded.');
     
-    // Call our dashboard loader function if we're on the dashboard page
-    if (typeof window.loadDashboardData === 'function') {
-        window.loadDashboardData();
+    // Call the main dashboard initializer (which should be in dashboard.js)
+    if (typeof window.initDashboardPage === 'function') {
+        window.initDashboardPage();
+    } else if (typeof initDashboardFeatures === 'function') { // Fallback if not wrapped
+        initDashboardFeatures();
+        fetchCurrentUserUsername();
+
+    } else {
+        console.warn('initDashboardPage or initDashboardFeatures not found. Dashboard might not fully initialize.');
     }
     
-    // Set up filter event listeners
-    const periodFilter = document.getElementById('period-filter');
-    const chartTypeFilter = document.getElementById('chart-type-filter');
-    
-    if (periodFilter) periodFilter.addEventListener('change', window.loadDashboardData);
-    if (chartTypeFilter) chartTypeFilter.addEventListener('change', window.loadDashboardData);
+    // The filter event listeners for charts should be part of initDashboardFeatures in dashboard.js
+    // If they were here, they would look like:
+    // const periodFilter = document.getElementById('period-filter');
+    // const chartTypeFilter = document.getElementById('chart-type-filter');
+    // if (periodFilter && typeof window.loadDashboardData === 'function') periodFilter.addEventListener('change', window.loadDashboardData);
+    // if (chartTypeFilter && typeof window.loadDashboardData === 'function') chartTypeFilter.addEventListener('change', window.loadDashboardData);
 });
 
 </script>

@@ -4,7 +4,7 @@ from flask import jsonify, request, url_for
 from flask_login import current_user, login_required
 from sqlite3 import IntegrityError
 from werkzeug.utils import secure_filename
-from app.models import Notification, StudyDuration, User
+from app.models import User
 from app import db
 from PIL import Image
 import os
@@ -229,93 +229,3 @@ def init_api_profile(app):
             print(f"Error getting users: {str(e)}")
             return jsonify([]), 500
 
-    @app.route('/api/share', methods=['POST'])
-    @login_required
-    def share_data():
-        try:
-            print("Share data API called")
-            data = request.get_json()
-            
-            if not data:
-                print("No data received in request")
-                return jsonify({
-                    'success': False,
-                    'message': 'No data received'
-                }), 400
-                
-            data_type = data.get('dataType')
-            user_ids = data.get('users', [])
-            
-            print(f"Received dataType: {data_type}, users: {user_ids}")
-            
-            if not data_type or not user_ids:
-                print("Missing required data")
-                return jsonify({
-                    'success': False,
-                    'message': 'Missing required data'
-                }), 400
-            
-            # Get content based on data type
-            shared_content = ""
-            if data_type == 'totalTime':
-                # Query total study time
-                total_time = db.session.query(db.func.sum(StudyDuration.duration))\
-                    .filter(StudyDuration.user_id == current_user.id).scalar() or 0
-                shared_content = f"{current_user.username} shared their total study time: {total_time} minutes"
-            elif data_type == 'averageTime':
-                # Query average study time
-                result = db.session.query(
-                    db.func.avg(StudyDuration.duration).label('avg_duration')
-                ).filter(StudyDuration.user_id == current_user.id).first()
-                avg_time = round(result.avg_duration) if result and result.avg_duration else 0
-                shared_content = f"{current_user.username} shared their average study time: {avg_time} minutes per session"
-            
-            # Create notifications for each recipient
-            notifications_created = 0
-            for user_id in user_ids:
-                try:
-                    user_id = int(user_id)  # Ensure user_id is an integer
-                    
-                    # Check if user exists
-                    user = User.query.get(user_id)
-                    if not user:
-                        print(f"User with ID {user_id} not found")
-                        continue
-                    
-                    notification = Notification(
-                        sender_id=current_user.id,
-                        receiver_id=user_id,
-                        content=shared_content,
-                        status=0  # Unread
-                    )
-                    db.session.add(notification)
-                    notifications_created += 1
-                    print(f"Added notification for user_id {user_id}")
-                except (ValueError, TypeError) as e:
-                    print(f"Invalid user_id: {user_id}, error: {str(e)}")
-                    continue
-            
-            if notifications_created > 0:
-                db.session.commit()
-                print(f"Successfully created {notifications_created} notifications")
-                return jsonify({
-                    'success': True,
-                    'message': f'Successfully shared {data_type} with {notifications_created} user(s)'
-                })
-            else:
-                db.session.rollback()
-                return jsonify({
-                    'success': False,
-                    'message': 'No valid users to share with'
-                }), 400
-            
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error sharing data: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return jsonify({
-                'success': False,
-                'message': f'An error occurred: {str(e)}'
-            }), 500
-            

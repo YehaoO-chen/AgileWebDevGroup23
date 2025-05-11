@@ -51,28 +51,7 @@ let timer = null;
     todoContainer.classList.add('animate');
     todoContainer.addEventListener('animationend', () => todoContainer.classList.remove('animate'));
   }
-  
 
-  // TODO: ✅ GET: Load the task data from the backend and display it in the task list
-  fetch('/api/dashboard/task')
-  .then(res => res.json())
-  .then(tasks => {
-    tasks.forEach(task => {
-      const li = document.createElement('li');
-      li.className = 'task';
-      li.setAttribute('data-status', task.status === 1 ? 'completed' : 'active');
-      li.setAttribute('data-id', task.id);
-      li.innerHTML = `
-        <div class="task-content">
-          <input type="checkbox" class="task-checkbox" ${task.status === 1 ? 'checked' : ''} />
-          <span class="task-text ${task.status === 1 ? 'completed' : ''}">${task.title}</span>
-          <button class="expand-btn">${icon_down}</button>
-          <button class="delete-btn">${icon_delete}</button>
-        </div>
-      `;
-      taskList.appendChild(li);
-    });
-  });
 
 // update the input value
 function updateTimeFromInput(type) {
@@ -146,19 +125,6 @@ function updateCountdownDisplay() {
 function backToSetup() {
   resetTimer();
 }
-
-
-// function showPopup() {
-//   console.log("showPopup", { isFocus, focusTime, breakTime });
-//   const times = isFocus ? focusTime : breakTime;
-//   const formatted = `${String(times).padStart(2, '0')}:00`; 
-//   const emoji = "🎉"
-
-//   document.getElementById('completed_time').textContent = `Your Focus Time: ${formatted}`;
-//   document.getElementById('popup-window').style.display = 'block';
-//   document.getElementById('floating-timer').classList.remove('show');
-
-// }
 
 function showPopup() {
   console.log("===== showPopup start run =====");
@@ -640,3 +606,4 @@ taskList.addEventListener('click', e => {
 
 
 }
+
