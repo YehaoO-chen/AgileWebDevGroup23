@@ -16,3 +16,15 @@ SQLAlchemy==2.0.40
 typing_extensions==4.13.2
 Werkzeug==2.3.7
 wheel==0.45.1
+
+# Testing dependencies
+pytest==7.4.2
+pytest-flask==1.2.0
+pytest-html==4.0.1
+pytest-cov==4.1.0
+flask-testing==0.8.1
+coverage==7.3.2
+
+# Selenium testing dependencies
+selenium==4.15.1
+webdriver-manager==4.0.1
