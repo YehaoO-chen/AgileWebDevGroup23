@@ -105,6 +105,7 @@ display:none;
   background-color: #f8f8f8; 
   border-radius: 0.5rem;
   border: 1px solid #EEE9DA; 
+  z-index: 9999 !important;
 }
 
 .dropdown-item {

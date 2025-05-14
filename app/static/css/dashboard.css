@@ -8,12 +8,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  font-family: sans-serif, Georgia, serif;
 }
 
 .dashboard-header h1 {
   color: #40ADA2;
   font-weight: 500;
   margin: 0;
+  font-family: sans-serif, Georgia, serif;
 }
 
 .copyright {
@@ -46,6 +48,7 @@
   padding: 20px;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-family: sans-serif, Georgia, serif;
 }
 
 .stat-card h3 {
@@ -73,6 +76,7 @@
   font-weight: 500;
   display: flex;
   align-items: center;
+  font-family: sans-serif, Georgia, serif;
 }
 
 .form-select {
@@ -85,6 +89,7 @@
 
 .chart-container {
   background-color: white;
+  font-family: sans-serif, Georgia, serif;
   border-radius: 10px;
   height: 400px;
   margin-bottom: 30px;
@@ -96,10 +101,12 @@
   display: flex;
   justify-content: center;
   margin-top: 30px;
+  font-family: sans-serif, Georgia, serif;
 }
 
 #share-button {
   background-color: #40ADA2;
+  font-family: sans-serif, Georgia, serif;
   border: none;
   border-radius: 30px;
   color: white;
@@ -132,6 +139,7 @@
 #doneButton {
   background-color: #40ADA2;
   border: none;
+  font-family: sans-serif, Georgia, serif;
 }
 
 #doneButton:hover {
@@ -169,6 +177,7 @@
   border-radius: 15px;
   border: none;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  font-family: sans-serif, Georgia, serif;
 }
 
 #doneButton:hover {

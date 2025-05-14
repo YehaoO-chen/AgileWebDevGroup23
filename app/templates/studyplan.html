@@ -1,138 +1,12 @@
-{% block styles %}
-<style>
-    .content-wrapper {
-        padding: 20px;
-    }
-    
-    .page-title {
-        text-align: center;
-        color: #C38D60;
-        margin-bottom: 30px;
-        font-size: 32px;
-    }
-    
-    .input-container {
-        background-color: #F3E7DD;
-        border-radius: 10px;
-        padding: 30px;
-        margin-bottom: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .study-input {
-        width: 100%;
-        padding: 15px;
-        border-radius: 10px;
-        border: none;
-        margin-bottom: 20px;
-        font-size: 16px;
-    }
-    
-    .add-btn {
-        background-color: #C38D60;
-        color: white;
-        border: none;
-        border-radius: 20px;
-        padding: 8px 30px;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    
-    .add-btn:hover {
-        background-color: #b07a50;
-    }
-    
-    .tabs {
-        display: flex;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #ddd;
-    }
-    
-    .tab {
-        padding: 10px 20px;
-        margin-right: 10px;
-        color: #C38D60;
-        cursor: pointer;
-        font-size: 18px;
-        position: relative;
-    }
-    
-    .tab.active {
-        color: #C38D60;
-        font-weight: bold;
-    }
-    
-    .tab.active::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background-color: #C38D60;
-    }
-    
-    .study-item {
-        background-color: #F3E7DD;
-        border-radius: 10px;
-        padding: 15px 20px;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-    .study-checkbox {
-        appearance: none;
-        -webkit-appearance: none;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #C38D60;
-        border-radius: 50%;
-        margin-right: 15px;
-        cursor: pointer;
-        position: relative;
-    }
-    
-    .study-checkbox:checked::after {
-        content: '';
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: #C38D60;
-    }
-    
-    .study-text {
-        font-size: 16px;
-        flex-grow: 1;
-        margin-left: 10px;
-    }
-    
-    .delete-btn {
-        background: none;
-        border: none;
-        color: #C38D60;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    
-    .task-container {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/studyplan.css') }}">
 {% endblock %}
 
 {% block content %}
-<h1 class="page-title">Study Plan</h1>
+<h1 class="page-title">My Study Plan</h1>
 
 <div class="input-container">
-    <input type="text" class="study-input" id="studyInput" placeholder="Input your study plan">
+    <input type="text" class="study-input" id="studyInput" placeholder="Let's crush some tasks today!">
     <button class="add-btn" id="addButton">Add</button>
 </div>
 
@@ -146,7 +20,7 @@
    
 </div>
 
-<div class="task-container" id="completedTasks" style="display: none;">
+<div class="task-container" id="completedTasks" style="display: none; ">
     <!-- Completed tasks will be displayed here -->
 </div>
 {% endblock %}

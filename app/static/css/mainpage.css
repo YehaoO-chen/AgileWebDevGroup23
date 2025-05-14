@@ -151,7 +151,7 @@
 
 
 .timer_text {
-  font-family: "Quicksand", sans-serif;
+  font-family: sans-serif, Georgia, serif;
   font-optical-sizing: auto;
   font-weight: 600;
   font-style: normal;
@@ -161,7 +161,7 @@
 
 
 #break-time, #focus-time {
-  font-family: "Quicksand", sans-serif;
+  font-family: sans-serif, Georgia, serif;
   font-optical-sizing: auto;
   font-weight: 600;
   font-style: normal;
@@ -248,7 +248,7 @@ input[type="number"] {
   padding: 16px;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  z-index: 900;
+  z-index: 500;
 }
 
 /* Separate the animation to make it triggered only once when the page is loaded */
@@ -291,7 +291,7 @@ input[type="number"] {
 }
 
 .filters {
-  font-family: "Quicksand", sans-serif;
+  font-family: sans-serif, Georgia, serif;
   font-optical-sizing: auto;
   font-weight: 600;
   font-style: normal;
@@ -446,7 +446,6 @@ input[type="number"] {
   color: white;
   padding: 15px;
   border-radius: 12px;
-  font-family: sans-serif;
 }
 
 @media (max-width: 950px){
@@ -459,6 +458,11 @@ input[type="number"] {
 .audio-widget{
     display: none;
   }
+}
+
+.audio-text {
+  font-family: sans-serif, Georgia, serif;
+  font-size: 17px;
 }
 
 .audio-widget.animate {
@@ -493,6 +497,29 @@ input[type="number"] {
   margin-top: 8px;
   margin-bottom: 8px;
   width: 100%;
+  background-color: #11111194;
+  color: white;
+  text-align: center;
+}
+
+#music-select {
+  background-color: #11111194;
+  border-radius: 4px;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+}
+
+#music-select:hover {
+  background-color: #444;
+}
+
+#bg-select {
+  background-color: #11111194;
+  border-radius: 4px;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
 }
 
 .audio-widget label {

@@ -1,0 +1,129 @@
+    .content-wrapper {
+        padding: 20px;
+    }
+    
+    .page-title {
+        text-align: center;
+        color: #40ADA2;
+        margin-bottom: 30px;
+        font-size: 35px;
+        font-family: sans-serif, Georgia, serif;
+    }
+    
+    .input-container {
+        background-color: #f9f4ee;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .study-input {
+        width: 100%;
+        padding: 15px;
+        border-radius: 10px;
+        border: none;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+    
+    .add-btn {
+        background-color: #40ADA2;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-family: sans-serif, Georgia, serif;
+        padding: 8px 30px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    .add-btn:hover {
+        background-color: #348e85;
+    }
+    
+    .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+        font-family: sans-serif, Georgia, serif;
+    }
+    
+    .tab {
+        padding: 10px 20px;
+        margin-right: 10px;
+        color: #40ADA2;
+        cursor: pointer;
+        font-size: 18px;
+        position: relative;
+    }
+    
+    .tab.active {
+        color: #40ADA2;
+        font-weight: bold;
+    }
+    
+    .tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #40ADA2;
+    }
+    
+    .study-item {
+        background-color: #f9f4ee;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .study-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #C38D60;
+        border-radius: 50%;
+        margin-right: 15px;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .study-checkbox:checked::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #C38D60;
+    }
+    
+    .study-text {
+        font-size: 16px;
+        flex-grow: 1;
+        margin-left: 10px;
+    }
+    
+    .delete-btn {
+        background: none;
+        border: none;
+        color: #C38D60;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .task-container {
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: sans-serif, Georgia, serif;
+    }
