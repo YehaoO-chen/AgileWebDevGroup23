@@ -543,8 +543,8 @@ document.querySelectorAll('#close-btn').forEach(btn => {
         toggleListBtn.addEventListener('click', () => {
             taskListContainer.classList.toggle('hidden');
             toggleListBtn.textContent = taskListContainer.classList.contains('hidden')
-                ? 'Show Tasks' // Or your preferred text
-                : 'Hide Tasks'; // Or your preferred text
+                ? 'Show' 
+                : 'Hide';
         });
     }
 
