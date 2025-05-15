@@ -152,56 +152,64 @@ function initDashboardFeatures() {
 
         console.log(`Fetching data for period: ${period}, chart type: ${chartType}`);
 
+        // DOM elements
+        const totalTasksEl = document.getElementById('total-tasks');
+        const totalTasksCard = document.getElementById('total-tasks-card');
+
         try {
-            // Fetch and update duration stats regardless of chart type, as they are always visible
+            // Duration Data - always fetch
             const durationResponse = await fetch(`/api/dashboard/duration?period=${period}`);
-            if (!durationResponse.ok) {
-                console.error(`Error fetching duration data: ${durationResponse.status}`);
-                const errData = await durationResponse.json();
-                console.error(errData);
-                // Display error to user?
-            } else {
+            if (durationResponse.ok) {
                 const durationData = await durationResponse.json();
-                console.log('Duration data received:', durationData);
                 if (totalDurationEl) totalDurationEl.textContent = Math.round(durationData.total_study_time || 0);
                 if (todayLearningEl) todayLearningEl.textContent = Math.round(durationData.today_study_time || 0);
                 if (averageDurationEl) averageDurationEl.textContent = Math.round(durationData.avg_study_time || 0);
 
                 if (chartType === 'duration') {
                     renderDurationChart(durationData);
+                    // ❌ Hide task card if shown
+                    if (totalTasksCard) totalTasksCard.style.display = 'none';
+                }
+            } else {
+                const errData = await durationResponse.json();
+                console.error("Error fetching duration data:", errData);
+            }
+
+            // Task Data - only if selected
+            if (chartType === 'task') {
+                const taskResponse = await fetch(`/api/dashboard/task?period=${period}`);
+                if (taskResponse.ok) {
+                    const taskData = await taskResponse.json();
+                    renderTaskSummaryChart(taskData);
+
+                    // ✅ Set total task value
+                    const taskSummary = taskData.task_summary || {};
+                    const totalTasks = (taskSummary.open || 0) + (taskSummary.completed || 0) + (taskSummary.deleted || 0);
+                    if (totalTasksEl) totalTasksEl.textContent = totalTasks;
+                    if (totalTasksCard) totalTasksCard.style.display = 'block';
+                } else {
+                    const errData = await taskResponse.json();
+                    console.error("Error fetching task data:", errData);
+                    if (totalTasksCard) totalTasksCard.style.display = 'none';
+
+                    if (studyChartInstance) {
+                        studyChartInstance.destroy();
+                        studyChartInstance = null;
+                    }
+                    if (chartCanvas) {
+                        const ctx = chartCanvas.getContext('2d');
+                        ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+                        ctx.fillText('Error loading task data.', chartCanvas.width / 2, chartCanvas.height / 2);
+                    }
                 }
             }
 
-            // Fetch task data only if task chart is selected
-            if (chartType === 'task') {
-                const taskResponse = await fetch(`/api/dashboard/task?period=${period}`);
-                if (!taskResponse.ok) {
-                    console.error(`Error fetching task data: ${taskResponse.status}`);
-                    const errData = await taskResponse.json();
-                    console.error(errData);
-                     // Display error to user or clear chart?
-                    if (studyChartInstance) {
-                        studyChartInstance.destroy();
-                        studyChartInstance = null; // Clear instance
-                         // Optionally display a message on the canvas
-                        if (chartCanvas) {
-                            const ctx = chartCanvas.getContext('2d');
-                            ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
-                            ctx.textAlign = 'center';
-                            ctx.fillText('Error loading task data.', chartCanvas.width / 2, chartCanvas.height / 2);
-                        }
-                    }
-                } else {
-                    const taskData = await taskResponse.json();
-                    console.log('Task data received:', taskData);
-                    renderTaskSummaryChart(taskData);
-                }
-            }
         } catch (error) {
             console.error('Error in loadAndDisplayData:', error);
-            // Handle network errors or other issues
+            if (totalTasksCard) totalTasksCard.style.display = 'none';
         }
     }
+
 
     // Event Listeners for filters
     if (periodFilter) {
@@ -215,7 +223,7 @@ function initDashboardFeatures() {
     loadAndDisplayData();
 
     // Note: Share modal functionality (openShareModal, loadUsers, etc.)
-    // is assumed to be handled by the existing script in dashboard.html via onclick
+    // is assumed to be handled by the sharemodal.js
     // or its own DOMContentLoaded listener. If not, those would also need to be
     // initialized here or ensured they are globally available.
 }
