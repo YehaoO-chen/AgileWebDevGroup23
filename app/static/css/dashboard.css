@@ -1,6 +1,8 @@
 /* dashboard.css */
 .dashboard-container {
-  padding: 20px;
+  padding: 30px;
+  padding-top: 40px;
+  padding-bottom: 0;
 }
 
 .dashboard-header {
