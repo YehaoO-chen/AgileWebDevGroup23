@@ -48,6 +48,8 @@ main{
   height: 100vh; 
   position: fixed;
   justify-content: space-between;
+  z-index: 1000;
+
 }
 
 /* Manage the sidebar items */
