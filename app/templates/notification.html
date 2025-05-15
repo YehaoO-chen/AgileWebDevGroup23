@@ -59,9 +59,34 @@
     </div>
   </div>
 </div>
+
+
+
+<!-- Dashboard Chart Modal -->
+<div class="modal fade" id="notificationChartModal" tabindex="-1" aria-labelledby="notificationChartModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header justify-content-center">
+        <h5 class="modal-title w-100 text-center">Shared Dashboard Chart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex justify-content-center">
+        <div style="width: 80%; max-width: 500px;"></div>
+          <canvas id="notificationChartCanvas" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
+<script>
+  const currentUserId = {{ user.id }};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+
+
 
 {% endblock %}

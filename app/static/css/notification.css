@@ -245,7 +245,7 @@
   }
   
   .message-sent .message-header {
-    color: rgba(255,255,255,0.9);
+    color: #333;
     justify-content: flex-end;
   }
   
@@ -360,3 +360,4 @@
       height: calc(100vh - 180px);
     }
   }
+

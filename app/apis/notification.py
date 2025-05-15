@@ -4,7 +4,7 @@ from app import db
 from app.models import Notification, User
 import traceback # For more detailed error logging if needed
 
-
+    
 def init_api_notification(app):
     # Notification API
     @app.route('/api/notification', methods=['POST'])
@@ -212,3 +212,30 @@ def init_api_notification(app):
         db.session.commit()
         
         return jsonify({'success': True, 'message': f'Notification {notification_id} status updated to {new_status}.'})
+   
+    @app.route('/api/notification/<int:notification_id>/data', methods=['GET'])
+    @login_required
+    def get_notification_shared_data(notification_id):
+        notification = Notification.query.get(notification_id)
+        if not notification:
+            return jsonify({'success': False, 'message': 'Notification not found'}), 404
+        if notification.receiver_id != current_user.id and notification.sender_id != current_user.id:
+            return jsonify({'success': False, 'message': 'Access denied'}), 403
+
+        content = notification.content
+        if "Total Study Time" in content:
+            data_type = "Total Study Time"
+            value = content.split(":")[1].replace("minutes", "").strip()
+        elif "Average Study Time" in content:
+            data_type = "Average Study Time"
+            value = content.split(":")[1].replace("minutes", "").strip()
+        else:
+            return jsonify({'success': False, 'message': 'Unrecognized data format'}), 400
+
+        return jsonify({
+            'success': True,
+            'data_type': data_type,
+            'value': value,
+            'period': "Shared manually"
+        })
+
