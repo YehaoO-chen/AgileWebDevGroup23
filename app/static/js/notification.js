@@ -1,45 +1,53 @@
+let currentFilter = 'all';
+
 function initNotificationFeatures() {
     console.log("Initializing Notification Features...");
 
     const notificationListElement = document.getElementById('notificationList');
     const totalNotificationsElement = document.getElementById('total-notifications');
     const receivedCountElement = document.getElementById('received-count');
-    const sentCountElement = document.getElementById('sent-count'); // This will likely show 0 or be hidden
+    const sentCountElement = document.getElementById('sent-count');
     const todayCountElement = document.getElementById('today-count');
     const emptyStateElement = document.getElementById('emptyState');
-    // Ensure spinnerContainer is accessed only if notificationListElement exists
     const spinnerContainer = notificationListElement ? notificationListElement.querySelector('.spinner-container') : null;
 
-    // Helper function to format date
     function formatDate(dateString) {
         const date = new Date(dateString);
         return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
     }
 
-    // Helper function to format time
     function formatTime(dateString) {
         const date = new Date(dateString);
         return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Function to create a notification HTML element for received messages
     function createNotificationElement(notification) {
         const messageWrapper = document.createElement('div');
-        messageWrapper.classList.add('message-wrapper', 'message-received');
+        messageWrapper.classList.add('message-wrapper');
         messageWrapper.setAttribute('data-id', notification.id);
         messageWrapper.setAttribute('data-status', notification.status);
 
-        let readDotHtml = '';
-        if (notification.status === 0) { // Unread (status 0)
-            // Red dot on top-right corner
-            readDotHtml = '<span class="unread-dot" style="position: absolute; top: -5px; right: -5px; left: auto; width: 10px; height: 10px; background-color: #DC3545; border-radius: 50%; border: 1px solid white; z-index:1;"></span>';
+        const isSent = notification.__type === 'sent';
+        if (isSent) {
+            messageWrapper.classList.add('message-sent');
+        } else {
+            messageWrapper.classList.add('message-received');
         }
+
+        let readDotHtml = '';
+        if (notification.status === 0 && !isSent) {
+            readDotHtml = '<span class="unread-dot" style="position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background-color: #DC3545; border-radius: 50%; border: 1px solid white; z-index:1;"></span>';
+        }
+
+        const messageHeader = isSent
+            ? `<strong>To: ${notification.receiver_username || 'Unknown User'}</strong>`
+            : `<strong>From: ${notification.sender_username || 'Unknown User'}</strong>`;
 
         messageWrapper.innerHTML = `
             ${readDotHtml}
-            <div class="message-bubble">
+            <div class="message-bubble ${isSent ? 'bg-light' : ''}">
                 <div class="message-header">
-                    <strong>${notification.sender_username || 'Unknown User'}</strong>
+                    ${messageHeader}
                 </div>
                 <div class="message-content">
                     ${notification.content}
@@ -50,192 +58,214 @@ function initNotificationFeatures() {
             </div>
         `;
 
-        if (notification.status === 0) {
-            messageWrapper.style.cursor = 'pointer';
-            messageWrapper.addEventListener('click', async () => {
+        messageWrapper.style.cursor = 'pointer';
+        messageWrapper.addEventListener('click', async () => {
+            if (!isSent && notification.status === 0) {
                 await markNotificationAsRead(notification.id, messageWrapper);
-            });
-        }
+            }
+            openNotificationModal(notification);
+        });
+
         return messageWrapper;
     }
 
-    // Function to mark notification as read
     async function markNotificationAsRead(notificationId, element) {
         try {
             const response = await fetch(`/api/notification/${notificationId}/status`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Add CSRF token header if needed
-                },
-                body: JSON.stringify({ status: 1 }) // 1 for read
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 1 })
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Failed to mark notification as read:', errorData.message);
-                return;
-            }
 
             const result = await response.json();
             if (result.success) {
-                console.log(`Notification ${notificationId} marked as read.`);
                 const dot = element.querySelector('.unread-dot');
-                if (dot) {
-                    dot.remove();
-                }
+                if (dot) dot.remove();
                 element.setAttribute('data-status', '1');
                 element.style.cursor = 'default';
-                updateUnreadNotificationBadge(); // Update global badge
-            } else {
-                console.error('API reported failure in marking notification as read:', result.message);
+                updateUnreadNotificationBadge();
             }
         } catch (error) {
             console.error('Error marking notification as read:', error);
         }
     }
 
-    // Function to load all (active received) notifications
     async function loadAllNotifications() {
-        if (!notificationListElement) {
-            console.error("Notification list element not found. Cannot load notifications.");
-            return;
-        }
+        if (!notificationListElement) return;
 
         if (spinnerContainer) spinnerContainer.classList.remove('d-none');
         if (emptyStateElement) emptyStateElement.classList.add('d-none');
-        notificationListElement.innerHTML = ''; // Clear previous content
-
-        // Re-show spinner if it was hidden by clearing innerHTML
-        if (spinnerContainer && notificationListElement.children.length === 0) {
-             notificationListElement.appendChild(spinnerContainer);
-        }
+        notificationListElement.innerHTML = '';
 
         try {
-            // Fetch active received notifications (status 0 or 1) from /api/notification/
-            // The backend API uses @login_required and current_user to scope notifications.
-            const response = await fetch('/api/notification/');
+            const [receivedRes, sentRes] = await Promise.all([
+                fetch('/api/notification/'),
+                fetch('/api/notifications/sent')
+            ]);
 
-            if (!response.ok) {
-                console.error('Failed to fetch notifications, status:', response.status);
-                const errorText = await response.text(); // Get more error details
-                console.error('Error details:', errorText);
-                notificationListElement.innerHTML = '<p class="text-danger p-3">Error loading notifications. Please try again.</p>';
-                if (spinnerContainer) spinnerContainer.classList.add('d-none');
-                return;
+            const received = receivedRes.ok ? await receivedRes.json() : [];
+            const sent = sentRes.ok ? await sentRes.json() : [];
+
+            received.forEach(n => n.__type = 'received');
+            sent.forEach(n => n.__type = 'sent');
+
+            let all = [...received, ...sent];
+
+            const now = new Date();
+            const todayStr = now.toLocaleDateString();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay());
+            startOfWeek.setHours(0, 0, 0, 0);
+
+            if (currentFilter === 'received') {
+                all = received;
+            } else if (currentFilter === 'sent') {
+                all = sent;
+            } else if (currentFilter === 'today') {
+                all = all.filter(n => new Date(n.send_time).toLocaleDateString() === todayStr);
+            } else if (currentFilter === 'week') {
+                all = all.filter(n => new Date(n.send_time) >= startOfWeek);
             }
 
-            const receivedActiveNotifications = await response.json();
+            all.sort((a, b) => new Date(b.send_time) - new Date(a.send_time));
 
-            if (spinnerContainer) spinnerContainer.classList.add('d-none');
+            totalNotificationsElement.textContent = all.length;
+            receivedCountElement.textContent = received.length;
+            sentCountElement.textContent = sent.length;
 
-            if (!Array.isArray(receivedActiveNotifications)) {
-                console.error('Fetched notifications is not an array:', receivedActiveNotifications);
-                notificationListElement.innerHTML = '<p class="text-warning p-3">Received unexpected data format for notifications.</p>';
-                return;
-            }
-
-            // API should ideally sort, but client-side sort as a fallback
-            receivedActiveNotifications.sort((a, b) => new Date(b.send_time) - new Date(a.send_time));
-
-            if (totalNotificationsElement) totalNotificationsElement.textContent = receivedActiveNotifications.length;
-            if (receivedCountElement) receivedCountElement.textContent = receivedActiveNotifications.length;
-            if (sentCountElement) sentCountElement.textContent = "0"; // As we are only fetching received
-
-            let todayNotificationsCount = 0;
-            const todayStr = new Date().toLocaleDateString();
-
-            notificationListElement.innerHTML = ''; // Clear spinner or previous content again before adding new items
-
-            if (receivedActiveNotifications.length === 0) {
+            if (all.length === 0) {
                 if (emptyStateElement) emptyStateElement.classList.remove('d-none');
-            } else {
-                if (emptyStateElement) emptyStateElement.classList.add('d-none');
-                let lastDate = null;
-                receivedActiveNotifications.forEach(notification => {
-                    const notificationDateStr = new Date(notification.send_time).toLocaleDateString();
-                    if (notificationDateStr === todayStr) {
-                        todayNotificationsCount++;
-                    }
-
-                    const currentDate = formatDate(notification.send_time);
-                    if (currentDate !== lastDate) {
-                        const dateDivider = document.createElement('div');
-                        dateDivider.classList.add('date-divider');
-                        dateDivider.innerHTML = `<span>${currentDate}</span>`;
-                        notificationListElement.appendChild(dateDivider);
-                        lastDate = currentDate;
-                    }
-                    const notificationElement = createNotificationElement(notification);
-                    notificationListElement.appendChild(notificationElement);
-                });
+                if (spinnerContainer) spinnerContainer.classList.add('d-none');
+                todayCountElement.textContent = '0';
+                return;
             }
-            if (todayCountElement) todayCountElement.textContent = todayNotificationsCount;
-            updateUnreadNotificationBadge(); // Update global badge
 
-        } catch (error) {
-            console.error('Error fetching or processing notifications:', error);
+            let todayCount = 0;
+            let lastDate = null;
+
+            all.forEach(notification => {
+                const sendDate = new Date(notification.send_time);
+                const dateStr = sendDate.toLocaleDateString();
+                if (dateStr === todayStr) todayCount++;
+
+                const currentDate = formatDate(notification.send_time);
+                if (currentDate !== lastDate) {
+                    const divider = document.createElement('div');
+                    divider.classList.add('date-divider');
+                    divider.innerHTML = `<span>${currentDate}</span>`;
+                    notificationListElement.appendChild(divider);
+                    lastDate = currentDate;
+                }
+
+                const element = createNotificationElement(notification);
+                notificationListElement.appendChild(element);
+            });
+
+            todayCountElement.textContent = todayCount;
             if (spinnerContainer) spinnerContainer.classList.add('d-none');
-            notificationListElement.innerHTML = '<p class="text-danger p-3">An unexpected error occurred while loading notifications. Please try again.</p>';
+            updateUnreadNotificationBadge();
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            notificationListElement.innerHTML = '<p class="text-danger p-3">An error occurred while loading notifications. Please try again.</p>';
+            if (spinnerContainer) spinnerContainer.classList.add('d-none');
         }
     }
 
-    // Function to update a global unread notification badge (e.g., in the navbar)
     async function updateUnreadNotificationBadge() {
         try {
-            // The /api/notification/ endpoint returns notifications with status 0 (unread) and 1 (read).
-            // We need to filter for status 0 on the client side for the unread count.
-            const response = await fetch('/api/notification/'); // Backend scopes this to current_user
-            if (!response.ok) {
-                console.warn('Could not fetch data for unread notification badge.');
-                return;
-            }
-            const activeNotifications = await response.json();
-            let unreadCount = 0;
-            if (Array.isArray(activeNotifications)) {
-                unreadCount = activeNotifications.filter(n => n.status === 0).length;
-            }
+            const response = await fetch('/api/notification/');
+            if (!response.ok) return;
 
-            const badgeElement = document.querySelector('.notification-badge'); // Adjust selector
-            const notificationIcon = document.querySelector('.notification-icon-indicator'); // Adjust selector
+            const activeNotifications = await response.json();
+            const unreadCount = activeNotifications.filter(n => n.status === 0).length;
+
+            const badgeElement = document.querySelector('.notification-badge');
+            const notificationIcon = document.querySelector('.notification-icon-indicator');
 
             if (badgeElement) {
                 badgeElement.textContent = unreadCount > 0 ? unreadCount : '';
                 badgeElement.style.display = unreadCount > 0 ? 'inline-block' : 'none';
             }
             if (notificationIcon) {
-                 notificationIcon.style.display = unreadCount > 0 ? 'block' : 'none';
+                notificationIcon.style.display = unreadCount > 0 ? 'block' : 'none';
             }
         } catch (error) {
             console.warn('Error updating unread notification badge:', error);
         }
     }
 
-    // Initial setup function
-    async function initializePage() {
-        // No longer need to fetch currentUserId here
+    function initializePage() {
         loadAllNotifications();
 
-        // Example: Setup for a filter dropdown if you have one
-        const filterDropdown = document.querySelector('.filter-dropdown'); // Ensure this ID/class exists in your HTML
+        const filterDropdown = document.querySelector('.filter-dropdown');
         if (filterDropdown) {
             filterDropdown.addEventListener('change', (event) => {
-                console.log("Filter changed to:", event.target.value);
-                // Currently, only "All Notifications" (received) is handled by reloading.
-                // Implement other filter logic as needed.
-                if (event.target.value === "All Notifications") {
-                    loadAllNotifications();
+                const value = event.target.value;
+                switch (value) {
+                    case 'All Notifications': currentFilter = 'all'; break;
+                    case 'Received': currentFilter = 'received'; break;
+                    case 'Sent': currentFilter = 'sent'; break;
+                    case 'Today': currentFilter = 'today'; break;
+                    case 'This Week': currentFilter = 'week'; break;
+                    default: currentFilter = 'all';
                 }
+                loadAllNotifications();
             });
         }
     }
 
-    // Check if we are on the notification page before running full init
-    if (notificationListElement) {
-        initializePage();
-    } else {
-        // If not on the notification page, still attempt to update the global badge
-        console.log("Not on notification page, attempting to update global badge only.");
-        updateUnreadNotificationBadge();
+    function openNotificationModal(notification) {
+        const isSharedDashboard = notification.content.includes('dashboard insights');
+
+        if (isSharedDashboard) {
+            const modalEl = document.getElementById('notificationChartModal');
+            const canvas = document.getElementById('notificationChartCanvas');
+
+            if (!canvas || !modalEl) return;
+
+            const ctx = canvas.getContext('2d');
+            if (window.notificationChartInstance) {
+                window.notificationChartInstance.destroy();
+            }
+
+            const sharedValue = extractStudyValue(notification.content); 
+
+            window.notificationChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Shared Study Time'],
+                    datasets: [{
+                        label: 'Minutes',
+                        data: [sharedValue],
+                        backgroundColor: 'rgba(64, 173, 162, 0.7)',
+                        borderColor: 'rgba(64, 173, 162, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 300 
+                        }
+                    }
+                }
+            });
+
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        } else {
+            alert("This notification does not contain shared dashboard data.");
+        }
     }
+
+    function extractStudyValue(content) {
+        const match = content.match(/(\d+)\s*minutes?/i);
+        return match ? parseInt(match[1]) : 0;
+    }
+
+    initializePage();
+
 }
+
+
