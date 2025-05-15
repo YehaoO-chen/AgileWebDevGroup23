@@ -1,3 +1,5 @@
+let currentFilter = 'all';
+
 function initNotificationFeatures() {
     console.log("Initializing Notification Features...");
 
@@ -104,81 +106,106 @@ function initNotificationFeatures() {
 
         if (spinnerContainer) spinnerContainer.classList.remove('d-none');
         if (emptyStateElement) emptyStateElement.classList.add('d-none');
-        notificationListElement.innerHTML = ''; // Clear previous content
-
-        // Re-show spinner if it was hidden by clearing innerHTML
-        if (spinnerContainer && notificationListElement.children.length === 0) {
-             notificationListElement.appendChild(spinnerContainer);
-        }
+        notificationListElement.innerHTML = '';
 
         try {
-            // Fetch active received notifications (status 0 or 1) from /api/notification/
-            // The backend API uses @login_required and current_user to scope notifications.
-            const response = await fetch('/api/notification/');
+            const [receivedRes, sentRes] = await Promise.all([
+                fetch('/api/notification/'),
+                fetch('/api/notifications/sent')
+            ]);
 
-            if (!response.ok) {
-                console.error('Failed to fetch notifications, status:', response.status);
-                const errorText = await response.text(); // Get more error details
-                console.error('Error details:', errorText);
-                notificationListElement.innerHTML = '<p class="text-danger p-3">Error loading notifications. Please try again.</p>';
-                if (spinnerContainer) spinnerContainer.classList.add('d-none');
-                return;
+            const received = receivedRes.ok ? await receivedRes.json() : [];
+            const sent = sentRes.ok ? await sentRes.json() : [];
+
+            // Add source tagging
+            received.forEach(n => n.__type = 'received');
+            sent.forEach(n => n.__type = 'sent');
+
+            let all = [...received, ...sent];
+
+            // Screening Logic
+            const now = new Date();
+            const todayStr = now.toLocaleDateString();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay());
+            startOfWeek.setHours(0, 0, 0, 0);
+
+            if (currentFilter === 'received') {
+                all = received;
+            } else if (currentFilter === 'sent') {
+                all = sent;
+            } else if (currentFilter === 'today') {
+                all = all.filter(n => new Date(n.send_time).toLocaleDateString() === todayStr);
+            } else if (currentFilter === 'week') {
+                all = all.filter(n => new Date(n.send_time) >= startOfWeek);
             }
 
-            const receivedActiveNotifications = await response.json();
+            // Sort by: reverse chronological order
+            all.sort((a, b) => new Date(b.send_time) - new Date(a.send_time));
 
-            if (spinnerContainer) spinnerContainer.classList.add('d-none');
+            // Update statistics
+            totalNotificationsElement.textContent = all.length;
+            receivedCountElement.textContent = received.length;
+            sentCountElement.textContent = sent.length;
 
-            if (!Array.isArray(receivedActiveNotifications)) {
-                console.error('Fetched notifications is not an array:', receivedActiveNotifications);
-                notificationListElement.innerHTML = '<p class="text-warning p-3">Received unexpected data format for notifications.</p>';
-                return;
-            }
-
-            // API should ideally sort, but client-side sort as a fallback
-            receivedActiveNotifications.sort((a, b) => new Date(b.send_time) - new Date(a.send_time));
-
-            if (totalNotificationsElement) totalNotificationsElement.textContent = receivedActiveNotifications.length;
-            if (receivedCountElement) receivedCountElement.textContent = receivedActiveNotifications.length;
-            if (sentCountElement) sentCountElement.textContent = "0"; // As we are only fetching received
-
-            let todayNotificationsCount = 0;
-            const todayStr = new Date().toLocaleDateString();
-
-            notificationListElement.innerHTML = ''; // Clear spinner or previous content again before adding new items
-
-            if (receivedActiveNotifications.length === 0) {
+            if (all.length === 0) {
                 if (emptyStateElement) emptyStateElement.classList.remove('d-none');
-            } else {
-                if (emptyStateElement) emptyStateElement.classList.add('d-none');
-                let lastDate = null;
-                receivedActiveNotifications.forEach(notification => {
-                    const notificationDateStr = new Date(notification.send_time).toLocaleDateString();
-                    if (notificationDateStr === todayStr) {
-                        todayNotificationsCount++;
-                    }
-
-                    const currentDate = formatDate(notification.send_time);
-                    if (currentDate !== lastDate) {
-                        const dateDivider = document.createElement('div');
-                        dateDivider.classList.add('date-divider');
-                        dateDivider.innerHTML = `<span>${currentDate}</span>`;
-                        notificationListElement.appendChild(dateDivider);
-                        lastDate = currentDate;
-                    }
-                    const notificationElement = createNotificationElement(notification);
-                    notificationListElement.appendChild(notificationElement);
-                });
+                if (spinnerContainer) spinnerContainer.classList.add('d-none');
+                todayCountElement.textContent = '0';
+                return;
             }
-            if (todayCountElement) todayCountElement.textContent = todayNotificationsCount;
-            updateUnreadNotificationBadge(); // Update global badge
+
+            let todayCount = 0;
+            let lastDate = null;
+
+            all.forEach(notification => {
+                const sendDate = new Date(notification.send_time);
+                const dateStr = sendDate.toLocaleDateString();
+                if (dateStr === todayStr) todayCount++;
+
+                const currentDate = formatDate(notification.send_time);
+                if (currentDate !== lastDate) {
+                    const divider = document.createElement('div');
+                    divider.classList.add('date-divider');
+                    divider.innerHTML = `<span>${currentDate}</span>`;
+                    notificationListElement.appendChild(divider);
+                    lastDate = currentDate;
+                }
+
+                let element;
+                if (notification.__type === 'received') {
+                    element = createNotificationElement(notification); 
+                } else {
+                    element = document.createElement('div');
+                    element.classList.add('message-wrapper', 'message-sent');
+                    element.innerHTML = `
+                        <div class="message-bubble bg-light">
+                            <div class="message-header">
+                                <strong>To: ${notification.receiver_username}</strong>
+                            </div>
+                            <div class="message-content">${notification.content}</div>
+                            <div class="message-footer">
+                                <span class="timestamp">${formatTime(notification.send_time)}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                notificationListElement.appendChild(element);
+            });
+
+            todayCountElement.textContent = todayCount;
+            if (spinnerContainer) spinnerContainer.classList.add('d-none');
+            updateUnreadNotificationBadge();
 
         } catch (error) {
-            console.error('Error fetching or processing notifications:', error);
+            console.error('Error loading notifications:', error);
+            notificationListElement.innerHTML = '<p class="text-danger p-3">An error occurred while loading notifications. Please try again.</p>';
             if (spinnerContainer) spinnerContainer.classList.add('d-none');
-            notificationListElement.innerHTML = '<p class="text-danger p-3">An unexpected error occurred while loading notifications. Please try again.</p>';
         }
     }
+
+    
 
     // Function to update a global unread notification badge (e.g., in the navbar)
     async function updateUnreadNotificationBadge() {
@@ -220,12 +247,27 @@ function initNotificationFeatures() {
         const filterDropdown = document.querySelector('.filter-dropdown'); // Ensure this ID/class exists in your HTML
         if (filterDropdown) {
             filterDropdown.addEventListener('change', (event) => {
-                console.log("Filter changed to:", event.target.value);
-                // Currently, only "All Notifications" (received) is handled by reloading.
-                // Implement other filter logic as needed.
-                if (event.target.value === "All Notifications") {
-                    loadAllNotifications();
+                const value = event.target.value;
+                switch (value) {
+                    case 'All Notifications':
+                        currentFilter = 'all';
+                        break;
+                    case 'Received':
+                        currentFilter = 'received';
+                        break;
+                    case 'Sent':
+                        currentFilter = 'sent';
+                        break;
+                    case 'Today':
+                        currentFilter = 'today';
+                        break;
+                    case 'This Week':
+                        currentFilter = 'week';
+                        break;
+                    default:
+                        currentFilter = 'all';
                 }
+                loadAllNotifications();
             });
         }
     }
