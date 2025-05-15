@@ -179,7 +179,7 @@ function initNotificationFeatures() {
                     element = document.createElement('div');
                     element.classList.add('message-wrapper', 'message-sent');
                     element.innerHTML = `
-                        <div class="message-bubble bg-light">
+                        <div class="message-bubble ">
                             <div class="message-header">
                                 <strong>To: ${notification.receiver_username}</strong>
                             </div>
