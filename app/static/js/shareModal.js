@@ -177,14 +177,22 @@ function shareData() {
     }
 
     const type = typeElement.value;
-    let dataText = "dashboard insights";
+    const period = document.getElementById('period-filter')?.value || 'unknown';
 
+    const periodTextMap = {
+        day: 'Today',
+        week: 'This Week',
+        month: 'This Month'
+    };
+    const periodText = periodTextMap[period] || period;
+
+    let dataText = "dashboard insights";
     if (type === "totalTime") {
         const val = document.getElementById('total-duration')?.textContent.trim();
-        dataText = `Total Study Time: ${val} minutes`;
+        dataText = `Total Study Time: ${val} minutes (${periodText})`;
     } else if (type === "averageTime") {
         const val = document.getElementById('average-duration')?.textContent.trim();
-        dataText = `Average Study Time: ${val} minutes`;
+        dataText = `Average Study Time: ${val} minutes (${periodText})`;
     }
 
     const message = `shared their '${dataText}' dashboard insights with you.`;
@@ -220,6 +228,7 @@ function shareData() {
         alert('An error occurred while sharing.');
     });
 }
+
 
 // Auto fetch username on page load
 document.addEventListener('DOMContentLoaded', () => {
