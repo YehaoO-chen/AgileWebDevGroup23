@@ -27,5 +27,60 @@ Our project **ProcrastiNo** is a web application designed to provide a fully sim
 - **Backend**: Flask 
 - **Data Processing**: SQLite
 
-## 🚀 Getting Started (*※TBD*)
-**To be determined - once our project has completed**
+## 🚀 Getting Started
+
+This section will guide you through setting up and running the project locally.
+
+---
+
+### ✅ Prerequisites
+
+Make sure you have the following installed:
+
+- [Python 3.8+](https://www.python.org/)
+- [pip](https://pip.pypa.io/)
+- Virtual environment tool: `venv` or `virtualenv`
+
+---
+
+### 🔧 Installation
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/YehaoO-chen/AgileWebDevGroup23.git
+cd AgileWebDevGroup23
+```
+2. **Create and activate a virtual environment**
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+3. **Install Dependency**
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### ▶️ Running the App
+
+**Start the run.py to initiate the project:**
+```bash
+python run.py
+```
+
+**Open the address:**
+```bash
+ * Running on: http://127.0.0.1:5000
+```
+
+
+
+## 🔬 Running Test
