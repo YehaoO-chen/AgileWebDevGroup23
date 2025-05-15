@@ -75,11 +75,7 @@ def init_api_studyduration(app):
         print("Received study time data:", request.json)
         try:
             data = request.json
-            
-            # 解析开始时间
             start_time = datetime.fromisoformat(data['start_time'].replace('Z', '+00:00'))
-            
-            # 计算结束时间（开始时间 + 持续时间）
             end_time = start_time + timedelta(minutes=data['duration'])
             
             study_duration = StudyDuration(
