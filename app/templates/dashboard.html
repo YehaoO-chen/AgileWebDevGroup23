@@ -323,14 +323,17 @@ function shareData() {
         return;
     }
     const dataTypeValue = dataTypeElement.value;
-    let dataTypeText = "study data"; // Default
+    let dataTypeText = "dashboard insights";
     if (dataTypeValue === "totalTime") {
-        dataTypeText = "Total Study Time";
+        const val = document.getElementById('total-duration')?.textContent.trim();
+        dataTypeText = `Total Study Time: ${val} minutes`;
     } else if (dataTypeValue === "averageTime") {
-        dataTypeText = "Average Study Time";
+        const val = document.getElementById('average-duration')?.textContent.trim();
+        dataTypeText = `Average Study Time: ${val} minutes`;
     }
 
     const notificationMessage = `shared their '${dataTypeText}' dashboard insights with you.`;
+
 
     console.log('Sharing data type:', dataTypeText, 'with user IDs:', selectedUserIds);
     console.log('Notification message:', notificationMessage);
