@@ -39,7 +39,7 @@ Make sure you have the following installed:
 
 - [Python 3.8+](https://www.python.org/)
 - [pip](https://pip.pypa.io/)
-- Virtual environment tool: `venv` or `virtualenv`
+- Virtual environment tool: `venv` or `virtualenv` 
 
 ---
 
