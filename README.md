@@ -74,6 +74,11 @@ pip install -r requirements.txt
 
 **Start the run.py to initiate the project:**
 ```bash
+flask run
+```
+
+**Or**
+```bash
 python run.py
 ```
 
