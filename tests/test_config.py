@@ -4,14 +4,15 @@ This file contains shared configurations for the test suite.
 """
 
 import os
+import tempfile
 
 # Unit Test Configuration
 class UnitTestConfig:
     """Configuration for unit tests."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory SQLite database
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    WTF_CSRF_ENABLED = False  # Disable CSRF for testing
+    WTF_CSRF_ENABLED = False
     SECRET_KEY = 'test-secret-key'
     LOGIN_VIEW = 'login'
     LOGIN_MESSAGE = 'Please login first'
@@ -21,8 +22,7 @@ class UnitTestConfig:
 class SeleniumTestConfig:
     """Configuration for Selenium tests."""
     TESTING = True
-    # Using SQLite file for selenium tests to persist between requests
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
     SECRET_KEY = 'test-secret-key'
@@ -45,3 +45,10 @@ def cleanup_database():
     """Remove test database if it exists."""
     if os.path.exists('test.db'):
         os.remove('test.db')
+    if os.path.exists('site.db'):
+        os.remove('site.db')
+
+# Helper function to create a temporary user data directory
+def create_temp_user_data_dir():
+    """Create a temporary directory for Chrome user data."""
+    return tempfile.mkdtemp()
