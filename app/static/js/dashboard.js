@@ -1,4 +1,3 @@
-window.loadAndDisplayData = loadAndDisplayData;
 
 function initDashboardFeatures() {
     console.log("Initializing Dashboard Features...");
@@ -236,6 +235,7 @@ function initDashboardFeatures() {
             if (totalTasksCard) totalTasksCard.style.display = 'block';
         }
     })();
+    window.loadAndDisplayData = loadAndDisplayData;
 
     // Note: Share modal functionality (openShareModal, loadUsers, etc.)
     // is assumed to be handled by the sharemodal.js
