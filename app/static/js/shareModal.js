@@ -1,6 +1,6 @@
-let allUsers = [];
-let selectedUserIds = [];
-let currentUserUsername = '';
+var allUsers = [];
+var selectedUserIds = [];
+var currentUserUsername = '';
 
 // Fetch current user's username once
 async function fetchCurrentUserUsername() {

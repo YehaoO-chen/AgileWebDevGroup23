@@ -82,7 +82,7 @@
 
 {% block extra_js %}
 <script>
-  const currentUserId = {{ user.id }};
+  var currentUserId = {{ user.id }};
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ url_for('static', filename='js/notification.js') }}"></script>

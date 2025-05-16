@@ -1,4 +1,4 @@
-let currentFilter = 'all';
+var currentFilter = 'all';
 
 function initNotificationFeatures() {
     console.log("Initializing Notification Features...");
