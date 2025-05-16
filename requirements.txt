@@ -16,6 +16,7 @@ SQLAlchemy==2.0.40
 typing_extensions==4.13.2
 Werkzeug==2.3.7
 wheel==0.45.1
+Flask-WTF==1.2.2
 
 # Testing dependencies
 pytest==7.4.2

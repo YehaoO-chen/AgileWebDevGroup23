@@ -15,12 +15,12 @@ def init_api_studyplan(app):
         study_plan = StudyPlan(
             user_id=current_user.id,
             content=data['content'],
-            # create_time is set by default in model
-            # complete_time is initially null
-            # status is set by default in model (0: open)
+            title='-'  
         )
+
         db.session.add(study_plan)
         db.session.commit()
+
         return jsonify({
             'success': True,
             'message': 'Study plan created successfully.',
@@ -28,11 +28,14 @@ def init_api_studyplan(app):
                 'id': study_plan.id,
                 'user_id': study_plan.user_id,
                 'content': study_plan.content,
-                'create_time': study_plan.create_time.isoformat() + 'Z', # ISO format with Z for UTC
+                'create_time': study_plan.create_time.isoformat() + 'Z',
                 'complete_time': study_plan.complete_time.isoformat() + 'Z' if study_plan.complete_time else None,
                 'status': study_plan.status
             }
         }), 201
+
+
+
 
     @app.route('/api/studyplan/<int:study_plan_id>', methods=['GET'])
     @login_required
@@ -48,7 +51,8 @@ def init_api_studyplan(app):
                 'user_id': study_plan.user_id,
                 'content': study_plan.content,
                 'create_time': study_plan.create_time.isoformat() + 'Z',
-                'complete_time': study_plan.complete_time.isoformat() + 'Z' if study_plan.complete_time else None,
+                'complete_time': study_plan.complete_time.isoformat() + 'Z' if study_plan.complete_time else '',
+
                 'status': study_plan.status
             }
         })
@@ -109,7 +113,7 @@ def init_api_studyplan(app):
                 'user_id': study_plan.user_id,
                 'content': study_plan.content,
                 'create_time': study_plan.create_time.isoformat() + 'Z',
-                'complete_time': study_plan.complete_time.isoformat() + 'Z' if study_plan.complete_time else None,
+                'complete_time': study_plan.complete_time.isoformat() + 'Z' if study_plan.complete_time else '',
                 'status': study_plan.status
             }
         })

@@ -1,20 +1,80 @@
 /* Timer widget JS */
 // Initialise the default value
-// (function () {
-let focusTime = 50;
-let breakTime = 10;
-let remainingSeconds = 0;
-let isFocus = true;
-let isPaused = false;
-let timer = null;
-// })();
-let pauseCount = 0;
-let currentSessionStartTime = null;
-let currentSessionInitialFocusTime = 0; // To store focusTime at the start of a session
+
+window.focusTime = window.focusTime || 50; 
+window.breakTime = window.breakTime || 10; 
+window.remainingSeconds = window.remainingSeconds || 0; 
+window.isFocus = window.isFocus ?? true; 
+window.isPaused = window.isPaused ?? false; 
+window.timer = window.timer || null; 
 
 
+function saveTimerState() {
+  localStorage.setItem('remainingSeconds', window.remainingSeconds);
+  localStorage.setItem('isFocus', window.isFocus);
+  localStorage.setItem('timerRunning', window.timer ? 'true' : 'false');
+}
 
-    // Restricting the minimum and maximum input value (if the input value is less than 1, then change to 1; if is more than 180, then change to 1)
+
+function restoreTimerState() {
+  const storedRemaining = parseInt(localStorage.getItem('remainingSeconds'), 10);
+  const storedIsFocus = localStorage.getItem('isFocus') === 'true';
+  const storedRunning = localStorage.getItem('timerRunning') === 'true';
+
+  if (storedRunning && storedRemaining > 0) {
+    window.remainingSeconds = storedRemaining;
+    window.isFocus = storedIsFocus;
+    window.isPaused = false;
+    updateCountdownDisplay();
+    document.getElementById('setup-area').style.display = 'none';
+    document.getElementById('floating-timer').classList.add('show');
+
+    window.timer = setInterval(() => {
+      if (!window.isPaused) {
+        window.remainingSeconds--;
+        updateCountdownDisplay();
+        saveTimerState();
+        if (window.remainingSeconds <= 0) {
+          clearInterval(window.timer);
+          window.timer = null;
+          showPopup();
+          localStorage.setItem('timerRunning', 'false');
+        }
+      }
+    }, 1000);
+  }
+}
+
+
+function restoreBackgroundAndMusic() {
+  const savedBg = localStorage.getItem('bgSelected');
+  if (savedBg) {
+    bgDiv.style.backgroundImage = `url('/static/gifs/${savedBg}')`;
+    bgSelect.value = savedBg;
+  }
+
+  const savedMusic = localStorage.getItem('musicSelected');
+  if (savedMusic) {
+    audio.src = `/static/audio/${savedMusic}`;
+    musicSelect.value = savedMusic;
+  }
+
+  const savedVolume = parseFloat(localStorage.getItem('volume'));
+  if (!isNaN(savedVolume)) {
+    audio.volume = savedVolume;
+    volumeSlider.value = savedVolume;
+  }
+
+  const savedMuted = localStorage.getItem('muted') === 'true';
+  audio.muted = savedMuted;
+  toggleMuteBtn.textContent = savedMuted ? 'Unmute' : 'Mute';
+} 
+
+window.pauseCount = 0;
+window.currentSessionStartTime = null;
+window.currentSessionInitialFocusTime = 0; // To store focusTime at the start of a session
+
+    // Ensure time is within allowed range (1-180)
   // Ensure the input does not exceed the scope
   function setTimeValue(type, value) {
     value = Math.max(1, Math.min(180, value));
@@ -35,25 +95,30 @@ let currentSessionInitialFocusTime = 0; // To store focusTime at the start of a 
   function sanitizeInput(input, type) {
       // Restrict the maximum length of input (3 digits) and screen out all the non-digit input
     input.value = input.value.replace(/[^\d]/g, '').slice(0, 3);
-    // Because 'getElementById' method always returns string, therefore, use ParseInt() to change it into integer
+    // Convert input to integer after removing non-digit characters
     let value = parseInt(input.value, 10);
     if (isNaN(value)) return;
     setTimeValue(type, value);
   }
   
   
-  const setupArea = document.getElementById('setup-area');
-  if (setupArea) {
-    setupArea.classList.add('animate');
-    setupArea.addEventListener('animationend', () => setupArea.classList.remove('animate'));
-  }
-  
-  const todoContainer = document.getElementById('todo-container');
-  if (todoContainer) {
-    todoContainer.classList.add('animate');
-    todoContainer.addEventListener('animationend', () => todoContainer.classList.remove('animate'));
+  window.setupArea = document.getElementById('setup-area');
+  if (window.setupArea) {
+    window.setupArea.classList.add('animate');
+    window.setupArea.addEventListener('animationend', () => window.setupArea.classList.remove('animate'));
   }
 
+  window.todoContainer = document.querySelector('.todo-container');
+  if (window.todoContainer) {
+    window.todoContainer.classList.add('animate');
+    window.todoContainer.addEventListener('animationend', () => window.todoContainer.classList.remove('animate'));
+  }
+
+  window.background = document.getElementById('audio-widget');
+  if (window.background) {
+    window.background.classList.add('animate');
+    window.background.addEventListener('animationend', () => window.background.classList.remove('animate'));
+  }
 
 // update the input value
 function updateTimeFromInput(type) {
@@ -74,7 +139,6 @@ function formatIsoToDateTimeString(isoString) {
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
-
 
 async function sendStudyDurationToServer(durationMinutes, startTimeIso, endTimeIso,  stopTimesCount) {
     if (durationMinutes <= 0) {
@@ -116,7 +180,7 @@ async function sendStudyDurationToServer(durationMinutes, startTimeIso, endTimeI
     }
 }
 function startTimer() {
-  pauseCount = 0;
+  window.pauseCount = 0;
   console.log("start record", { focusTime, breakTime, remainingSeconds });
   updateTimeFromInput('focus');
   updateTimeFromInput('break');
@@ -147,7 +211,7 @@ function startTimer() {
       if (remainingSeconds <= 0) {
         clearInterval(timer);
         timer = null;
-        // get current time and convert to ISO string
+        // Record end time as ISO string
         const endTime = new Date();
         const endTimeIso = endTime.toISOString();
         sendStudyDurationToServer(currentSessionInitialFocusTime, currentSessionStartTime.toISOString(), endTimeIso,pauseCount);
@@ -182,7 +246,7 @@ function resetTimer() {
     const elapsedSeconds = (currentSessionInitialFocusTime * 60) - remainingSeconds;
     if (elapsedSeconds > 0) {
         const durationMinutes = Math.round(elapsedSeconds / 60);
-        // get current time and convert to ISO string
+        // Record end time as ISO string
         const endTime = new Date();
         const endTimeIso = endTime.toISOString();
         sendStudyDurationToServer(durationMinutes, currentSessionStartTime.toISOString(), endTimeIso, pauseCount);
@@ -206,7 +270,11 @@ function updateCountdownDisplay() {
   const emoji = isFocus ? "✍🏻" : "☕";
   const emoji2 = isFocus ? "📖" : "🍫"
 
-  document.getElementById('countdown-display').textContent = `${emoji} ${min}:${sec} ${emoji2}`;
+  const countdownDisplay = document.getElementById('countdown-display');
+if (countdownDisplay) {
+  countdownDisplay.textContent = `${emoji} ${min}:${sec} ${emoji2}`;
+}
+
 }
 
 function backToSetup() {
@@ -300,6 +368,50 @@ function ContinueFocus() {
 // Wrapping all logic in a single function ensures it runs only after the DOM is fully loaded.
 // This avoids errors from trying to access elements that don’t yet exist.
 function initMainpageFeatures() {
+  restoreTimerState();
+  restoreBackgroundAndMusic();
+
+  if (!window.timer && window.remainingSeconds > 0) {
+    updateCountdownDisplay();
+    document.getElementById('setup-area').style.display = 'none';
+    document.getElementById('floating-timer').classList.add('show');
+    window.timer = setInterval(() => {
+      if (!window.isPaused) {
+        window.remainingSeconds--;
+        updateCountdownDisplay();
+        if (window.remainingSeconds <= 0) {
+          clearInterval(window.timer);
+          window.timer = null;
+          showPopup();
+        }
+      }
+    }, 1000);
+  }
+  
+  const isReload = performance.getEntriesByType("navigation")[0].type === "reload";
+  
+  if (isReload) {
+    resetTimer(); 
+    console.log("refresh page, timer state reset");
+  } else {
+    console.log("page loaded, timer state preserved");
+    if (remainingSeconds > 0 && !timer) {
+      updateCountdownDisplay();
+      document.getElementById('setup-area').style.display = 'none';
+      document.getElementById('floating-timer').classList.add('show');
+      timer = setInterval(() => {
+        if (!isPaused) {
+          remainingSeconds--;
+          updateCountdownDisplay();
+          if (remainingSeconds <= 0) {
+            clearInterval(timer);
+            timer = null;
+            showPopup();
+          }
+        }
+      }, 1000);
+    }
+  }
 
 ['focus', 'break'].forEach(type => {
   const input = document.getElementById(`${type}-time`);
@@ -318,7 +430,6 @@ document.getElementById('continue-btn')?.addEventListener('click', ContinueFocus
 document.querySelectorAll('#close-btn').forEach(btn => {
   btn.addEventListener('click', closePopup);
 });
-
 
  /* Goal setting widget JS (Task List) */
     const taskInput = document.getElementById('task-input');
@@ -374,7 +485,6 @@ document.querySelectorAll('#close-btn').forEach(btn => {
             });
     }
 
-
     // --- Add Task (Study Plan) ---
     if (addBtn) {
         addBtn.addEventListener('click', () => {
@@ -401,7 +511,7 @@ document.querySelectorAll('#close-btn').forEach(btn => {
                     const li = createTaskElement(data.study_plan);
                     taskList.appendChild(li);
                     taskInput.value = '';
-                    applyCurrentFilter(); // Apply filter to new task
+                    applyCurrentFilter(); // Apply current filter to new task
                 } else {
                     console.warn("Failed to add task:", data.message);
                     alert("Error: " + (data.message || "Could not add task."));
@@ -413,7 +523,6 @@ document.querySelectorAll('#close-btn').forEach(btn => {
             });
         });
     }
-
 
     // --- Handle Checkbox Toggle (Update Task Status) and Delete Task ---
     if (taskList) {
@@ -437,7 +546,7 @@ document.querySelectorAll('#close-btn').forEach(btn => {
                 })
                 .then(res => {
                     if (!res.ok) {
-                        // Revert checkbox on error before throwing
+                        // Roll back checkbox if request fails
                         target.checked = !isChecked;
                         return res.json().then(err => { throw new Error(err.message || `HTTP error! status: ${res.status}`) });
                     }
@@ -451,13 +560,13 @@ document.querySelectorAll('#close-btn').forEach(btn => {
                     } else {
                         console.warn("Failed to update task status:", data.message);
                         alert("Error: " + (data.message || "Could not update task."));
-                        target.checked = !isChecked; // Revert checkbox
+                        target.checked = !isChecked; // Roll back checkbox
                     }
                 })
                 .catch(error => {
                     console.error("Error updating task status:", error);
                     alert("Error: " + error.message);
-                    target.checked = !isChecked; // Revert checkbox
+                    target.checked = !isChecked; // Roll back checkbox
                 });
             }
 
@@ -505,7 +614,6 @@ document.querySelectorAll('#close-btn').forEach(btn => {
         });
     }
 
-
     // --- Filter Tasks ---
     function applyCurrentFilter() {
         const activeFilterButton = document.querySelector('.filter.active');
@@ -537,7 +645,7 @@ document.querySelectorAll('#close-btn').forEach(btn => {
 
     // --- Toggle Task List Visibility (existing logic) ---
     const toggleListBtn = document.getElementById('toggle-task-list');
-    const taskListContainer = document.querySelector('.task-list'); // Ensure this selector is correct
+    const taskListContainer = document.querySelector('.task-list'); // Ensure correct selector for task list
 
     if (toggleListBtn && taskListContainer) {
         toggleListBtn.addEventListener('click', () => {
@@ -598,33 +706,37 @@ taskList.addEventListener('click', e => {
     volumeSlider.value = 0;
     toggleMuteBtn.textContent = 'Unmute';
     
-    // 背景切换
+    // background change
     bgSelect.addEventListener('change', () => {
       bgDiv.style.backgroundImage = `url('/static/gifs/${bgSelect.value}')`;
+  localStorage.setItem('bgSelected', bgSelect.value); 
     });
-    
-    // 音乐切换
+
+    // music change
     musicSelect.addEventListener('change', () => {
       audio.src =  `/static/audio/${musicSelect.value}`;
+  localStorage.setItem('musicSelected', musicSelect.value); 
       if (!audio.muted) {
         audio.play().catch(err => console.warn("Autoplay restriction:", err));
       }
     });
     
-    // 音量调节
-    volumeSlider.addEventListener('input', () => {
-      const vol = parseFloat(volumeSlider.value);
-      audio.volume = vol;
+    // volume change
+  volumeSlider.addEventListener('input', () => {
+    const vol = parseFloat(volumeSlider.value);
+    audio.volume = vol;
+    localStorage.setItem('volume', audio.volume); 
+    localStorage.setItem('muted', audio.muted); 
     
       if (vol === 0) {
         audio.muted = true;
         toggleMuteBtn.textContent = 'Unmute';
       } else {
-        lastVolume = vol; // 记住用户设置的音量
+        lastVolume = vol; // Remember user-set volume
         audio.muted = false;
         toggleMuteBtn.textContent = 'Mute';
 
-        // ensure audio plays if not muted
+        // Ensure audio playback if not muted
         if (audio.paused) {
         audio.play().catch(err => console.warn("Autoplay blocked:", err));
     }
@@ -633,17 +745,17 @@ taskList.addEventListener('click', e => {
       }
     });
     
-    // 静音切换按钮
+    // Mute and store last volume
     toggleMuteBtn.addEventListener('click', () => {
       if (audio.muted) {
-        // 取消静音：恢复上次音量
+        // Unmute and restore volume
         audio.muted = false;
         audio.volume = lastVolume;
         volumeSlider.value = lastVolume;
         audio.play().catch(err => console.warn("Autoplay restriction:", err));
         toggleMuteBtn.textContent = 'Mute';
       } else {
-        // 静音：记住当前音量并设为0
+        // Mute and store last volume
         lastVolume = audio.volume;
         audio.muted = true;
         audio.volume = 0;
@@ -652,17 +764,55 @@ taskList.addEventListener('click', e => {
       }
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-    const background = document.getElementById('audio-widget');
-    if (background) {
-    background.classList.add('animate');
-    background.addEventListener('animationend', () => {
-      background.classList.remove('animate');
-    });
-  } 
-    
-}); 
+const isFirstLoad = window.name !== '__initialized__';
+if (isFirstLoad) {
+  window.name = '__initialized__'; // Mark page as initialized
+  window.focusTime = 50;
+  window.breakTime = 10;
+  window.remainingSeconds = 0;
+  window.isFocus = true;
+  window.isPaused = false;
+  window.timer = null;
+  console.log("refresh page, timer initialized");
+} else {
+  console.log("refresh page, timer state preserved");
+}
 
+function restoreBackgroundAndMusic() {
+  const bgDiv = document.getElementById('bg-gif');
+  const bgSelect = document.getElementById('bg-select');
+  const musicSelect = document.getElementById('music-select');
+  const audio = document.getElementById('bg-audio');
+  const volumeSlider = document.getElementById('volume-range');
+  const toggleMuteBtn = document.getElementById('toggle-mute');
+
+  if (!bgDiv || !bgSelect || !musicSelect || !audio || !volumeSlider || !toggleMuteBtn) {
+    console.warn("restoreBackgroundAndMusic: DOM elements not loaded yet, skipping restoration.");
+    return;
+  }
+
+  const savedBg = localStorage.getItem('bgSelected');
+  if (savedBg) {
+    bgDiv.style.backgroundImage = `url('/static/gifs/${savedBg}')`;
+    bgSelect.value = savedBg;
+  }
+
+  const savedMusic = localStorage.getItem('musicSelected');
+  if (savedMusic) {
+    audio.src = `/static/audio/${savedMusic}`;
+    musicSelect.value = savedMusic;
+  }
+
+  const savedVolume = parseFloat(localStorage.getItem('volume'));
+  if (!isNaN(savedVolume)) {
+    audio.volume = savedVolume;
+    volumeSlider.value = savedVolume;
+  }
+
+  const savedMuted = localStorage.getItem('muted') === 'true';
+  audio.muted = savedMuted;
+  toggleMuteBtn.textContent = savedMuted ? 'Unmute' : 'Mute';
+}
 
 }
 

@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+import tempfile
 
 from app import create_app
 from app.extensions import db
@@ -21,7 +22,7 @@ from app.models import User
 class SeleniumTestConfig:
     """Configuration for Selenium tests."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
     SECRET_KEY = 'test-secret-key'
@@ -53,10 +54,7 @@ def teardown_module():
     """Clean up after all tests are done."""
     # Server thread will be terminated when the main thread exits
     # since it's a daemon thread
-    
-    # Remove test database file if it exists
-    if os.path.exists('test.db'):
-        os.remove('test.db')
+    pass
 
 class SeleniumBaseTest(unittest.TestCase):
     """Base class for Selenium tests without LiveServerTestCase."""
@@ -96,10 +94,15 @@ class SeleniumBaseTest(unittest.TestCase):
         
         # Set up Selenium WebDriver
         options = webdriver.ChromeOptions()
+        self.user_data_dir = tempfile.mkdtemp()
+        options.add_argument(f'--user-data-dir={self.user_data_dir}')
+        
         # For debugging, you can comment this out to see the browser
         options.add_argument('--headless')  # Run in headless mode (no browser UI)
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-extensions')
+        options.add_argument('--disable-gpu')
         
         self.driver = webdriver.Chrome(options=options)
         self.driver.set_window_size(1200, 800)
@@ -123,8 +126,20 @@ class SeleniumBaseTest(unittest.TestCase):
                     except Exception as e:
                         print(f"Failed to save screenshot: {e}")
         
-        # Quit the driver
-        self.driver.quit()
+        # Close the browser
+        if hasattr(self, 'driver') and self.driver:
+            try:
+                self.driver.quit()
+            except Exception as e:
+                print(f"Failed to quit driver: {e}")
+        
+        # Remove temporary user data directory
+        import shutil
+        if hasattr(self, 'user_data_dir') and self.user_data_dir:
+            try:
+                shutil.rmtree(self.user_data_dir, ignore_errors=True)
+            except Exception as e:
+                print(f"Failed to remove temp directory: {e}")
         
         # Clean up the database
         db.session.remove()

@@ -12,14 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/reset.css') }}" rel="stylesheet">
-    <style>
-        .reset-icon {
-            font-size: 2.5rem;
-            color: #66D2CE;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-    </style>
 </head>
 
 <body>
@@ -49,12 +41,13 @@
                 {% endwith %}
 
                 <form method="POST" action="{{ url_for('reset') }}">
+                    {{ form.csrf_token }}
                     <!-- Username -->
                     <div class="mb-3">
                         <label for="username" class="form-label">
                             <i class="bi bi-person me-2"></i>Username
                         </label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                        {{ form.username(class="form-control", id="username", placeholder="Enter your username", required=true) }}
                     </div>
 
                     <!-- Security Question -->
@@ -68,7 +61,7 @@
                             </div>
                         </div>
                         <label for="security_answer" class="form-label">Your Answer</label>
-                        <input type="text" class="form-control" id="security_answer" name="security_answer" placeholder="Enter your answer" required>
+                        {{ form.security_answer(class="form-control", id="security_answer", placeholder="Enter your answer", required=true) }}
                     </div>
 
                     <!-- New Password -->
@@ -76,7 +69,7 @@
                         <label for="new_password" class="form-label">
                             <i class="bi bi-key me-2"></i>New Password
                         </label>
-                        <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Create a new password" required>
+                        {{ form.new_password(class="form-control", id="new_password", placeholder="Create a new password", required=true) }}
                     </div>
 
                     <!-- Submit Button -->

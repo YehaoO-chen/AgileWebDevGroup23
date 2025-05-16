@@ -23,9 +23,10 @@ Our project **ProcrastiNo** is a web application designed to provide a fully sim
 
 
 ## 🛠️ Applied Technologies and Libraries (*※TBD*)
-- **Frontend**: HTML , CSS , Javascript , JQuery , Bootstrap , AJAX
-- **Backend**: Flask 
-- **Data Processing**: SQLite
+- **Frontend**: `HTML` , `CSS` , `Javascript` , `JQuery` , `Bootstrap` , `AJAX`
+- **Backend**: `Flask` 
+- **Data Processing**: `SQLite`
+- **Testing**: `unittest`, `pytest`, `selenium`
 
 ## 🚀 Getting Started
 
@@ -84,3 +85,18 @@ python run.py
 
 
 ## 🔬 Running Test
+Use the provided test runner script to execute tests:
+
+```bash
+# Run all tests
+python test_runner.py
+
+# Run only unit tests
+python test_runner.py --unit
+
+# Run only unit tests
+python test_runner.py --selenium
+
+# Generate test reports
+python test_runner.py --report --coverage
+```
