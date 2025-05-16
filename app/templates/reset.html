@@ -12,14 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/reset.css') }}" rel="stylesheet">
-    <style>
-        .reset-icon {
-            font-size: 2.5rem;
-            color: #66D2CE;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-    </style>
 </head>
 
 <body>
@@ -49,6 +41,9 @@
                 {% endwith %}
 
                 <form method="POST" action="{{ url_for('reset') }}">
+                    <!-- CSRF Token (only addition) -->
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
                     <!-- Username -->
                     <div class="mb-3">
                         <label for="username" class="form-label">
@@ -72,11 +67,19 @@
                     </div>
 
                     <!-- New Password -->
-                    <div class="mb-4">
-                        <label for="new_password" class="form-label">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
                             <i class="bi bi-key me-2"></i>New Password
                         </label>
-                        <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Create a new password" required>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a new password" required>
+                    </div>
+                    
+                    <!-- Confirm Password -->
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label">
+                            <i class="bi bi-key-fill me-2"></i>Confirm New Password
+                        </label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm your new password" required>
                     </div>
 
                     <!-- Submit Button -->

@@ -23,9 +23,10 @@ Our project **ProcrastiNo** is a web application designed to provide a fully sim
 
 
 ## 🛠️ Applied Technologies and Libraries (*※TBD*)
-- **Frontend**: HTML , CSS , Javascript , JQuery , Bootstrap , AJAX
-- **Backend**: Flask 
-- **Data Processing**: SQLite
+- **Frontend**: `HTML` , `CSS` , `Javascript` , `JQuery` , `Bootstrap` , `AJAX`
+- **Backend**: `Flask` 
+- **Data Processing**: `SQLite`
+- **Testing**: `unittest`, `pytest`, `selenium`
 
 ## 🚀 Getting Started
 
