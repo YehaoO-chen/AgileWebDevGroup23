@@ -80,3 +80,10 @@ a:hover {
 .floating-card {
     animation: float 6s ease-in-out infinite;
 }
+
+.reset-icon {
+    font-size: 2.5rem;
+    color: #66D2CE;
+    margin-bottom: 1rem;
+    display: inline-block;
+}

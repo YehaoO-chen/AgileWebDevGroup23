@@ -3,9 +3,13 @@ from app.extensions import db, login_manager
 from flask_migrate import Migrate
 import os
 from config import get_config
+from flask_wtf.csrf import CSRFProtect
 
 # Initialize Flask-Migrate
 migrate = Migrate()
+
+# Initialize CSRF protection
+csrf = CSRFProtect()
 
 def create_app(config_class=None):
     app = Flask(__name__)
@@ -23,6 +27,9 @@ def create_app(config_class=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+
+    # Initialize CSRF protection with the app
+    csrf.init_app(app)
 
     # Set the login view for unauthorized users
     login_manager.login_view = app.config['LOGIN_VIEW']

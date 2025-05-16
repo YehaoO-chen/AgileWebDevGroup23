@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta,timezone
 from app.models import User, StudyPlan, StudyDuration, Notification
 from app import db
-
+from app.forms import LoginForm, SignupForm, ResetPasswordForm
 
 def init_routes(app):
     # Home page route
@@ -19,12 +19,17 @@ def init_routes(app):
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
+        # Redirect if already logged in
         if current_user.is_authenticated:
             return redirect(url_for('index'))
 
-        if request.method == 'POST':
-            username = request.form['username']
-            password = request.form['password']
+        # Create login form instance
+        form = LoginForm()
+
+        # Handle form submission
+        if form.validate_on_submit():
+            username = form.username.data
+            password = form.password.data
 
             # Query the database for the user
             user = User.query.filter_by(username=username).first()
@@ -42,7 +47,8 @@ def init_routes(app):
             else:
                 flash('Invalid password. Please try again.', 'danger')
 
-        return render_template('login.html')
+        # Render login template with form
+        return render_template('login.html', form=form)
 
     # Logout route
     @app.route('/logout')
@@ -54,21 +60,22 @@ def init_routes(app):
 
     @app.route('/signup', methods=['GET', 'POST'])
     def signup():
-        if request.method == 'POST':
+        # Redirect if already logged in
+        if current_user.is_authenticated:
+            return redirect(url_for('index'))
+
+        # Create signup form instance
+        form = SignupForm()
+
+        # Handle form submission
+        if form.validate_on_submit():
             try:
-                # Get form data
-                username = request.form['username']
-                password = request.form['password']
-                security_answer = request.form['security_answer']
-
-                # Check if the username already exists in the database
-                existing_user = User.query.filter_by(username=username).first()
-                if existing_user:
-                    flash('Username already exists', 'danger')
-                    return redirect(url_for('signup'))
-
                 # Create a new user and add it to the database
-                new_user = User(username=username, password=password, security_answer=security_answer)
+                new_user = User(
+                    username=form.username.data, 
+                    password=form.password.data, 
+                    security_answer=form.security_answer.data
+                )
                 db.session.add(new_user)
                 db.session.commit()
 
@@ -79,14 +86,19 @@ def init_routes(app):
                 flash(f'An error occurred: {str(e)}', 'danger')
                 return redirect(url_for('signup'))
 
-        return render_template('signup.html')
+        # Render signup template with form
+        return render_template('signup.html', form=form)
 
     @app.route('/reset', methods=['GET', 'POST'])
     def reset():
-        if request.method == 'POST':
-            username = request.form['username']
-            security_answer = request.form['security_answer']
-            new_password = request.form['new_password']
+        # Create reset password form instance
+        form = ResetPasswordForm()
+
+        # Handle form submission
+        if form.validate_on_submit():
+            username = form.username.data
+            security_answer = form.security_answer.data
+            new_password = form.new_password.data
 
             # Query the database for the user
             user = User.query.filter_by(username=username).first()
@@ -112,7 +124,8 @@ def init_routes(app):
                 flash('An error occurred while resetting your password. Please try again.', 'danger')
                 return redirect(url_for('reset'))
 
-        return render_template('reset.html')
+        # Render reset template with form
+        return render_template('reset.html', form=form)
     
     # Study plan route (requires login)
     @app.route('/studyplan')

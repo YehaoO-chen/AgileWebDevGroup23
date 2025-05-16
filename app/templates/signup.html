@@ -37,13 +37,28 @@
                   {% endif %}
                 {% endwith %}
 
+                <!-- Form Errors -->
+                {% if form.errors %}
+                  <div class="mb-4">
+                    {% for field, errors in form.errors.items() %}
+                      {% for error in errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                          {{ error }}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                      {% endfor %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
                 <form method="POST" action="{{ url_for('signup') }}">
+                    {{ form.csrf_token }}
                     <!-- Username Input -->
                     <div class="mb-3">
                         <label for="username" class="form-label">
                             <i class="bi bi-person me-2"></i>Username
                         </label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Choose a unique username" required>
+                        {{ form.username(class="form-control", id="username", placeholder="Choose a unique username", required=true) }}
                     </div>
 
                     <!-- Password Input -->
@@ -51,7 +66,7 @@
                         <label for="password" class="form-label">
                             <i class="bi bi-lock me-2"></i>Password
                         </label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required>
+                        {{ form.password(class="form-control", id="password", placeholder="Create a strong password", required=true) }}
                     </div>
 
                     <!-- Security Question -->
@@ -65,7 +80,7 @@
                             </div>
                         </div>
                         <label for="security_answer" class="form-label">Your Answer</label>
-                        <input type="text" class="form-control" id="security_answer" name="security_answer" placeholder="Enter your answer" required>
+                        {{ form.security_answer(class="form-control", id="security_answer", placeholder="Enter your answer", required=true) }}
                         <div class="form-text mt-2">
                             <i class="bi bi-info-circle me-1"></i>
                             This answer will help you recover your account if you forget your password.
