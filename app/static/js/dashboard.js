@@ -1,3 +1,5 @@
+window.loadAndDisplayData = loadAndDisplayData;
+
 function initDashboardFeatures() {
     console.log("Initializing Dashboard Features...");
 
@@ -221,6 +223,19 @@ function initDashboardFeatures() {
 
     // Initial data load
     loadAndDisplayData();
+    // ✅ Force load task summary to show total tasks regardless of chart type
+    (async () => {
+        const taskResponse = await fetch(`/api/dashboard/task?period=week`);
+        if (taskResponse.ok) {
+            const taskData = await taskResponse.json();
+            const taskSummary = taskData.task_summary || {};
+            const totalTasks = (taskSummary.open || 0) + (taskSummary.completed || 0) + (taskSummary.deleted || 0);
+            const totalTasksEl = document.getElementById('total-tasks');
+            const totalTasksCard = document.getElementById('total-tasks-card');
+            if (totalTasksEl) totalTasksEl.textContent = totalTasks;
+            if (totalTasksCard) totalTasksCard.style.display = 'block';
+        }
+    })();
 
     // Note: Share modal functionality (openShareModal, loadUsers, etc.)
     // is assumed to be handled by the sharemodal.js

@@ -72,8 +72,8 @@ function loadMainContent(url) {
         if (typeof initStudyplanFeatures === 'function') {
             initStudyplanFeatures(); 
         }else {
-                    console.warn("initStudyplanFeatures function not found for /studyplan, but was expected.");
-                }
+            console.warn("initStudyplanFeatures function not found for /studyplan, but was expected.");
+        }
     }
     if (url === '/dashboard') {
         if (typeof initDashboardFeatures === 'function') {
