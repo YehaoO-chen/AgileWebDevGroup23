@@ -14,8 +14,7 @@ def init_api_studyplan(app):
 
         study_plan = StudyPlan(
             user_id=current_user.id,
-            content=data['content'],
-            title='-'  
+            content=data['content']
         )
 
         db.session.add(study_plan)
