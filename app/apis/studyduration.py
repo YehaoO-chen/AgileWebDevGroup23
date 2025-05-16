@@ -81,7 +81,7 @@ def init_api_studyduration(app):
             study_duration = StudyDuration(
                 user_id=current_user.id,
                 start_time=start_time,
-                end_time=end_time,  # 添加结束时间
+                end_time=end_time, 
                 duration=data['duration']
             )
             

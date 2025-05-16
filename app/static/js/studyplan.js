@@ -99,11 +99,12 @@ function initStudyplanFeatures() {
     });
 
     // Event delegation for checkbox changes
+    
     $(document).on('change', '.study-checkbox', function() {
         const $item = $(this).closest('.study-item');
         const planId = $item.data('id');
         const isChecked = $(this).is(':checked');
-        const newStatus = isChecked ? 1 : 0; // 1 for completed, 0 for open
+        const newStatus = isChecked ? 1 : 0;
 
         $.ajax({
             url: `/api/studyplan/${planId}`,
@@ -113,34 +114,41 @@ function initStudyplanFeatures() {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    // Move the item to the correct tab
                     $item.remove();
                     if (newStatus === 1) {
                         displayStudyPlan(response.study_plan, $completedTasksContainer);
-                        // If user is on open tab, they won't see it move unless they switch
                     } else {
                         displayStudyPlan(response.study_plan, $openTasksContainer);
-                         // If user is on completed tab, they won't see it move unless they switch
                     }
-                    // Optional: Reload the current tab to reflect all changes
+                    
+                    if (typeof window.loadAndDisplayData === 'function') {
+                        window.loadAndDisplayData(); 
+                    }
+
                     if ($openTab.hasClass('active')) {
                         loadStudyPlans(0);
                     } else {
                         loadStudyPlans(1);
                     }
+
+                   
+                    if (window.location.pathname === '/dashboard' && typeof initDashboardFeatures === 'function') {
+                        initDashboardFeatures();  
+                    }
+
                 } else {
                     alert('Error updating plan status: ' + (response.message || 'Unknown error'));
-                    // Revert checkbox state on error
                     $(this).prop('checked', !isChecked);
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error("Error updating plan status:", textStatus, errorThrown);
                 alert('An error occurred while updating the plan. Please try again.');
-                $(this).prop('checked', !isChecked); // Revert checkbox
+                $(this).prop('checked', !isChecked);
             }
         });
     });
+
 
     // Event delegation for delete button clicks
     $(document).on('click', '.delete-btn', function() {

@@ -63,9 +63,10 @@ class StudyPlan(db.Model):
     status = db.Column(db.Integer, default=0, nullable=False)  # 0: open, 1: completed, 2: deleted
     
     user = db.relationship('User', backref=db.backref('study_plans', lazy=True))
-    
+    title = db.Column(db.String(100), nullable=False, default='-')
     def __repr__(self):
-        return f'<StudyPlan {self.title}>'
+        return f'<StudyPlan id={self.id}, status={self.status}>'
+
 
 # StudyDuration model
 class StudyDuration(db.Model):
