@@ -71,9 +71,14 @@ function initNotificationFeatures() {
 
     async function markNotificationAsRead(notificationId, element) {
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
             const response = await fetch(`/api/notification/${notificationId}/status`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',                
+                    'X-CSRFToken': csrfToken // Include CSRF token for security
+            },
                 body: JSON.stringify({ status: 1 })
             });
 

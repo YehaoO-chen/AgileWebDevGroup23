@@ -40,6 +40,7 @@ $(document).ready(function() {
 
     // --- Load Initial Profile Data ---
     function loadProfileData() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $.ajax({
             url: '/api/profile', // GET request to fetch user data
@@ -176,11 +177,14 @@ $(document).ready(function() {
 
         // --- Send data to the server using fetch API ---
         if (hasChanges) {
-            // Note: Using PUT as it's standard for updates. Change to 'POST' if required by your API.
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             $.ajax({
                 url: '/api/profile',
                 method: 'PUT', 
-                contentType: 'application/json',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // Include CSRF token for security
+                },
                 data: JSON.stringify(updatedData),
                 dataType: 'json',
                 success: function(data) {
@@ -252,10 +256,14 @@ $(document).ready(function() {
     function uploadAvatar(file) {
         const formData = new FormData();
         formData.append('avatar', file); // Key 'avatar' must match server expectation
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $.ajax({
             url: '/api/upload_avatar', // Your avatar upload endpoint
             method: 'POST',
+            headers:{
+                'X-CSRFToken': csrfToken // Include CSRF token for security
+            },
             data: formData,
             processData: false, // Prevent jQuery from processing the data
             contentType: false, // Prevent jQuery from setting contentType

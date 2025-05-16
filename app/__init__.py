@@ -1,9 +1,10 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 from app.extensions import db, login_manager
 from flask_migrate import Migrate
 import os
 from config import get_config
 from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import validate_csrf, CSRFError
 
 # Initialize Flask-Migrate
 migrate = Migrate()
@@ -30,14 +31,21 @@ def create_app(config_class=None):
 
     # Initialize CSRF protection with the app
     csrf.init_app(app)
-
     # Set the login view for unauthorized users
     login_manager.login_view = app.config['LOGIN_VIEW']
     login_manager.login_message = app.config['LOGIN_MESSAGE']
     login_manager.login_message_category = app.config['LOGIN_MESSAGE_CATEGORY']
 
-    # Import models before creating tables
-    from app.models import User
+
+    @app.before_request
+    def csrf_protect():
+        if request.path.startswith('/api/'):
+            if request.method in ['POST', 'PUT', 'DELETE']:
+                token = request.headers.get('X-CSRFToken')
+                try:
+                    validate_csrf(token)
+                except CSRFError:
+                    return jsonify({'success': False, 'message': 'CSRF token missing or invalid'}), 400
 
     # Create database tables
     with app.app_context():

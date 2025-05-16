@@ -200,10 +200,14 @@ function shareData() {
     const doneBtn = document.getElementById('doneButton');
     doneBtn.disabled = true;
     doneBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sharing...';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     fetch('/api/notification', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // Include CSRF token for security
+         },
         body: JSON.stringify({
             receiver_ids: selectedUserIds,
             content: message
