@@ -93,9 +93,10 @@ class SeleniumBaseTest(unittest.TestCase):
         db.session.commit()
         
         # Set up Selenium WebDriver
-        options = webdriver.ChromeOptions()
-        self.user_data_dir = tempfile.mkdtemp()
+        self.user_data_dir = os.path.join(os.getcwd(), 'tests', 'tmp_chrome_profile')
+        os.makedirs(self.user_data_dir, exist_ok=True)
         options.add_argument(f'--user-data-dir={self.user_data_dir}')
+
         
         # For debugging, you can comment this out to see the browser
         options.add_argument('--headless')  # Run in headless mode (no browser UI)

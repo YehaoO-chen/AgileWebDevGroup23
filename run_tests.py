@@ -20,6 +20,9 @@ def parse_args():
     parser.add_argument('--unit', action='store_true', help='Run only unit tests')
     parser.add_argument('--selenium', action='store_true', help='Run only selenium tests')
     parser.add_argument('--quiet', action='store_true', help='Run in quiet mode (less output)')
+    parser.add_argument('--coverage', action='store_true', help='Generate coverage report')
+    parser.add_argument('--report', action='store_true', help='Generate HTML test report')
+
     return parser.parse_args()
 
 def kill_chrome_processes(quiet=False):

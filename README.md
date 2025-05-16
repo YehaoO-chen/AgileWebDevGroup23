@@ -89,14 +89,18 @@ Use the provided test runner script to execute tests:
 
 ```bash
 # Run all tests
-python test_runner.py
+python run_tests.py
 
 # Run only unit tests
-python test_runner.py --unit
+python run_tests.py --unit
 
 # Run only unit tests
-python test_runner.py --selenium
+python run_tests.py --selenium
 
 # Generate test reports
-python test_runner.py --report --coverage
+python run_tests.py --report --coverage
+
+# Optional flag to reduce console output.
+python script.py --quiet
+
 ```
