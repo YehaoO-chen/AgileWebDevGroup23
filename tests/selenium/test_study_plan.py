@@ -143,7 +143,7 @@ class TestStudyPlan(SeleniumBaseTest):
         """
         # Verify page title
         page_title = self.wait_for(By.CLASS_NAME, 'page-title')
-        self.assertEqual(page_title.text, 'Study Plan')
+        self.assertEqual(page_title.text, 'My Study Plan')
     
     def test_add_study_plan(self):
         """Test adding a new study plan item.
