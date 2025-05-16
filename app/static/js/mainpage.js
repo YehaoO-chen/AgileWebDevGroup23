@@ -161,11 +161,12 @@ async function sendStudyDurationToServer(durationMinutes, startTimeIso, endTimeI
     };
     console.log("Sending study duration data to /api/studyduration:", requestData);
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const response = await fetch('/api/studyduration', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
-                // Add CSRF token header here if needed by your backend
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken // Include CSRF token for security
             },
             body: JSON.stringify(requestData)
         });
@@ -490,13 +491,14 @@ document.querySelectorAll('#close-btn').forEach(btn => {
         addBtn.addEventListener('click', () => {
             const taskText = taskInput.value.trim();
             if (taskText === '') return;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             // POST to studyplan API
             fetch('/api/studyplan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Add CSRF token header if your app uses it for POST/PUT/DELETE
+                    'X-CSRFToken': csrfToken // Include CSRF token for security
                 },
                 body: JSON.stringify({ content: taskText }) // 'content' matches StudyPlan model
             })
@@ -535,12 +537,13 @@ document.querySelectorAll('#close-btn').forEach(btn => {
                 const taskId = taskElement.dataset.id;
                 const isChecked = target.checked;
                 const newStatus = isChecked ? 1 : 0; // 1 for completed, 0 for open
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                 fetch(`/api/studyplan/${taskId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Add CSRF token header if needed
+                        'X-CSRFToken': csrfToken // Include CSRF token for security
                     },
                     body: JSON.stringify({ status: newStatus })
                 })
@@ -575,12 +578,13 @@ document.querySelectorAll('#close-btn').forEach(btn => {
             if (deleteButton) {
                 const taskElement = deleteButton.closest('li.task');
                 const taskId = taskElement.dataset.id;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                 if (confirm('Are you sure you want to delete this task?')) {
                     fetch(`/api/studyplan/${taskId}`, {
                         method: 'DELETE',
                         headers: {
-                            // Add CSRF token header if needed
+                          'X-CSRFToken': csrfToken // Include CSRF token for security
                         }
                     })
                     .then(res => {

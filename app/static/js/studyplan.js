@@ -56,11 +56,15 @@ function initStudyplanFeatures() {
             alert('Please enter a study plan.'); // Or use a more sophisticated notification
             return;
         }
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $.ajax({
             url: '/api/studyplan',
             method: 'POST',
-            contentType: 'application/json', // Set content type for JSON data
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken // Include CSRF token for security
+            },
             data: JSON.stringify({ content: content }), // Convert data to JSON string
             dataType: 'json', // Expect JSON response
             success: function(response) {
@@ -105,11 +109,16 @@ function initStudyplanFeatures() {
         const planId = $item.data('id');
         const isChecked = $(this).is(':checked');
         const newStatus = isChecked ? 1 : 0;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $.ajax({
             url: `/api/studyplan/${planId}`,
             method: 'PUT',
-            contentType: 'application/json',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken // Include CSRF token for security
+
+            },
             data: JSON.stringify({ status: newStatus }),
             dataType: 'json',
             success: function(response) {
@@ -158,10 +167,14 @@ function initStudyplanFeatures() {
         if (!confirm('Are you sure you want to delete this study plan?')) {
             return;
         }
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $.ajax({
             url: `/api/studyplan/${planId}`,
             method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken // Include CSRF token for security
+            },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {

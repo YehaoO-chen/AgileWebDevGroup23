@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     {% block styles %}{% endblock %}
@@ -12,7 +13,8 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     {% block extra_css %}{% endblock %}
     <title>{%block title %}ProcrastiNo - Your Best Study Buddy{% endblock %}</title> 
-    {% block head %}{% endblock %}
+    {% block head %}
+    {% endblock %}
 
 </head>
 
