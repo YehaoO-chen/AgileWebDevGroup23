@@ -41,15 +41,13 @@
                 {% endwith %}
 
                 <form method="POST" action="{{ url_for('reset') }}">
-                    <!-- CSRF Token (only addition) -->
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    
+                    {{ form.csrf_token }}
                     <!-- Username -->
                     <div class="mb-3">
                         <label for="username" class="form-label">
                             <i class="bi bi-person me-2"></i>Username
                         </label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                        {{ form.username(class="form-control", id="username", placeholder="Enter your username", required=true) }}
                     </div>
 
                     <!-- Security Question -->
@@ -63,23 +61,15 @@
                             </div>
                         </div>
                         <label for="security_answer" class="form-label">Your Answer</label>
-                        <input type="text" class="form-control" id="security_answer" name="security_answer" placeholder="Enter your answer" required>
+                        {{ form.security_answer(class="form-control", id="security_answer", placeholder="Enter your answer", required=true) }}
                     </div>
 
                     <!-- New Password -->
-                    <div class="mb-3">
-                        <label for="password" class="form-label">
+                    <div class="mb-4">
+                        <label for="new_password" class="form-label">
                             <i class="bi bi-key me-2"></i>New Password
                         </label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a new password" required>
-                    </div>
-                    
-                    <!-- Confirm Password -->
-                    <div class="mb-4">
-                        <label for="confirm_password" class="form-label">
-                            <i class="bi bi-key-fill me-2"></i>Confirm New Password
-                        </label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm your new password" required>
+                        {{ form.new_password(class="form-control", id="new_password", placeholder="Create a new password", required=true) }}
                     </div>
 
                     <!-- Submit Button -->
